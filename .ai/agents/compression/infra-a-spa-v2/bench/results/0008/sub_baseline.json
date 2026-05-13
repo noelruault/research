@@ -1,0 +1,41 @@
+{
+  "app-3e4f5a7.js": {
+    "raw_bytes": 84041,
+    "wire_bytes": 84041,
+    "wire_bytes_p95": 84041,
+    "encode_cpu_ms_p50": 4.560896,
+    "encode_cpu_ms_p95": 5.388585450000001,
+    "encode_cpu_ms_p99": 5.712884289999999,
+    "decode_cpu_ms_p50": 4.4589375,
+    "decode_cpu_ms_p95": 5.2595940500000005,
+    "decode_cpu_ms_p99": 5.35538521,
+    "raw_sha256": "ce0a5bc2d08e2640aeefee7dd764f76439b486024ed640e9dea4d1ef4af16cc5",
+    "n_runs": 20
+  },
+  "main-7f8a3c3.css": {
+    "raw_bytes": 31749,
+    "wire_bytes": 31749,
+    "wire_bytes_p95": 31749,
+    "encode_cpu_ms_p50": 4.136875,
+    "encode_cpu_ms_p95": 4.699229500000002,
+    "encode_cpu_ms_p99": 6.497579499999997,
+    "decode_cpu_ms_p50": 4.128978999999999,
+    "decode_cpu_ms_p95": 4.74276315,
+    "decode_cpu_ms_p99": 4.79298623,
+    "raw_sha256": "525f5f26c9690b0deaf937b25cc9a6204cce774c5c583ea587619767e9accb65",
+    "n_runs": 20
+  },
+  "vendor-a9b8c7e.js": {
+    "raw_bytes": 261255,
+    "wire_bytes": 261255,
+    "wire_bytes_p95": 261255,
+    "encode_cpu_ms_p50": 5.905479,
+    "encode_cpu_ms_p95": 6.15562465,
+    "encode_cpu_ms_p99": 6.3348577299999995,
+    "decode_cpu_ms_p50": 5.8423125,
+    "decode_cpu_ms_p95": 6.199937199999999,
+    "decode_cpu_ms_p99": 6.2243210399999995,
+    "raw_sha256": "7a4248cc26ddb8c5e766d9654371ae8ca701bac211b3a60dc906054e6c2122ac",
+    "n_runs": 20
+  }
+}

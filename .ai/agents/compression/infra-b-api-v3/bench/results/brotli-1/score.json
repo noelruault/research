@@ -1,0 +1,63 @@
+{
+  "n": 7,
+  "mean_delta_bytes": -61717.08091175643,
+  "mean_delta_pct": -71.74962482851642,
+  "ci_low_bytes": -95176.04490328785,
+  "ci_high_bytes": -32728.889183956428,
+  "ci_low_pct": -73.8058659760084,
+  "ci_high_pct": -69.8536951809823,
+  "decision": "KEEP",
+  "baseline_total_score": 599291.77572973,
+  "candidate_total_score": 167272.20934743498,
+  "per_item": [
+    {
+      "key": "catalog-full.json",
+      "baseline": 189176.07305791,
+      "candidate": 52195.281727905,
+      "delta": -136980.79133000498,
+      "pct": -72.4091525507419
+    },
+    {
+      "key": "notifications.json",
+      "baseline": 38239.14682147,
+      "candidate": 10504.467023804998,
+      "delta": -27734.679797665,
+      "pct": -72.52954655905897
+    },
+    {
+      "key": "order-history.json",
+      "baseline": 42788.16007002,
+      "candidate": 9791.189626325,
+      "delta": -32996.970443695,
+      "pct": -77.11705852669905
+    },
+    {
+      "key": "products-list-v2.json",
+      "baseline": 139506.32597051,
+      "candidate": 39161.218567225,
+      "delta": -100345.10740328499,
+      "pct": -71.92871484874225
+    },
+    {
+      "key": "products-list.json",
+      "baseline": 126772.56530033001,
+      "candidate": 35638.552333995,
+      "delta": -91134.01296633501,
+      "pct": -71.88780376135354
+    },
+    {
+      "key": "search-results-v2.json",
+      "baseline": 31631.159587285,
+      "candidate": 10080.60558639,
+      "delta": -21550.554000895,
+      "pct": -68.13077447074633
+    },
+    {
+      "key": "search-results.json",
+      "baseline": 31178.344922205,
+      "candidate": 9900.89448179,
+      "delta": -21277.450440415,
+      "pct": -68.24432308227287
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "catalog-full.json": {
+    "wire_bytes_p95": 189168,
+    "encode_cpu_ms_p95": 0.203333,
+    "decode_cpu_ms_p95": 0.203333,
+    "encode_cpu_ms_mean": 0.1427778,
+    "decode_cpu_ms_mean": 0.1427778,
+    "encode_cpu_ms_min": 0.075459,
+    "decode_cpu_ms_min": 0.075459
+  },
+  "error-404.json": {
+    "wire_bytes_p95": 65,
+    "encode_cpu_ms_p95": 0.105667,
+    "decode_cpu_ms_p95": 0.105667,
+    "encode_cpu_ms_mean": 0.09174303333333333,
+    "decode_cpu_ms_mean": 0.09174303333333333,
+    "encode_cpu_ms_min": 0.07625,
+    "decode_cpu_ms_min": 0.07625
+  },
+  "notifications.json": {
+    "wire_bytes_p95": 38234,
+    "encode_cpu_ms_p95": 0.10625,
+    "decode_cpu_ms_p95": 0.10625,
+    "encode_cpu_ms_mean": 0.09131386666666666,
+    "decode_cpu_ms_mean": 0.09131386666666666,
+    "encode_cpu_ms_min": 0.07025,
+    "decode_cpu_ms_min": 0.07025
+  },
+  "order-history.json": {
+    "wire_bytes_p95": 42784,
+    "encode_cpu_ms_p95": 0.179375,
+    "decode_cpu_ms_p95": 0.179375,
+    "encode_cpu_ms_mean": 0.0994194,
+    "decode_cpu_ms_mean": 0.0994194,
+    "encode_cpu_ms_min": 0.065084,
+    "decode_cpu_ms_min": 0.065084
+  },
+  "products-list-v2.json": {
+    "wire_bytes_p95": 139497,
+    "encode_cpu_ms_p95": 0.128583,
+    "decode_cpu_ms_p95": 0.128583,
+    "encode_cpu_ms_mean": 0.09560826666666666,
+    "decode_cpu_ms_mean": 0.09560826666666666,
+    "encode_cpu_ms_min": 0.078875,
+    "decode_cpu_ms_min": 0.078875
+  },
+  "products-list.json": {
+    "wire_bytes_p95": 126767,
+    "encode_cpu_ms_p95": 0.160125,
+    "decode_cpu_ms_p95": 0.160125,
+    "encode_cpu_ms_mean": 0.10267086666666667,
+    "decode_cpu_ms_mean": 0.10267086666666667,
+    "encode_cpu_ms_min": 0.087917,
+    "decode_cpu_ms_min": 0.087917
+  },
+  "search-results-v2.json": {
+    "wire_bytes_p95": 31626,
+    "encode_cpu_ms_p95": 0.111375,
+    "decode_cpu_ms_p95": 0.111375,
+    "encode_cpu_ms_mean": 0.0907028,
+    "decode_cpu_ms_mean": 0.0907028,
+    "encode_cpu_ms_min": 0.072583,
+    "decode_cpu_ms_min": 0.072583
+  },
+  "search-results.json": {
+    "wire_bytes_p95": 31169,
+    "encode_cpu_ms_p95": 0.205708,
+    "decode_cpu_ms_p95": 0.205708,
+    "encode_cpu_ms_mean": 0.1157389,
+    "decode_cpu_ms_mean": 0.1157389,
+    "encode_cpu_ms_min": 0.076875,
+    "decode_cpu_ms_min": 0.076875
+  },
+  "user-profile.json": {
+    "wire_bytes_p95": 278,
+    "encode_cpu_ms_p95": 0.149708,
+    "decode_cpu_ms_p95": 0.149708,
+    "encode_cpu_ms_mean": 0.08603323333333333,
+    "decode_cpu_ms_mean": 0.08603323333333333,
+    "encode_cpu_ms_min": 0.06425,
+    "decode_cpu_ms_min": 0.06425
+  }
+}

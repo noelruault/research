@@ -1,0 +1,69 @@
+{
+  "gzip-6": {
+    "p50_ms": 12.4635,
+    "p95_ms": 12.943959,
+    "mb_s_at_p50": 19.605970748060898,
+    "runs": 20,
+    "table_mb_s": 50,
+    "diff_pct_vs_table": -60.8
+  },
+  "gzip-9": {
+    "p50_ms": 19.023375,
+    "p95_ms": 20.438292,
+    "mb_s_at_p50": 12.845197890408878,
+    "runs": 20,
+    "table_mb_s": 30,
+    "diff_pct_vs_table": -57.2
+  },
+  "brotli-1": {
+    "p50_ms": 7.764792,
+    "p95_ms": 8.544834,
+    "mb_s_at_p50": 31.470130354870683,
+    "runs": 20,
+    "table_mb_s": 290,
+    "diff_pct_vs_table": -89.1
+  },
+  "brotli-5": {
+    "p50_ms": 11.166125,
+    "p95_ms": 18.007334,
+    "mb_s_at_p50": 21.88395852799938,
+    "runs": 20,
+    "table_mb_s": 100,
+    "diff_pct_vs_table": -78.1
+  },
+  "brotli-11": {
+    "p50_ms": 273.169458,
+    "p95_ms": 300.403042,
+    "mb_s_at_p50": 0.8945327131646503,
+    "runs": 8,
+    "table_mb_s": 0.5,
+    "diff_pct_vs_table": 78.9
+  },
+  "zstd-3": {
+    "p50_ms": 8.500958,
+    "p95_ms": 8.970958,
+    "mb_s_at_p50": 28.744879861594068,
+    "runs": 20,
+    "table_mb_s": 250,
+    "diff_pct_vs_table": -88.5
+  },
+  "zstd-19": {
+    "p50_ms": 88.293084,
+    "p95_ms": 102.117875,
+    "mb_s_at_p50": 2.7675895477663577,
+    "runs": 20,
+    "table_mb_s": 10,
+    "diff_pct_vs_table": -72.3
+  },
+  "_sample_path": "bench/corpus/assets/vendor-a9b8c7d.js",
+  "_sample_bytes": 256229,
+  "_warnings_vs_table": [
+    "gzip-6: local 19.6 MB/s vs table 50 MB/s (-61%)",
+    "gzip-9: local 12.8 MB/s vs table 30 MB/s (-57%)",
+    "brotli-1: local 31.5 MB/s vs table 290 MB/s (-89%)",
+    "brotli-5: local 21.9 MB/s vs table 100 MB/s (-78%)",
+    "brotli-11: local 0.9 MB/s vs table 0.5 MB/s (+79%)",
+    "zstd-3: local 28.7 MB/s vs table 250 MB/s (-89%)",
+    "zstd-19: local 2.8 MB/s vs table 10 MB/s (-72%)"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "baseline": "bench/results/baseline.json",
+  "candidate": "bench/results/0009/items.json",
+  "n_items": 7,
+  "items": [
+    "catalog-full.json",
+    "notifications.json",
+    "order-history.json",
+    "products-list-v2.json",
+    "products-list.json",
+    "search-results-v2.json",
+    "search-results.json"
+  ],
+  "baseline_total_score": 599245.8882008,
+  "candidate_total_score": 118928.3597127,
+  "pct_delta": -80.15366278611017,
+  "mean_delta": -68616.78978401428,
+  "median_delta": -37882.9124291,
+  "ci_low": -105610.35025604286,
+  "ci_high": -37900.00913345715,
+  "decision": "KEEP",
+  "weights": {
+    "encode_cpu_ms": 0.5,
+    "decode_cpu_ms": 0.3
+  }
+}

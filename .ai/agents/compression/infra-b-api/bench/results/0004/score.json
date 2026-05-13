@@ -1,0 +1,26 @@
+{
+  "baseline": "/Users/noelruault/go/src/github.com/noelruault/compression-test/infra-b-api/bench/results/baseline.json",
+  "candidate": "/Users/noelruault/go/src/github.com/noelruault/compression-test/infra-b-api/bench/results/0004/items.json",
+  "n_items": 7,
+  "items": [
+    "catalog-full.json",
+    "notifications.json",
+    "order-history.json",
+    "products-list-v2.json",
+    "products-list.json",
+    "search-results-v2.json",
+    "search-results.json"
+  ],
+  "baseline_total_score": 599245.8882008,
+  "candidate_total_score": 167147.8974592,
+  "pct_delta": -72.10695963871332,
+  "mean_delta": -61728.28439165715,
+  "median_delta": -33012.5157711,
+  "ci_low": -95184.73912157145,
+  "ci_high": -32734.348372085715,
+  "decision": "KEEP",
+  "weights": {
+    "encode_cpu_ms": 0.5,
+    "decode_cpu_ms": 0.3
+  }
+}

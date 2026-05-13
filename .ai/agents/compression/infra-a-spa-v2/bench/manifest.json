@@ -1,0 +1,98 @@
+{
+  "agent_version": "compression-engineer-v2",
+  "session_started": "2026-05-07T20:35:00Z",
+  "session_ended": "2026-05-07T19:39:23.291046+00:00",
+  "git_root": "/Users/noelruault/go/src/github.com/noelruault/compression-test",
+  "git_sha": "",
+  "scope_sha256": "f2704095d75ba75d60180923471619e74f5060f0614393bed9f03f0aac8cd25b",
+  "corpus_sha256": "d3795f54e95159b888912e23f65782fa11678083ee1533dc221c69ce8ea7cee4",
+  "scoring_seed": "0xC0FFEE",
+  "n_experiments": 10,
+  "n_keep": 10,
+  "n_discard": 0,
+  "n_discard_by_prediction": 3,
+  "tools": {
+    "brotli": "brotli 1.2.0",
+    "zstd": "*** Zstandard CLI (64-bit) v1.5.7, by Yann Collet ***",
+    "gzip": "Apple gzip 479",
+    "hyperfine": "hyperfine 1.20.0",
+    "openssl": "OpenSSL 3.6.2 7 Apr 2026 (Library: OpenSSL 3.6.2 7 Apr 2026)",
+    "python3": "Python 3.14.2"
+  },
+  "platform": {
+    "os": "Darwin 25.4.0",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro",
+    "cores": 11
+  },
+  "calibration_summary": {
+    "sample_path": "bench/corpus/assets/vendor-a9b8c7d.js",
+    "sample_bytes": 256229,
+    "gzip_6_ms_p50": 12.46,
+    "gzip_9_ms_p50": 19.02,
+    "brotli_1_ms_p50": 7.76,
+    "brotli_5_ms_p50": 11.17,
+    "brotli_11_ms_p50": 273.17,
+    "zstd_3_ms_p50": 8.5,
+    "zstd_19_ms_p50": 88.29,
+    "warning_vs_table": [
+      "gzip-6: -61% MB/s vs table",
+      "gzip-9: -57% MB/s vs table",
+      "brotli-1: -89% MB/s vs table",
+      "brotli-5: -78% MB/s vs table",
+      "brotli-11: +79% MB/s vs table",
+      "zstd-3: -89% MB/s vs table",
+      "zstd-19: -72% MB/s vs table",
+      "Note: subset of the divergence is Python subprocess.run fork/exec floor (~5 ms) per invocation",
+      "Encode CPU weight is 0.0 in SCOPE.md; divergence does not affect KEEP decisions on this run"
+    ]
+  },
+  "exclusions_at_session": [],
+  "metric_at_session": {
+    "primary": "wire_bytes_p95",
+    "weights": {
+      "encode_cpu_ms": 0.0,
+      "decode_cpu_ms": 0.5
+    },
+    "client_profile": "mobile_4g_slow",
+    "target_kind": "filesystem-only",
+    "budget_seconds_per_candidate": 30
+  },
+  "blocked_tools": [
+    {
+      "tool": "svgo",
+      "install": "npm i -g svgo",
+      "blocks": "SVG re-encoding experiment; raw SVG through brotli still ran"
+    },
+    {
+      "tool": "oxipng",
+      "install": "brew install oxipng",
+      "blocks": "n/a (no PNG)"
+    },
+    {
+      "tool": "pngquant",
+      "install": "brew install pngquant",
+      "blocks": "n/a (no PNG)"
+    },
+    {
+      "tool": "woff2_compress",
+      "install": "brew install woff2",
+      "blocks": "n/a (no fonts)"
+    },
+    {
+      "tool": "pyftsubset",
+      "install": "pip3 install fonttools brotli",
+      "blocks": "n/a (no fonts)"
+    },
+    {
+      "tool": "oha",
+      "install": "brew install oha",
+      "blocks": "wire-bench (n/a, filesystem-only)"
+    },
+    {
+      "tool": "lighthouse",
+      "install": "npm i -g lighthouse",
+      "blocks": "page-level metrics (n/a, filesystem-only)"
+    }
+  ]
+}

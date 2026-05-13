@@ -1,0 +1,93 @@
+{
+  "catalog-full.json": {
+    "raw_bytes": 189168,
+    "wire_bytes": 44200,
+    "wire_bytes_p95": 44200,
+    "encode_cpu_ms_p50": 13.9637085,
+    "encode_cpu_ms_p95": 24.7777253,
+    "encode_cpu_ms_p99": 30.270597320000007,
+    "decode_cpu_ms_p50": 10.1099165,
+    "decode_cpu_ms_p95": 12.830858150000001,
+    "decode_cpu_ms_p99": 15.431999250000002,
+    "raw_sha256": "535077f9761da48a021a579ce4a9da4348329803215e9cbe0308732832e944d5",
+    "n_runs": 30
+  },
+  "notifications.json": {
+    "raw_bytes": 38234,
+    "wire_bytes": 8994,
+    "wire_bytes_p95": 8994,
+    "encode_cpu_ms_p50": 11.0136665,
+    "encode_cpu_ms_p95": 22.296289800000004,
+    "encode_cpu_ms_p99": 29.118783290000007,
+    "decode_cpu_ms_p50": 8.625875,
+    "decode_cpu_ms_p95": 21.615170500000005,
+    "decode_cpu_ms_p99": 27.114399960000004,
+    "raw_sha256": "fc1fa8ccb631e32a75838bb4cd2f8745526f7dc4aebad7ac729275a9dcd5b0d9",
+    "n_runs": 30
+  },
+  "order-history.json": {
+    "raw_bytes": 42784,
+    "wire_bytes": 8695,
+    "wire_bytes_p95": 8695,
+    "encode_cpu_ms_p50": 10.809604,
+    "encode_cpu_ms_p95": 13.86659535,
+    "encode_cpu_ms_p99": 14.37031032,
+    "decode_cpu_ms_p50": 8.719249999999999,
+    "decode_cpu_ms_p95": 16.373565250000006,
+    "decode_cpu_ms_p99": 22.183924180000005,
+    "raw_sha256": "21873f917a7d41e1429c846108c0775e79c120d5f127def9274ca548694a8e62",
+    "n_runs": 30
+  },
+  "products-list-v2.json": {
+    "raw_bytes": 139497,
+    "wire_bytes": 33155,
+    "wire_bytes_p95": 33155,
+    "encode_cpu_ms_p50": 12.483062499999999,
+    "encode_cpu_ms_p95": 15.10465465,
+    "encode_cpu_ms_p99": 15.47433468,
+    "decode_cpu_ms_p50": 8.900417000000001,
+    "decode_cpu_ms_p95": 16.0260106,
+    "decode_cpu_ms_p99": 16.56560682,
+    "raw_sha256": "b8922dceb67579e4c7171fce868a4dc5a7c8251c6fc292ea925ebb132b648f53",
+    "n_runs": 30
+  },
+  "products-list.json": {
+    "raw_bytes": 126767,
+    "wire_bytes": 30310,
+    "wire_bytes_p95": 30310,
+    "encode_cpu_ms_p50": 16.717020499999997,
+    "encode_cpu_ms_p95": 26.694183300000002,
+    "encode_cpu_ms_p99": 30.196281750000004,
+    "decode_cpu_ms_p50": 9.979083,
+    "decode_cpu_ms_p95": 23.352154050000003,
+    "decode_cpu_ms_p99": 28.357376820000002,
+    "raw_sha256": "396fdb32e673254abadd28e714d1e5dffbefa9d20558af5c0895b94505c92c0d",
+    "n_runs": 30
+  },
+  "search-results-v2.json": {
+    "raw_bytes": 31626,
+    "wire_bytes": 8423,
+    "wire_bytes_p95": 8423,
+    "encode_cpu_ms_p50": 10.545145999999999,
+    "encode_cpu_ms_p95": 14.99118125,
+    "encode_cpu_ms_p99": 15.82288982,
+    "decode_cpu_ms_p50": 11.2880625,
+    "decode_cpu_ms_p95": 20.619825000000002,
+    "decode_cpu_ms_p99": 29.839024820000006,
+    "raw_sha256": "c31ee92437a6ba7a50451b530b1376ac9fe5cbe2eae8f3d69787d3bff017e515",
+    "n_runs": 30
+  },
+  "search-results.json": {
+    "raw_bytes": 31169,
+    "wire_bytes": 8291,
+    "wire_bytes_p95": 8291,
+    "encode_cpu_ms_p50": 12.033542,
+    "encode_cpu_ms_p95": 23.580367000000003,
+    "encode_cpu_ms_p99": 41.31553093000002,
+    "decode_cpu_ms_p50": 8.252146,
+    "decode_cpu_ms_p95": 13.947753800000003,
+    "decode_cpu_ms_p99": 15.85268582,
+    "raw_sha256": "4d54944e9e4ed716e95edb05f478f0a18991f240415f003abfb86a4aec1641af",
+    "n_runs": 30
+  }
+}

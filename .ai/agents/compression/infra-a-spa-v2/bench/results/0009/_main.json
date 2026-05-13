@@ -1,0 +1,15 @@
+{
+  "main-7f8a3c3.css": {
+    "raw_bytes": 31749,
+    "wire_bytes": 6447,
+    "wire_bytes_p95": 6447,
+    "encode_cpu_ms_p50": 16.4229585,
+    "encode_cpu_ms_p95": 24.87577465,
+    "encode_cpu_ms_p99": 26.29608773,
+    "decode_cpu_ms_p50": 7.0134795,
+    "decode_cpu_ms_p95": 7.6512083,
+    "decode_cpu_ms_p99": 8.16357446,
+    "raw_sha256": "525f5f26c9690b0deaf937b25cc9a6204cce774c5c583ea587619767e9accb65",
+    "n_runs": 20
+  }
+}

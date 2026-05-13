@@ -1,0 +1,35 @@
+{
+  "results": [
+    {
+      "command": "bench/encode.sh identity 'bench/corpus/assets/main-7f8a3c3.css' 'bench/results/identity/main-7f8a3c3.css.enc'",
+      "mean": 0.01609874994,
+      "stddev": 0.0014755687803047338,
+      "median": 0.01668078394,
+      "user": 0.0043541,
+      "system": 0.004965540000000002,
+      "min": 0.01421932494,
+      "max": 0.01779878294,
+      "times": [
+        0.01686361694,
+        0.01493124094,
+        0.01421932494,
+        0.01668078394,
+        0.01779878294
+      ],
+      "memory_usage_byte": [
+        7028736,
+        7028736,
+        7028736,
+        7028736,
+        7061504
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

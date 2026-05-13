@@ -1,0 +1,15 @@
+{
+  "app-3e4f5a7.js": {
+    "raw_bytes": 84041,
+    "wire_bytes": 14523,
+    "wire_bytes_p95": 14523,
+    "encode_cpu_ms_p50": 37.996646,
+    "encode_cpu_ms_p95": 40.15628895,
+    "encode_cpu_ms_p99": 40.16195779,
+    "decode_cpu_ms_p50": 7.3252915000000005,
+    "decode_cpu_ms_p95": 7.922869050000001,
+    "decode_cpu_ms_p99": 8.361040209999999,
+    "raw_sha256": "ce0a5bc2d08e2640aeefee7dd764f76439b486024ed640e9dea4d1ef4af16cc5",
+    "n_runs": 20
+  }
+}

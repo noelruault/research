@@ -1,0 +1,35 @@
+{
+  "results": [
+    {
+      "command": "bench/encode.sh identity 'bench/corpus/assets/vendor-a9b8c7d.js' 'bench/results/identity/vendor-a9b8c7d.js.enc'",
+      "mean": 0.01574481498,
+      "stddev": 0.00398098126754539,
+      "median": 0.014502906379999998,
+      "user": 0.0044948,
+      "system": 0.00517798,
+      "min": 0.01092194838,
+      "max": 0.021147365379999998,
+      "times": [
+        0.01821878138,
+        0.014502906379999998,
+        0.021147365379999998,
+        0.01092194838,
+        0.01393307338
+      ],
+      "memory_usage_byte": [
+        7012352,
+        7012352,
+        7012352,
+        7012352,
+        7028736
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

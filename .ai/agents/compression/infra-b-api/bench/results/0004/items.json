@@ -1,0 +1,65 @@
+{
+  "catalog-full.json": {
+    "wire_bytes_p95": 52186,
+    "encode_cpu_ms_p95": 6.672625,
+    "decode_cpu_ms_p95": 6.773542,
+    "encode_cpu_ms_mean": 6.223729166666667,
+    "decode_cpu_ms_mean": 6.1988486,
+    "encode_cpu_ms_min": 5.423375,
+    "decode_cpu_ms_min": 5.4635
+  },
+  "notifications.json": {
+    "wire_bytes_p95": 10485,
+    "encode_cpu_ms_p95": 8.006375,
+    "decode_cpu_ms_p95": 6.244375,
+    "encode_cpu_ms_mean": 6.0943611,
+    "decode_cpu_ms_mean": 5.720006866666667,
+    "encode_cpu_ms_min": 5.143833,
+    "decode_cpu_ms_min": 4.913666
+  },
+  "order-history.json": {
+    "wire_bytes_p95": 9767,
+    "encode_cpu_ms_p95": 5.818708,
+    "decode_cpu_ms_p95": 5.780583,
+    "encode_cpu_ms_mean": 5.327268066666667,
+    "decode_cpu_ms_mean": 5.4314428,
+    "encode_cpu_ms_min": 4.153625,
+    "decode_cpu_ms_min": 4.668
+  },
+  "products-list-v2.json": {
+    "wire_bytes_p95": 39099,
+    "encode_cpu_ms_p95": 6.249292,
+    "decode_cpu_ms_p95": 6.460334,
+    "encode_cpu_ms_mean": 5.942809766666667,
+    "decode_cpu_ms_mean": 5.7126668,
+    "encode_cpu_ms_min": 5.276333,
+    "decode_cpu_ms_min": 3.962375
+  },
+  "products-list.json": {
+    "wire_bytes_p95": 35612,
+    "encode_cpu_ms_p95": 8.196375,
+    "decode_cpu_ms_p95": 6.456292,
+    "encode_cpu_ms_mean": 6.263262433333333,
+    "decode_cpu_ms_mean": 5.747837566666667,
+    "encode_cpu_ms_min": 4.147375,
+    "decode_cpu_ms_min": 4.607208
+  },
+  "search-results-v2.json": {
+    "wire_bytes_p95": 10070,
+    "encode_cpu_ms_p95": 7.999584,
+    "decode_cpu_ms_p95": 5.935833,
+    "encode_cpu_ms_mean": 5.260473666666667,
+    "decode_cpu_ms_mean": 5.4991903,
+    "encode_cpu_ms_min": 3.869584,
+    "decode_cpu_ms_min": 4.60175
+  },
+  "search-results.json": {
+    "wire_bytes_p95": 9887,
+    "encode_cpu_ms_p95": 14.378334,
+    "decode_cpu_ms_p95": 6.47175,
+    "encode_cpu_ms_mean": 6.7440750000000005,
+    "decode_cpu_ms_mean": 5.7166112,
+    "encode_cpu_ms_min": 5.120208,
+    "decode_cpu_ms_min": 4.829042
+  }
+}

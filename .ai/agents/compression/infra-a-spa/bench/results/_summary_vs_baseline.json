@@ -1,0 +1,92 @@
+{
+  "gzip-6": {
+    "n": 9,
+    "encoded_bytes_total": 163935,
+    "score_total": 164003.61175966,
+    "delta_total_pct": -79.37979669937411,
+    "mean_delta": -70150.04313781555,
+    "ci_low": -124243.57290361889,
+    "ci_high": -25700.668147585555,
+    "decision": "KEEP"
+  },
+  "gzip-9": {
+    "n": 9,
+    "encoded_bytes_total": 162492,
+    "score_total": 162561.49460727,
+    "delta_total_pct": -79.56111434565364,
+    "mean_delta": -70310.27837697,
+    "ci_low": -124518.32094737112,
+    "ci_high": -25807.951711195557,
+    "decision": "KEEP"
+  },
+  "brotli-5": {
+    "n": 9,
+    "encoded_bytes_total": 182133,
+    "score_total": 182208.01463584,
+    "delta_total_pct": -77.09095388520835,
+    "mean_delta": -68127.33170712889,
+    "ci_low": -120101.86197472445,
+    "ci_high": -25500.786087335557,
+    "decision": "KEEP"
+  },
+  "brotli-11": {
+    "n": 9,
+    "encoded_bytes_total": 142839,
+    "score_total": 142906.48472508,
+    "delta_total_pct": -82.03234223690583,
+    "mean_delta": -72494.16836388,
+    "ci_low": -128208.45798257888,
+    "ci_high": -26767.02373413889,
+    "decision": "KEEP"
+  },
+  "zstd-3": {
+    "n": 9,
+    "encoded_bytes_total": 182477,
+    "score_total": 182549.27046391,
+    "delta_total_pct": -77.04804772919857,
+    "mean_delta": -68089.41439289889,
+    "ci_low": -120291.61124945777,
+    "ci_high": -25210.922881833332,
+    "decision": "KEEP"
+  },
+  "zstd-19": {
+    "n": 9,
+    "encoded_bytes_total": 144972,
+    "score_total": 145042.38098924,
+    "delta_total_pct": -81.76379561940469,
+    "mean_delta": -72256.84655675112,
+    "ci_low": -127987.31003475333,
+    "ci_high": -26453.39773975,
+    "decision": "KEEP"
+  },
+  "brotli-dict-11": {
+    "n": 9,
+    "encoded_bytes_total": 141570,
+    "score_total": 141593.8618521,
+    "delta_total_pct": -82.19737854438401,
+    "mean_delta": -72640.01534976666,
+    "ci_low": -128468.29981052778,
+    "ci_high": -26825.224122453335,
+    "decision": "KEEP"
+  },
+  "zstd-dict-19": {
+    "n": 9,
+    "encoded_bytes_total": 140254,
+    "score_total": 140278.316482,
+    "delta_total_pct": -82.36278229794532,
+    "mean_delta": -72786.18705755555,
+    "ci_low": -129275.46856102555,
+    "ci_high": -26590.59968755,
+    "decision": "KEEP"
+  },
+  "hybrid-dict-br11": {
+    "n": 9,
+    "encoded_bytes_total": 141570,
+    "score_total": 141624.02505057,
+    "delta_total_pct": -82.19358612007106,
+    "mean_delta": -72636.66388327,
+    "ci_low": -128465.09984601445,
+    "ci_high": -26821.171970936666,
+    "decision": "KEEP"
+  }
+}

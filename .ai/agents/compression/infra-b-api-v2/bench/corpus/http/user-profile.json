@@ -1,0 +1,1 @@
+{"id": "usr_abc123", "email": "user@example.com", "name": "Example User", "preferences": {"theme": "dark", "lang": "en", "currency": "USD"}, "addresses": [{"label": "home", "city": "NYC", "country": "US"}, {"label": "work", "city": "Boston", "country": "US"}], "verified": true}

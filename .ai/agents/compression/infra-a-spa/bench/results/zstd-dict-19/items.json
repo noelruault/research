@@ -1,0 +1,47 @@
+{
+  "about.html": {
+    "wire_bytes_p95": 3574,
+    "encode_cpu_ms_p95": 0.0,
+    "decode_cpu_ms_p95": 6.193699100000001
+  },
+  "app-3e4f5a6.js": {
+    "wire_bytes_p95": 15397,
+    "encode_cpu_ms_p95": 0.0,
+    "decode_cpu_ms_p95": 4.55823666
+  },
+  "app-3e4f5a7.js": {
+    "wire_bytes_p95": 14567,
+    "encode_cpu_ms_p95": 0.0,
+    "decode_cpu_ms_p95": 4.600398660000001
+  },
+  "index.html": {
+    "wire_bytes_p95": 2566,
+    "encode_cpu_ms_p95": 0.0,
+    "decode_cpu_ms_p95": 6.808830239999999
+  },
+  "logo.svg": {
+    "wire_bytes_p95": 2764,
+    "encode_cpu_ms_p95": 0.0,
+    "decode_cpu_ms_p95": 4.790102140000001
+  },
+  "main-7f8a3c2.css": {
+    "wire_bytes_p95": 6504,
+    "encode_cpu_ms_p95": 0.0,
+    "decode_cpu_ms_p95": 3.846594679999998
+  },
+  "main-7f8a3c3.css": {
+    "wire_bytes_p95": 6495,
+    "encode_cpu_ms_p95": 0.0,
+    "decode_cpu_ms_p95": 4.978889940000001
+  },
+  "vendor-a9b8c7d.js": {
+    "wire_bytes_p95": 45430,
+    "encode_cpu_ms_p95": 0.0,
+    "decode_cpu_ms_p95": 5.35135048
+  },
+  "vendor-a9b8c7e.js": {
+    "wire_bytes_p95": 42957,
+    "encode_cpu_ms_p95": 0.0,
+    "decode_cpu_ms_p95": 7.504862099999999
+  }
+}

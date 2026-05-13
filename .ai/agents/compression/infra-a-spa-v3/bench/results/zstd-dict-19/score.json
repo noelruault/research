@@ -1,0 +1,35 @@
+{
+  "n": 3,
+  "mean_delta_bytes": -104399.902067375,
+  "mean_delta_pct": -81.94086730541159,
+  "ci_low_bytes": -218469.24833547501,
+  "ci_high_bytes": -25254.07879295,
+  "ci_low_pct": -83.62150152784328,
+  "ci_high_pct": -79.53453394711659,
+  "decision": "KEEP",
+  "baseline_total_score": 377056.1101259,
+  "candidate_total_score": 63856.403923775004,
+  "per_item": [
+    {
+      "key": "app.js",
+      "baseline": 84044.1088394,
+      "candidate": 14567.7297657,
+      "delta": -69476.3790737,
+      "pct": -82.66656644127491
+    },
+    {
+      "key": "main.css",
+      "baseline": 31752.3439689,
+      "candidate": 6498.26517595,
+      "delta": -25254.07879295,
+      "pct": -79.53453394711659
+    },
+    {
+      "key": "vendor.js",
+      "baseline": 261259.6573176,
+      "candidate": 42790.408982125,
+      "delta": -218469.24833547501,
+      "pct": -83.62150152784328
+    }
+  ]
+}

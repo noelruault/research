@@ -1,0 +1,15 @@
+{
+  "vendor-a9b8c7e.js": {
+    "raw_bytes": 261255,
+    "wire_bytes": 42745,
+    "wire_bytes_p95": 42745,
+    "encode_cpu_ms_p50": 144.543021,
+    "encode_cpu_ms_p95": 161.671,
+    "encode_cpu_ms_p99": 169.7365,
+    "decode_cpu_ms_p50": 7.409396000000001,
+    "decode_cpu_ms_p95": 7.6839021,
+    "decode_cpu_ms_p99": 7.70711402,
+    "raw_sha256": "7a4248cc26ddb8c5e766d9654371ae8ca701bac211b3a60dc906054e6c2122ac",
+    "n_runs": 20
+  }
+}

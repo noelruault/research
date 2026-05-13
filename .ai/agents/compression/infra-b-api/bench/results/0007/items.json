@@ -1,0 +1,65 @@
+{
+  "catalog-full.json": {
+    "wire_bytes_p95": 47910,
+    "encode_cpu_ms_p95": 7.940125,
+    "decode_cpu_ms_p95": 7.423042,
+    "encode_cpu_ms_mean": 6.89521412,
+    "decode_cpu_ms_mean": 5.9873809,
+    "encode_cpu_ms_min": 5.82825,
+    "decode_cpu_ms_min": 4.793
+  },
+  "notifications.json": {
+    "wire_bytes_p95": 9594,
+    "encode_cpu_ms_p95": 6.846667,
+    "decode_cpu_ms_p95": 7.338875,
+    "encode_cpu_ms_mean": 5.68291168,
+    "decode_cpu_ms_mean": 6.20497574,
+    "encode_cpu_ms_min": 4.670917,
+    "decode_cpu_ms_min": 4.786916
+  },
+  "order-history.json": {
+    "wire_bytes_p95": 9084,
+    "encode_cpu_ms_p95": 7.1915,
+    "decode_cpu_ms_p95": 9.768334,
+    "encode_cpu_ms_mean": 6.0982875,
+    "decode_cpu_ms_mean": 6.29565998,
+    "encode_cpu_ms_min": 4.526167,
+    "decode_cpu_ms_min": 4.6645
+  },
+  "products-list-v2.json": {
+    "wire_bytes_p95": 35843,
+    "encode_cpu_ms_p95": 9.47925,
+    "decode_cpu_ms_p95": 7.928625,
+    "encode_cpu_ms_mean": 6.84281004,
+    "decode_cpu_ms_mean": 6.73088834,
+    "encode_cpu_ms_min": 5.29825,
+    "decode_cpu_ms_min": 5.207542
+  },
+  "products-list.json": {
+    "wire_bytes_p95": 32352,
+    "encode_cpu_ms_p95": 7.503125,
+    "decode_cpu_ms_p95": 9.245,
+    "encode_cpu_ms_mean": 6.28353422,
+    "decode_cpu_ms_mean": 6.8930042,
+    "encode_cpu_ms_min": 5.207667,
+    "decode_cpu_ms_min": 5.78075
+  },
+  "search-results-v2.json": {
+    "wire_bytes_p95": 8827,
+    "encode_cpu_ms_p95": 7.542041,
+    "decode_cpu_ms_p95": 7.176292,
+    "encode_cpu_ms_mean": 5.86126744,
+    "decode_cpu_ms_mean": 5.6886059,
+    "encode_cpu_ms_min": 4.633,
+    "decode_cpu_ms_min": 4.586667
+  },
+  "search-results.json": {
+    "wire_bytes_p95": 8630,
+    "encode_cpu_ms_p95": 7.62275,
+    "decode_cpu_ms_p95": 6.461,
+    "encode_cpu_ms_mean": 6.4630558,
+    "decode_cpu_ms_mean": 5.38176908,
+    "encode_cpu_ms_min": 4.857917,
+    "decode_cpu_ms_min": 4.529875
+  }
+}

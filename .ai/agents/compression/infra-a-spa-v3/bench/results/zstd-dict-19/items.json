@@ -1,0 +1,44 @@
+{
+  "app.js": {
+    "raw_bytes": 84041,
+    "wire_bytes": 14563,
+    "wire_bytes_p95": 14563,
+    "encode_cpu_ms_p50": 44.004792,
+    "encode_cpu_ms_p95": 54.46298505000001,
+    "encode_cpu_ms_p99": 57.85829207,
+    "decode_cpu_ms_p50": 7.5220835,
+    "decode_cpu_ms_p95": 9.459531400000001,
+    "decode_cpu_ms_p99": 10.38334893,
+    "raw_sha256": "ce0a5bc2d08e2640aeefee7dd764f76439b486024ed640e9dea4d1ef4af16cc5",
+    "n_runs": 30,
+    "note_dcz_framing_bytes": 40
+  },
+  "main.css": {
+    "raw_bytes": 31749,
+    "wire_bytes": 6487,
+    "wire_bytes_p95": 6487,
+    "encode_cpu_ms_p50": 18.375854,
+    "encode_cpu_ms_p95": 30.265325300000004,
+    "encode_cpu_ms_p99": 46.39010214000001,
+    "decode_cpu_ms_p50": 8.132792,
+    "decode_cpu_ms_p95": 22.5303519,
+    "decode_cpu_ms_p99": 27.617180320000003,
+    "raw_sha256": "525f5f26c9690b0deaf937b25cc9a6204cce774c5c583ea587619767e9accb65",
+    "n_runs": 30,
+    "note_dcz_framing_bytes": 40
+  },
+  "vendor.js": {
+    "raw_bytes": 261255,
+    "wire_bytes": 42785,
+    "wire_bytes_p95": 42785,
+    "encode_cpu_ms_p50": 165.4309165,
+    "encode_cpu_ms_p95": 235.6532686,
+    "encode_cpu_ms_p99": 278.67086982000006,
+    "decode_cpu_ms_p50": 8.130604,
+    "decode_cpu_ms_p95": 10.817964250000001,
+    "decode_cpu_ms_p99": 11.975139250000002,
+    "raw_sha256": "7a4248cc26ddb8c5e766d9654371ae8ca701bac211b3a60dc906054e6c2122ac",
+    "n_runs": 30,
+    "note_dcz_framing_bytes": 40
+  }
+}

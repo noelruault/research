@@ -1,0 +1,80 @@
+{
+  "agent_version": "compression-engineer-v2",
+  "session_started": "2026-05-07T20:35:00Z",
+  "session_ended": "2026-05-07T18:47:40.375308+00:00",
+  "git_root": "",
+  "git_sha": "",
+  "scope_sha256": "ccbbbbfaf1f91b2cc8907c443d22eb351e4eba08d40ae7a0b0511d16afcb7bbe",
+  "corpus_sha256": "72ec96b4a3ac4cf48dc82d28ee97c2673ae0e57fec39133611cda8ca5287e593",
+  "scoring_seed": "0xC0FFEE",
+  "target_kind": "filesystem-only",
+  "n_experiments": 10,
+  "n_keep": 10,
+  "n_discard": 0,
+  "n_discard_by_prediction": 2,
+  "winner": {
+    "exp_id": "0009b",
+    "algo": "zstd-dict-9",
+    "wire_bytes_total": 134266,
+    "wire_pct_vs_baseline": -77.59,
+    "wire_pct_vs_gzip6": -10.48,
+    "ci95_score_pct": [
+      -79.32,
+      -77.01
+    ]
+  },
+  "tools": {
+    "brotli": "brotli 1.2.0",
+    "zstd": "*** Zstandard CLI (64-bit) v1.5.7, by Yann Collet ***",
+    "gzip": "Apple gzip 479",
+    "hyperfine": "hyperfine 1.20.0",
+    "python3": "Python 3.14.2",
+    "openssl": "OpenSSL 3.6.2 7 Apr 2026 (Library: OpenSSL 3.6.2 7 Apr 2026)"
+  },
+  "platform": {
+    "os": "Darwin 25.4.0",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro",
+    "cores": 11
+  },
+  "calibration_summary": {
+    "sample_path": "bench/corpus/http/catalog-full.json",
+    "sample_bytes": 189168,
+    "gzip_6_ms_p50": 7.431,
+    "brotli_5_ms_p50": 8.747,
+    "brotli_11_ms_p50": 173.263,
+    "zstd_3_ms_p50": 7.203,
+    "zstd_19_ms_p50": 58.324,
+    "warning_vs_table": [
+      "gzip-6: 24.28 MB/s vs table 50 MB/s (-51.4%)",
+      "brotli-1: 24.39 MB/s vs table 290 MB/s (-91.6%)",
+      "brotli-5: 20.62 MB/s vs table 100 MB/s (-79.4%)",
+      "brotli-11: 1.04 MB/s vs table 0.5 MB/s (+108.0%)",
+      "zstd-1: 24.83 MB/s vs table 510 MB/s (-95.1%)",
+      "zstd-3: 25.05 MB/s vs table 250 MB/s (-90.0%)",
+      "zstd-9: 17.7 MB/s vs table 60 MB/s (-70.5%)",
+      "zstd-19: 3.09 MB/s vs table 10 MB/s (-69.1%)"
+    ]
+  },
+  "exclusions_applied": [
+    "error-404.json",
+    "user-profile.json"
+  ],
+  "min_compress_size_recommended": 1024,
+  "dictionary": {
+    "path": "bench/zstd-dict.bin",
+    "size_bytes": 16384,
+    "training": "zstd --train bench/corpus/http/*.json --maxdict=16384",
+    "sha256": "038f14963d0164f35e89773417fcdfb95fb74406b387be3628c0d27ac353e0e4"
+  },
+  "metric": {
+    "primary": "score",
+    "formula": "wire_bytes_p95 + 0.5 * encode_cpu_ms_p95 + 0.3 * decode_cpu_ms_p95",
+    "weights": {
+      "encode_cpu_ms": 0.5,
+      "decode_cpu_ms": 0.3
+    },
+    "client_profile": "cable",
+    "budget_seconds_per_candidate": 30
+  }
+}

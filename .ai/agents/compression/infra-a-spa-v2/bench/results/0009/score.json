@@ -1,0 +1,35 @@
+{
+  "n": 3,
+  "mean_delta_bytes": -104442.157385825,
+  "mean_delta_pct": -82.01186899514109,
+  "ci_low_bytes": -218509.25801755,
+  "ci_high_bytes": -25300.545777425003,
+  "ci_low_pct": -83.63731422827162,
+  "ci_high_pct": -79.68331658300168,
+  "decision": "KEEP",
+  "baseline_total_score": 377053.1011472,
+  "candidate_total_score": 63726.628989725,
+  "per_item": [
+    {
+      "key": "app-3e4f5a7.js",
+      "baseline": 84043.629797025,
+      "candidate": 14526.961434525,
+      "delta": -69516.6683625,
+      "pct": -82.71497617414994
+    },
+    {
+      "key": "main-7f8a3c3.css",
+      "baseline": 31751.371381575,
+      "candidate": 6450.82560415,
+      "delta": -25300.545777425003,
+      "pct": -79.68331658300168
+    },
+    {
+      "key": "vendor-a9b8c7e.js",
+      "baseline": 261258.0999686,
+      "candidate": 42748.84195105,
+      "delta": -218509.25801755,
+      "pct": -83.63731422827162
+    }
+  ]
+}

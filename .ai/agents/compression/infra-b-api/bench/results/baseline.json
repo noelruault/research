@@ -1,0 +1,65 @@
+{
+  "catalog-full.json": {
+    "wire_bytes_p95": 189168,
+    "encode_cpu_ms_p95": 0.094709,
+    "decode_cpu_ms_p95": 0.094709,
+    "encode_cpu_ms_mean": 0.08544453333333334,
+    "decode_cpu_ms_mean": 0.08544453333333334,
+    "encode_cpu_ms_min": 0.075333,
+    "decode_cpu_ms_min": 0.075333
+  },
+  "notifications.json": {
+    "wire_bytes_p95": 38234,
+    "encode_cpu_ms_p95": 0.208666,
+    "decode_cpu_ms_p95": 0.208666,
+    "encode_cpu_ms_mean": 0.12158873333333334,
+    "decode_cpu_ms_mean": 0.12158873333333334,
+    "encode_cpu_ms_min": 0.076083,
+    "decode_cpu_ms_min": 0.076083
+  },
+  "order-history.json": {
+    "wire_bytes_p95": 42784,
+    "encode_cpu_ms_p95": 0.199125,
+    "decode_cpu_ms_p95": 0.199125,
+    "encode_cpu_ms_mean": 0.17344026666666668,
+    "decode_cpu_ms_mean": 0.17344026666666668,
+    "encode_cpu_ms_min": 0.093125,
+    "decode_cpu_ms_min": 0.093125
+  },
+  "products-list-v2.json": {
+    "wire_bytes_p95": 139497,
+    "encode_cpu_ms_p95": 0.114708,
+    "decode_cpu_ms_p95": 0.114708,
+    "encode_cpu_ms_mean": 0.1013319,
+    "decode_cpu_ms_mean": 0.1013319,
+    "encode_cpu_ms_min": 0.095125,
+    "decode_cpu_ms_min": 0.095125
+  },
+  "products-list.json": {
+    "wire_bytes_p95": 126767,
+    "encode_cpu_ms_p95": 0.190292,
+    "decode_cpu_ms_p95": 0.190292,
+    "encode_cpu_ms_mean": 0.13329436666666666,
+    "decode_cpu_ms_mean": 0.13329436666666666,
+    "encode_cpu_ms_min": 0.093625,
+    "decode_cpu_ms_min": 0.093625
+  },
+  "search-results-v2.json": {
+    "wire_bytes_p95": 31626,
+    "encode_cpu_ms_p95": 0.192959,
+    "decode_cpu_ms_p95": 0.192959,
+    "encode_cpu_ms_mean": 0.12393613333333334,
+    "decode_cpu_ms_mean": 0.12393613333333334,
+    "encode_cpu_ms_min": 0.072583,
+    "decode_cpu_ms_min": 0.072583
+  },
+  "search-results.json": {
+    "wire_bytes_p95": 31169,
+    "encode_cpu_ms_p95": 0.109792,
+    "decode_cpu_ms_p95": 0.109792,
+    "encode_cpu_ms_mean": 0.0986792,
+    "decode_cpu_ms_mean": 0.0986792,
+    "encode_cpu_ms_min": 0.092125,
+    "decode_cpu_ms_min": 0.092125
+  }
+}

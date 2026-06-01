@@ -1,3 +1,13 @@
+> ⚠️ **HISTORICAL — THE MIGRATION IS COMPLETE. DO NOT ACT ON THIS RUNBOOK.**
+> This research now lives at its permanent home,
+> `noelruault/research/nearest-color-scaling/` (this very directory). This file is
+> preserved only as a record of *how* it got here. Paths below that refer to
+> `.plans/research/` (the old pixelize staging location) or to a
+> `pixelize-nearest-color-scaling/` destination folder are the **original
+> pre-migration instructions** and no longer describe the current layout — the
+> folder was named `nearest-color-scaling` on import. See this folder's `README.md`
+> for the current front door.
+
 # Agent instructions — migrate this research to `noelruault/research`
 
 **This is an actionable runbook for an AI agent.** If you have been asked to

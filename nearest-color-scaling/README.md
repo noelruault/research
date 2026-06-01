@@ -90,7 +90,8 @@ output and tables.
 ## Third-party material — `01-imagemagick-reverse-engineering-scratch/`
 
 > ⚠️ This subdirectory contains **verbatim extracts of ImageMagick's own source
-> code** (`MagickCore/quantize.c`, ImageMagick 6.9.12-98), included **only as the
+> code** (`magick/quantize.c` in the ImageMagick 6.9.12-98 tree — IM6 lays the core
+> out under `magick/`, not `MagickCore/`; see report 01), included **only as the
 > analyzed subject** of report 01. They are **© ImageMagick Studio LLC**, licensed
 > under the [ImageMagick License](https://imagemagick.org/script/license.php) — an
 > Apache-2.0–style license — **not** under this repository's license. The files
@@ -113,7 +114,9 @@ current front door.
 
 ## License
 
-The original research reports, data files, and `notes-*` files are MIT (this
-repository's license). The `im-*` files in
-`01-imagemagick-reverse-engineering-scratch/` are third-party ImageMagick source
-under the ImageMagick License — see that directory's `README.md`.
+The original research reports, data files, and `notes-*` files are released under
+the same terms as the rest of `noelruault/research`. The `im-*` files in
+`01-imagemagick-reverse-engineering-scratch/` are **not** covered by those terms:
+they are third-party ImageMagick source under the
+[ImageMagick License](https://imagemagick.org/script/license.php) — see that
+directory's `README.md`.

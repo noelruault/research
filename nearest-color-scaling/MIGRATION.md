@@ -1,3 +1,11 @@
+> ⚠️ **HISTORICAL — THE MIGRATION IS COMPLETE. DO NOT ACT ON THIS NOTE.**
+> The research now lives at `noelruault/research/nearest-color-scaling/` (this
+> directory). This file is kept only as the original historical note. References
+> below to a `pixelize-nearest-color-scaling/` destination or to a `.plans/research/`
+> staging location describe the **pre-migration** state; the folder was named
+> `nearest-color-scaling` on import. See this folder's `README.md` for the current
+> front door.
+
 # MIGRATION: this research belongs in `noelruault/research`
 
 > **Agents/automation:** follow `AGENT-MIGRATION-INSTRUCTIONS.md` in this directory

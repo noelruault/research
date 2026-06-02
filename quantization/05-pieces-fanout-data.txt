@@ -1,0 +1,396 @@
+# quantbench — 2026-06-02 22:56:47
+# go go1.25.0, 4 cores, 6 images
+# metric scale: MSE lower=better, PSNR higher=better, dE2000 lower=better
+
+== N = 4 ==
+quantizer             MSE     PSNR    meanDE     p95DE   image
+popularity       18741.26     5.40    45.757    81.749   athens.jpg
+popularity        5497.70    10.73    20.815    71.743   liberty.jpg
+popularity         292.48    23.47     8.762    18.588   monet.jpg
+popularity        1864.90    15.42    15.321    32.795   napoleon.jpg
+popularity        4513.95    11.59    16.597    60.755   pearl.jpg
+popularity        6888.51     9.75    27.249    54.265   starry.jpg
+popularity*       6299.80    12.73    22.417    53.316   [MEAN over 6, 1140ms]
+
+median-cut         415.77    21.94     7.762    17.916   athens.jpg
+median-cut         581.64    20.48     8.478    20.054   liberty.jpg
+median-cut         114.12    27.56     6.350    12.818   monet.jpg
+median-cut         345.99    22.74     7.845    15.299   napoleon.jpg
+median-cut         450.93    21.59     6.890    19.341   pearl.jpg
+median-cut         420.08    21.90    10.415    21.308   starry.jpg
+median-cut*        388.09    22.70     7.957    17.789   [MEAN over 6, 1209ms]
+
+divisive/axisaligned/rgb     418.17    21.92     7.786    17.874   athens.jpg
+divisive/axisaligned/rgb     328.33    22.97     7.478    17.241   liberty.jpg
+divisive/axisaligned/rgb     114.07    27.56     6.369    12.514   monet.jpg
+divisive/axisaligned/rgb     342.04    22.79     7.803    15.239   napoleon.jpg
+divisive/axisaligned/rgb     280.03    23.66     6.515    16.637   pearl.jpg
+divisive/axisaligned/rgb     419.64    21.90    10.419    21.269   starry.jpg
+divisive/axisaligned/rgb*     317.05    23.47     7.728    16.796   [MEAN over 6, 1383ms]
+
+divisive/pca/rgb     399.40    22.12     7.541    17.672   athens.jpg
+divisive/pca/rgb     322.59    23.04     7.319    16.472   liberty.jpg
+divisive/pca/rgb     111.87    27.64     5.966    11.309   monet.jpg
+divisive/pca/rgb     289.11    23.52     7.020    13.746   napoleon.jpg
+divisive/pca/rgb     274.36    23.75     6.440    17.895   pearl.jpg
+divisive/pca/rgb     338.13    22.84     8.802    19.939   starry.jpg
+divisive/pca/rgb*     289.24    23.82     7.181    16.172   [MEAN over 6, 1429ms]
+
+divisive/pca/oklab     398.20    22.13     7.558    17.595   athens.jpg
+divisive/pca/oklab     323.56    23.03     7.383    16.490   liberty.jpg
+divisive/pca/oklab     121.31    27.29     6.897    14.051   monet.jpg
+divisive/pca/oklab     289.89    23.51     7.041    13.789   napoleon.jpg
+divisive/pca/oklab     274.43    23.75     6.460    17.829   pearl.jpg
+divisive/pca/oklab     339.38    22.82     8.887    20.172   starry.jpg
+divisive/pca/oklab*     291.13    23.76     7.371    16.654   [MEAN over 6, 1518ms]
+
+kmeans/random/rgb/i10     368.20    22.47     7.649    16.307   athens.jpg
+kmeans/random/rgb/i10     307.30    23.26     7.301    16.866   liberty.jpg
+kmeans/random/rgb/i10     108.23    27.79     5.964    11.268   monet.jpg
+kmeans/random/rgb/i10     275.21    23.73     7.335    13.581   napoleon.jpg
+kmeans/random/rgb/i10     284.11    23.60     6.478    17.696   pearl.jpg
+kmeans/random/rgb/i10     328.33    22.97     8.712    19.612   starry.jpg
+kmeans/random/rgb/i10*     278.56    23.97     7.240    15.888   [MEAN over 6, 1280ms]
+
+kmeans/kmeans++/rgb/i10     391.36    22.21     7.800    14.070   athens.jpg
+kmeans/kmeans++/rgb/i10     306.46    23.27     7.366    16.753   liberty.jpg
+kmeans/kmeans++/rgb/i10     105.40    27.90     5.905    11.139   monet.jpg
+kmeans/kmeans++/rgb/i10     282.45    23.62     7.442    13.730   napoleon.jpg
+kmeans/kmeans++/rgb/i10     236.91    24.38     6.292    17.660   pearl.jpg
+kmeans/kmeans++/rgb/i10     335.16    22.88     8.780    18.635   starry.jpg
+kmeans/kmeans++/rgb/i10*     276.29    24.04     7.264    15.331   [MEAN over 6, 1325ms]
+
+kmeans/maximin/rgb/i10     369.45    22.46     7.613    17.200   athens.jpg
+kmeans/maximin/rgb/i10     307.90    23.25     7.475    16.991   liberty.jpg
+kmeans/maximin/rgb/i10     106.55    27.86     6.089    11.930   monet.jpg
+kmeans/maximin/rgb/i10     267.78    23.85     7.208    13.439   napoleon.jpg
+kmeans/maximin/rgb/i10     236.93    24.38     6.291    17.403   pearl.jpg
+kmeans/maximin/rgb/i10     357.61    22.60     8.945    16.804   starry.jpg
+kmeans/maximin/rgb/i10*     274.37    24.07     7.270    15.628   [MEAN over 6, 1302ms]
+
+kmeans/maximin/oklab/i10     377.23    22.36     7.782    14.102   athens.jpg
+kmeans/maximin/oklab/i10     309.15    23.23     7.312    16.831   liberty.jpg
+kmeans/maximin/oklab/i10     113.68    27.57     6.983    13.827   monet.jpg
+kmeans/maximin/oklab/i10     262.12    23.95     7.113    13.239   napoleon.jpg
+kmeans/maximin/oklab/i10     241.02    24.31     6.335    17.991   pearl.jpg
+kmeans/maximin/oklab/i10     333.39    22.90     8.845    19.192   starry.jpg
+kmeans/maximin/oklab/i10*     272.76    24.05     7.395    15.864   [MEAN over 6, 1390ms]
+
+kmeans[median-cut]/rgb/i10     368.67    22.46     7.609    16.938   athens.jpg
+kmeans[median-cut]/rgb/i10     312.27    23.19     7.309    16.957   liberty.jpg
+kmeans[median-cut]/rgb/i10     106.32    27.86     6.052    11.711   monet.jpg
+kmeans[median-cut]/rgb/i10     261.20    23.96     7.074    13.124   napoleon.jpg
+kmeans[median-cut]/rgb/i10     306.83    23.26     6.556    18.286   pearl.jpg
+kmeans[median-cut]/rgb/i10     328.81    22.96     8.738    19.977   starry.jpg
+kmeans[median-cut]/rgb/i10*     280.68    23.95     7.223    16.166   [MEAN over 6, 1436ms]
+
+kmeans[divisive/pca/rgb]/rgb/i10     368.69    22.46     7.619    16.926   athens.jpg
+kmeans[divisive/pca/rgb]/rgb/i10     306.42    23.27     7.405    16.920   liberty.jpg
+kmeans[divisive/pca/rgb]/rgb/i10     105.45    27.90     5.919    11.230   monet.jpg
+kmeans[divisive/pca/rgb]/rgb/i10     261.20    23.96     7.074    13.124   napoleon.jpg
+kmeans[divisive/pca/rgb]/rgb/i10     236.94    24.38     6.287    17.650   pearl.jpg
+kmeans[divisive/pca/rgb]/rgb/i10     328.06    22.97     8.697    19.917   starry.jpg
+kmeans[divisive/pca/rgb]/rgb/i10*     267.79    24.16     7.167    15.961   [MEAN over 6, 1667ms]
+
+kmeans[divisive/pca/oklab]/oklab/i10     374.57    22.40     7.770    13.972   athens.jpg
+kmeans[divisive/pca/oklab]/oklab/i10     309.90    23.22     7.264    16.879   liberty.jpg
+kmeans[divisive/pca/oklab]/oklab/i10     114.17    27.56     6.995    13.932   monet.jpg
+kmeans[divisive/pca/oklab]/oklab/i10     261.92    23.95     7.142    13.113   napoleon.jpg
+kmeans[divisive/pca/oklab]/oklab/i10     242.64    24.28     6.331    17.920   pearl.jpg
+kmeans[divisive/pca/oklab]/oklab/i10     329.20    22.96     8.798    20.018   starry.jpg
+kmeans[divisive/pca/oklab]/oklab/i10*     272.07    24.06     7.383    15.972   [MEAN over 6, 1820ms]
+
+== N = 16 ==
+quantizer             MSE     PSNR    meanDE     p95DE   image
+popularity        3870.20    12.25    18.743    32.897   athens.jpg
+popularity        5042.29    11.10    20.054    71.014   liberty.jpg
+popularity         194.99    25.23     7.597    17.977   monet.jpg
+popularity        1587.96    16.12    14.238    31.874   napoleon.jpg
+popularity        4121.10    11.98    15.330    59.522   pearl.jpg
+popularity        6334.10    10.11    26.397    52.869   starry.jpg
+popularity*       3525.11    14.47    17.060    44.359   [MEAN over 6, 1215ms]
+
+median-cut         103.09    28.00     5.258    11.104   athens.jpg
+median-cut         119.12    27.37     5.260    11.919   liberty.jpg
+median-cut          44.89    31.61     3.922     8.255   monet.jpg
+median-cut          80.48    29.07     4.604     9.590   napoleon.jpg
+median-cut         119.25    27.37     4.377    12.677   pearl.jpg
+median-cut         124.54    27.18     5.651    13.433   starry.jpg
+median-cut*         98.56    28.43     4.845    11.163   [MEAN over 6, 1356ms]
+
+divisive/axisaligned/rgb      94.42    28.38     5.041    11.298   athens.jpg
+divisive/axisaligned/rgb      85.07    28.83     5.126    10.932   liberty.jpg
+divisive/axisaligned/rgb      35.29    32.65     4.115     8.536   monet.jpg
+divisive/axisaligned/rgb      66.41    29.91     4.663     9.221   napoleon.jpg
+divisive/axisaligned/rgb      65.04    30.00     4.008     9.658   pearl.jpg
+divisive/axisaligned/rgb     106.65    27.85     5.586    11.995   starry.jpg
+divisive/axisaligned/rgb*      75.48    29.60     4.757    10.273   [MEAN over 6, 1569ms]
+
+divisive/pca/rgb      90.23    28.58     4.813    10.831   athens.jpg
+divisive/pca/rgb      75.52    29.35     4.858    11.106   liberty.jpg
+divisive/pca/rgb      34.42    32.76     4.150     8.175   monet.jpg
+divisive/pca/rgb      66.90    29.88     4.428     9.201   napoleon.jpg
+divisive/pca/rgb      57.18    30.56     3.708     8.369   pearl.jpg
+divisive/pca/rgb     100.35    28.12     5.325    11.646   starry.jpg
+divisive/pca/rgb*      70.77    29.87     4.547     9.888   [MEAN over 6, 1775ms]
+
+divisive/pca/oklab      92.40    28.47     4.988    11.042   athens.jpg
+divisive/pca/oklab      77.72    29.23     4.899    11.578   liberty.jpg
+divisive/pca/oklab      37.41    32.40     4.328     8.892   monet.jpg
+divisive/pca/oklab      74.59    29.40     4.508     9.744   napoleon.jpg
+divisive/pca/oklab      75.94    29.33     4.184    11.150   pearl.jpg
+divisive/pca/oklab     110.74    27.69     5.482    12.527   starry.jpg
+divisive/pca/oklab*      78.14    29.42     4.732    10.822   [MEAN over 6, 1811ms]
+
+kmeans/random/rgb/i10      93.95    28.40     4.799    10.456   athens.jpg
+kmeans/random/rgb/i10      70.58    29.64     4.609     9.764   liberty.jpg
+kmeans/random/rgb/i10      32.20    33.05     3.982     7.771   monet.jpg
+kmeans/random/rgb/i10      61.13    30.27     4.443     8.885   napoleon.jpg
+kmeans/random/rgb/i10      55.41    30.69     3.694     8.029   pearl.jpg
+kmeans/random/rgb/i10      96.88    28.27     5.493    12.351   starry.jpg
+kmeans/random/rgb/i10*      68.36    30.06     4.503     9.543   [MEAN over 6, 1570ms]
+
+kmeans/kmeans++/rgb/i10      86.46    28.76     4.856    10.638   athens.jpg
+kmeans/kmeans++/rgb/i10      72.66    29.52     4.738    10.530   liberty.jpg
+kmeans/kmeans++/rgb/i10      32.38    33.03     3.950     7.581   monet.jpg
+kmeans/kmeans++/rgb/i10      61.29    30.26     4.497     9.062   napoleon.jpg
+kmeans/kmeans++/rgb/i10      49.26    31.21     3.626     7.876   pearl.jpg
+kmeans/kmeans++/rgb/i10      96.21    28.30     5.510    12.007   starry.jpg
+kmeans/kmeans++/rgb/i10*      66.38    30.18     4.529     9.616   [MEAN over 6, 1597ms]
+
+kmeans/maximin/rgb/i10      88.70    28.65     4.874    10.569   athens.jpg
+kmeans/maximin/rgb/i10      80.31    29.08     4.846    10.220   liberty.jpg
+kmeans/maximin/rgb/i10      35.31    32.65     4.135     8.170   monet.jpg
+kmeans/maximin/rgb/i10      61.88    30.22     4.431     8.785   napoleon.jpg
+kmeans/maximin/rgb/i10      68.91    29.75     4.077     7.917   pearl.jpg
+kmeans/maximin/rgb/i10     105.18    27.91     5.712    12.495   starry.jpg
+kmeans/maximin/rgb/i10*      73.38    29.71     4.679     9.693   [MEAN over 6, 1530ms]
+
+kmeans/maximin/oklab/i10      96.01    28.31     5.178    11.412   athens.jpg
+kmeans/maximin/oklab/i10      82.98    28.94     5.185    13.268   liberty.jpg
+kmeans/maximin/oklab/i10      38.21    32.31     4.390     8.583   monet.jpg
+kmeans/maximin/oklab/i10      69.02    29.74     4.611     9.568   napoleon.jpg
+kmeans/maximin/oklab/i10      54.84    30.74     3.774     8.461   pearl.jpg
+kmeans/maximin/oklab/i10     106.94    27.84     5.513    12.030   starry.jpg
+kmeans/maximin/oklab/i10*      74.67    29.65     4.775    10.553   [MEAN over 6, 1626ms]
+
+kmeans[median-cut]/rgb/i10      85.17    28.83     4.832    10.821   athens.jpg
+kmeans[median-cut]/rgb/i10      83.55    28.91     4.719    10.086   liberty.jpg
+kmeans[median-cut]/rgb/i10      30.92    33.23     3.834     7.510   monet.jpg
+kmeans[median-cut]/rgb/i10      63.38    30.11     4.369     8.801   napoleon.jpg
+kmeans[median-cut]/rgb/i10      82.79    28.95     3.737     8.737   pearl.jpg
+kmeans[median-cut]/rgb/i10      96.51    28.29     5.287    11.679   starry.jpg
+kmeans[median-cut]/rgb/i10*      73.72    29.72     4.463     9.606   [MEAN over 6, 1731ms]
+
+kmeans[divisive/pca/rgb]/rgb/i10      84.99    28.84     4.788    10.717   athens.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      69.44    29.71     4.700    10.485   liberty.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      30.59    33.27     3.948     7.725   monet.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      58.75    30.44     4.367     8.697   napoleon.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      49.74    31.16     3.602     8.030   pearl.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      94.88    28.36     5.229    11.401   starry.jpg
+kmeans[divisive/pca/rgb]/rgb/i10*      64.73    30.30     4.439     9.509   [MEAN over 6, 2097ms]
+
+kmeans[divisive/pca/oklab]/oklab/i10      90.41    28.57     4.989    11.136   athens.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      70.55    29.65     4.738    10.719   liberty.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      32.01    33.08     4.085     8.402   monet.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      67.53    29.84     4.501     9.257   napoleon.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      54.28    30.78     3.689     8.543   pearl.jpg
+kmeans[divisive/pca/oklab]/oklab/i10     100.20    28.12     5.396    11.749   starry.jpg
+kmeans[divisive/pca/oklab]/oklab/i10*      69.16    30.01     4.566     9.968   [MEAN over 6, 2256ms]
+
+== N = 64 ==
+quantizer             MSE     PSNR    meanDE     p95DE   image
+popularity         278.94    23.68     6.641    16.889   athens.jpg
+popularity        4740.22    11.37    18.877    69.784   liberty.jpg
+popularity         154.09    26.25     6.816    17.824   monet.jpg
+popularity        1188.98    17.38    12.444    30.991   napoleon.jpg
+popularity        3814.39    12.32    14.388    58.362   pearl.jpg
+popularity        5722.64    10.55    25.752    51.625   starry.jpg
+popularity*       2649.88    16.93    14.153    40.913   [MEAN over 6, 1550ms]
+
+median-cut          35.92    32.58     3.680     9.091   athens.jpg
+median-cut          31.40    33.16     3.425     7.845   liberty.jpg
+median-cut          15.19    36.31     2.627     5.600   monet.jpg
+median-cut          26.26    33.94     3.234     7.166   napoleon.jpg
+median-cut          29.97    33.36     2.764     7.670   pearl.jpg
+median-cut          41.86    31.91     3.956     9.299   starry.jpg
+median-cut*         30.10    33.54     3.281     7.779   [MEAN over 6, 1697ms]
+
+divisive/axisaligned/rgb      32.86    32.96     3.666     8.825   athens.jpg
+divisive/axisaligned/rgb      24.97    34.16     3.434     7.631   liberty.jpg
+divisive/axisaligned/rgb      12.14    37.29     2.731     5.671   monet.jpg
+divisive/axisaligned/rgb      22.76    34.56     3.207     7.025   napoleon.jpg
+divisive/axisaligned/rgb      17.31    35.75     2.742     6.561   pearl.jpg
+divisive/axisaligned/rgb      35.28    32.66     3.874     8.816   starry.jpg
+divisive/axisaligned/rgb*      24.22    34.56     3.276     7.422   [MEAN over 6, 1932ms]
+
+divisive/pca/rgb      33.09    32.93     3.637     9.164   athens.jpg
+divisive/pca/rgb      24.32    34.27     3.321     7.378   liberty.jpg
+divisive/pca/rgb      11.96    37.35     2.786     5.903   monet.jpg
+divisive/pca/rgb      21.82    34.74     3.160     7.114   napoleon.jpg
+divisive/pca/rgb      16.73    35.90     2.687     6.300   pearl.jpg
+divisive/pca/rgb      33.41    32.89     3.760     8.702   starry.jpg
+divisive/pca/rgb*      23.56    34.68     3.225     7.427   [MEAN over 6, 2267ms]
+
+divisive/pca/oklab      33.69    32.86     3.626     8.975   athens.jpg
+divisive/pca/oklab      27.20    33.79     3.424     7.715   liberty.jpg
+divisive/pca/oklab      12.48    37.17     2.644     5.521   monet.jpg
+divisive/pca/oklab      23.36    34.45     3.196     7.337   napoleon.jpg
+divisive/pca/oklab      16.96    35.84     2.651     6.254   pearl.jpg
+divisive/pca/oklab      35.41    32.64     3.716     8.619   starry.jpg
+divisive/pca/oklab*      24.85    34.46     3.210     7.404   [MEAN over 6, 2361ms]
+
+kmeans/random/rgb/i10      27.38    33.76     3.472     8.343   athens.jpg
+kmeans/random/rgb/i10      22.22    34.66     3.293     7.207   liberty.jpg
+kmeans/random/rgb/i10      10.93    37.75     2.577     5.412   monet.jpg
+kmeans/random/rgb/i10      20.72    34.97     3.148     7.036   napoleon.jpg
+kmeans/random/rgb/i10      16.94    35.84     2.730     6.082   pearl.jpg
+kmeans/random/rgb/i10      32.33    33.03     3.747     8.740   starry.jpg
+kmeans/random/rgb/i10*      21.75    35.00     3.161     7.137   [MEAN over 6, 2266ms]
+
+kmeans/kmeans++/rgb/i10      27.22    33.78     3.501     8.421   athens.jpg
+kmeans/kmeans++/rgb/i10      21.30    34.85     3.250     7.196   liberty.jpg
+kmeans/kmeans++/rgb/i10      10.68    37.84     2.546     5.370   monet.jpg
+kmeans/kmeans++/rgb/i10      19.64    35.20     3.102     6.907   napoleon.jpg
+kmeans/kmeans++/rgb/i10      14.81    36.42     2.583     5.985   pearl.jpg
+kmeans/kmeans++/rgb/i10      31.28    33.18     3.722     8.559   starry.jpg
+kmeans/kmeans++/rgb/i10*      20.82    35.21     3.117     7.073   [MEAN over 6, 2376ms]
+
+kmeans/maximin/rgb/i10      28.80    33.54     3.561     8.477   athens.jpg
+kmeans/maximin/rgb/i10      26.33    33.93     3.470     7.588   liberty.jpg
+kmeans/maximin/rgb/i10      12.91    37.02     2.951     6.037   monet.jpg
+kmeans/maximin/rgb/i10      21.44    34.82     3.197     6.894   napoleon.jpg
+kmeans/maximin/rgb/i10      17.39    35.73     2.764     6.158   pearl.jpg
+kmeans/maximin/rgb/i10      34.08    32.81     3.726     8.226   starry.jpg
+kmeans/maximin/rgb/i10*      23.49    34.64     3.278     7.230   [MEAN over 6, 2327ms]
+
+kmeans/maximin/oklab/i10      31.61    33.13     3.644     8.615   athens.jpg
+kmeans/maximin/oklab/i10      23.13    34.49     3.364     7.518   liberty.jpg
+kmeans/maximin/oklab/i10      13.94    36.69     2.975     6.048   monet.jpg
+kmeans/maximin/oklab/i10      22.15    34.68     3.206     6.984   napoleon.jpg
+kmeans/maximin/oklab/i10      16.33    36.00     2.768     6.427   pearl.jpg
+kmeans/maximin/oklab/i10      34.30    32.78     3.711     8.354   starry.jpg
+kmeans/maximin/oklab/i10*      23.58    34.63     3.278     7.324   [MEAN over 6, 2442ms]
+
+kmeans[median-cut]/rgb/i10      27.65    33.71     3.511     8.687   athens.jpg
+kmeans[median-cut]/rgb/i10      25.69    34.03     3.234     7.377   liberty.jpg
+kmeans[median-cut]/rgb/i10      11.32    37.59     2.463     5.165   monet.jpg
+kmeans[median-cut]/rgb/i10      20.37    35.04     3.041     6.820   napoleon.jpg
+kmeans[median-cut]/rgb/i10      22.94    34.52     2.582     6.600   pearl.jpg
+kmeans[median-cut]/rgb/i10      32.75    32.98     3.631     8.455   starry.jpg
+kmeans[median-cut]/rgb/i10*      23.45    34.65     3.077     7.184   [MEAN over 6, 2477ms]
+
+kmeans[divisive/pca/rgb]/rgb/i10      28.11    33.64     3.569     8.668   athens.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      20.91    34.93     3.224     7.122   liberty.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      10.60    37.88     2.581     5.355   monet.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      19.26    35.28     3.074     6.870   napoleon.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      14.78    36.43     2.594     6.046   pearl.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      30.96    33.22     3.653     8.382   starry.jpg
+kmeans[divisive/pca/rgb]/rgb/i10*      20.77    35.23     3.116     7.074   [MEAN over 6, 3100ms]
+
+kmeans[divisive/pca/oklab]/oklab/i10      29.65    33.41     3.565     8.501   athens.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      23.81    34.36     3.282     7.459   liberty.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      10.99    37.72     2.503     5.063   monet.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      21.12    34.88     3.114     7.003   napoleon.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      15.81    36.14     2.583     6.180   pearl.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      33.36    32.90     3.703     8.610   starry.jpg
+kmeans[divisive/pca/oklab]/oklab/i10*      22.46    34.90     3.125     7.136   [MEAN over 6, 3229ms]
+
+== N = 256 ==
+quantizer             MSE     PSNR    meanDE     p95DE   image
+popularity         168.46    25.87     5.629    15.642   athens.jpg
+popularity        4417.94    11.68    17.787    68.879   liberty.jpg
+popularity          78.85    29.16     4.414    13.866   monet.jpg
+popularity         454.05    21.56     7.230    20.573   napoleon.jpg
+popularity        3488.38    12.70    13.199    57.079   pearl.jpg
+popularity        4594.80    11.51    23.770    49.076   starry.jpg
+popularity*       2200.42    18.75    12.005    37.519   [MEAN over 6, 2712ms]
+
+median-cut          15.27    36.29     2.575     6.679   athens.jpg
+median-cut          11.67    37.46     2.415     6.037   liberty.jpg
+median-cut           5.88    40.44     1.777     4.001   monet.jpg
+median-cut          10.44    37.94     2.265     5.398   napoleon.jpg
+median-cut           9.88    38.18     1.787     5.234   pearl.jpg
+median-cut          16.43    35.98     2.649     6.513   starry.jpg
+median-cut*         11.60    37.72     2.245     5.643   [MEAN over 6, 2976ms]
+
+divisive/axisaligned/rgb      12.41    37.19     2.589     6.238   athens.jpg
+divisive/axisaligned/rgb       9.36    38.42     2.474     5.796   liberty.jpg
+divisive/axisaligned/rgb       4.99    41.15     1.841     3.896   monet.jpg
+divisive/axisaligned/rgb       9.07    38.55     2.321     5.279   napoleon.jpg
+divisive/axisaligned/rgb       6.11    40.27     1.868     4.393   pearl.jpg
+divisive/axisaligned/rgb      14.64    36.47     2.678     6.363   starry.jpg
+divisive/axisaligned/rgb*       9.43    38.68     2.295     5.327   [MEAN over 6, 3343ms]
+
+divisive/pca/rgb      12.06    37.32     2.652     6.866   athens.jpg
+divisive/pca/rgb       8.77    38.70     2.486     6.002   liberty.jpg
+divisive/pca/rgb       4.44    41.66     1.762     3.809   monet.jpg
+divisive/pca/rgb       8.50    38.84     2.306     5.512   napoleon.jpg
+divisive/pca/rgb       5.79    40.50     1.846     4.577   pearl.jpg
+divisive/pca/rgb      13.67    36.77     2.678     6.575   starry.jpg
+divisive/pca/rgb*       8.87    38.96     2.288     5.557   [MEAN over 6, 3781ms]
+
+divisive/pca/oklab      12.62    37.12     2.464     6.042   athens.jpg
+divisive/pca/oklab       9.49    38.36     2.386     5.679   liberty.jpg
+divisive/pca/oklab       4.65    41.46     1.767     3.720   monet.jpg
+divisive/pca/oklab       9.20    38.49     2.248     5.227   napoleon.jpg
+divisive/pca/oklab       5.98    40.36     1.729     4.185   pearl.jpg
+divisive/pca/oklab      14.70    36.46     2.755     6.568   starry.jpg
+divisive/pca/oklab*       9.44    38.71     2.225     5.237   [MEAN over 6, 3770ms]
+
+kmeans/random/rgb/i10      10.87    37.77     2.399     5.605   athens.jpg
+kmeans/random/rgb/i10       8.27    38.96     2.427     5.615   liberty.jpg
+kmeans/random/rgb/i10       4.15    41.95     1.737     3.635   monet.jpg
+kmeans/random/rgb/i10       7.93    39.14     2.198     4.824   napoleon.jpg
+kmeans/random/rgb/i10       5.88    40.44     1.962     4.337   pearl.jpg
+kmeans/random/rgb/i10      12.88    37.03     2.532     5.885   starry.jpg
+kmeans/random/rgb/i10*       8.33    39.21     2.209     4.983   [MEAN over 6, 5128ms]
+
+kmeans/kmeans++/rgb/i10      10.56    37.89     2.383     5.587   athens.jpg
+kmeans/kmeans++/rgb/i10       8.10    39.05     2.334     5.553   liberty.jpg
+kmeans/kmeans++/rgb/i10       4.04    42.07     1.691     3.551   monet.jpg
+kmeans/kmeans++/rgb/i10       7.81    39.21     2.172     4.837   napoleon.jpg
+kmeans/kmeans++/rgb/i10       4.96    41.18     1.657     4.046   pearl.jpg
+kmeans/kmeans++/rgb/i10      12.69    37.10     2.569     6.141   starry.jpg
+kmeans/kmeans++/rgb/i10*       8.03    39.41     2.134     4.953   [MEAN over 6, 5485ms]
+
+kmeans/maximin/rgb/i10      11.76    37.43     2.553     5.959   athens.jpg
+kmeans/maximin/rgb/i10       9.75    38.24     2.626     5.918   liberty.jpg
+kmeans/maximin/rgb/i10       5.36    40.84     2.015     4.218   monet.jpg
+kmeans/maximin/rgb/i10       8.94    38.62     2.385     5.314   napoleon.jpg
+kmeans/maximin/rgb/i10       6.23    40.18     2.013     4.465   pearl.jpg
+kmeans/maximin/rgb/i10      14.55    36.50     2.804     6.606   starry.jpg
+kmeans/maximin/rgb/i10*       9.43    38.64     2.399     5.413   [MEAN over 6, 5630ms]
+
+kmeans/maximin/oklab/i10      12.78    37.07     2.493     5.645   athens.jpg
+kmeans/maximin/oklab/i10       9.18    38.50     2.460     5.540   liberty.jpg
+kmeans/maximin/oklab/i10       5.65    40.61     1.973     4.047   monet.jpg
+kmeans/maximin/oklab/i10       9.16    38.51     2.276     4.952   napoleon.jpg
+kmeans/maximin/oklab/i10       6.02    40.33     1.966     4.228   pearl.jpg
+kmeans/maximin/oklab/i10      14.47    36.52     2.716     6.234   starry.jpg
+kmeans/maximin/oklab/i10*       9.54    38.59     2.314     5.108   [MEAN over 6, 5498ms]
+
+kmeans[median-cut]/rgb/i10      11.12    37.67     2.370     5.660   athens.jpg
+kmeans[median-cut]/rgb/i10       9.34    38.43     2.290     5.707   liberty.jpg
+kmeans[median-cut]/rgb/i10       4.45    41.64     1.639     3.601   monet.jpg
+kmeans[median-cut]/rgb/i10       8.37    38.90     2.116     4.923   napoleon.jpg
+kmeans[median-cut]/rgb/i10       7.66    39.29     1.600     4.544   pearl.jpg
+kmeans[median-cut]/rgb/i10      13.69    36.77     2.514     6.080   starry.jpg
+kmeans[median-cut]/rgb/i10*       9.10    38.78     2.088     5.086   [MEAN over 6, 5327ms]
+
+kmeans[divisive/pca/rgb]/rgb/i10      10.50    37.92     2.419     5.724   athens.jpg
+kmeans[divisive/pca/rgb]/rgb/i10       7.93    39.14     2.387     5.734   liberty.jpg
+kmeans[divisive/pca/rgb]/rgb/i10       4.01    42.10     1.688     3.623   monet.jpg
+kmeans[divisive/pca/rgb]/rgb/i10       7.73    39.25     2.182     4.961   napoleon.jpg
+kmeans[divisive/pca/rgb]/rgb/i10       4.90    41.23     1.673     4.049   pearl.jpg
+kmeans[divisive/pca/rgb]/rgb/i10      12.60    37.13     2.562     6.093   starry.jpg
+kmeans[divisive/pca/rgb]/rgb/i10*       7.94    39.46     2.152     5.031   [MEAN over 6, 5975ms]
+
+kmeans[divisive/pca/oklab]/oklab/i10      11.61    37.48     2.353     5.412   athens.jpg
+kmeans[divisive/pca/oklab]/oklab/i10       8.94    38.62     2.301     5.388   liberty.jpg
+kmeans[divisive/pca/oklab]/oklab/i10       4.28    41.81     1.683     3.498   monet.jpg
+kmeans[divisive/pca/oklab]/oklab/i10       8.41    38.88     2.148     4.748   napoleon.jpg
+kmeans[divisive/pca/oklab]/oklab/i10       5.25    40.93     1.618     3.897   pearl.jpg
+kmeans[divisive/pca/oklab]/oklab/i10      13.65    36.78     2.611     6.096   starry.jpg
+kmeans[divisive/pca/oklab]/oklab/i10*       8.69    39.08     2.119     4.840   [MEAN over 6, 6110ms]
+

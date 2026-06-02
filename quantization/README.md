@@ -20,6 +20,11 @@ raw output sits in the matching `*-data.txt`.
   CVT, OKLab, HyAB; the ranked shortlist of pieces to prototype; confirmed dead ends.
 - **[04-pieces-selection-baselines.md](04-pieces-selection-baselines.md)** (+ data)
   — the popularity and median-cut floor every piece is measured against.
+- **[05-pieces-fanout-judge.md](05-pieces-fanout-judge.md)** (+ data) — the 12-config
+  selection fan-out (P3 × P1 × seeding) and the judged verdict: winners (init +
+  k-means refine; PCA-divisive as the deterministic default) and discards (maximin
+  under-performs; OKLab doesn't help under RGB assignment), plus the determinism
+  finding (sort the histogram or seeded k-means drifts).
 - **[bench/](bench/)** — the self-contained Go harness (imports nothing from
   pixelize): trustworthy metrics (MSE/PSNR + CIEDE2000 self-tested against Sharma),
   a `Quantizer` interface, and the pieces. `go test` checks the metric; `go run .`

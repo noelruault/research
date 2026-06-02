@@ -42,7 +42,26 @@ func main() {
 		}
 	}
 
-	quantizers := []Quantizer{Popularity{}, MedianCut{}}
+	rgb := RGBSpace{}
+	ok := OKLabSpace{}
+	quantizers := []Quantizer{
+		// --- baselines (P3 floor) ---
+		Popularity{},
+		MedianCut{}, // classic median cut, population split, RGB axis
+		// --- divisive selection variants (P3 x P1) ---
+		Divisive{Space: rgb, PCA: false}, // variance split, RGB coord axis
+		Divisive{Space: rgb, PCA: true},  // variance split, RGB principal axis (piece #2)
+		Divisive{Space: ok, PCA: true},   // PCA divisive in OKLab (does perceptual space help?)
+		// --- k-means selection variants (P3 x P4 seeding x P1) ---
+		KMeans{Space: rgb, Seed: "random", Iters: 10},   // weak-seed control
+		KMeans{Space: rgb, Seed: "kmeans++", Iters: 10}, // D^2 seeding
+		KMeans{Space: rgb, Seed: "maximin", Iters: 10},  // deterministic maximin (piece #1)
+		KMeans{Space: ok, Seed: "maximin", Iters: 10},   // maximin in OKLab
+		// --- divisive-init + k-means refine (the libimagequant recipe) ---
+		KMeans{Space: rgb, Init: MedianCut{}, Iters: 10},
+		KMeans{Space: rgb, Init: Divisive{Space: rgb, PCA: true}, Iters: 10}, // predicted winner
+		KMeans{Space: ok, Init: Divisive{Space: ok, PCA: true}, Iters: 10},
+	}
 
 	fmt.Printf("# quantbench — %s\n", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Printf("# go %s, %d cores, %d images\n", runtime.Version(), runtime.NumCPU(), len(imgs))

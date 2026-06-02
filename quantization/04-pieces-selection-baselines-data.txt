@@ -1,0 +1,58 @@
+# quantbench — 2026-06-02 22:43:52
+# go go1.25.0, 4 cores, 6 images
+# metric scale: MSE lower=better, PSNR higher=better, dE2000 lower=better
+
+== N = 8 ==
+quantizer             MSE     PSNR    meanDE     p95DE   image
+popularity       18583.52     5.44    45.647    81.672   athens.jpg
+popularity        5226.04    10.95    20.268    71.042   liberty.jpg
+popularity         261.57    23.95     8.231    18.064   monet.jpg
+popularity        1804.04    15.57    15.009    32.107   napoleon.jpg
+popularity        4122.69    11.98    15.446    59.522   pearl.jpg
+popularity        6887.95     9.75    27.229    54.265   starry.jpg
+popularity*       6147.63    12.94    21.972    52.779   [MEAN over 6, 1183ms]
+
+median-cut         206.67    24.98     6.435    14.117   athens.jpg
+median-cut         246.20    24.22     6.769    15.458   liberty.jpg
+median-cut          69.30    29.72     5.076    10.581   monet.jpg
+median-cut         169.31    25.84     5.780    11.246   napoleon.jpg
+median-cut         226.36    24.58     5.862    15.617   pearl.jpg
+median-cut         218.95    24.73     7.213    17.541   starry.jpg
+median-cut*        189.46    25.68     6.189    14.093   [MEAN over 6, 1262ms]
+
+== N = 16 ==
+quantizer             MSE     PSNR    meanDE     p95DE   image
+popularity        3870.20    12.25    18.743    32.897   athens.jpg
+popularity        5042.29    11.10    20.054    71.014   liberty.jpg
+popularity         194.99    25.23     7.597    17.977   monet.jpg
+popularity        1587.96    16.12    14.238    31.874   napoleon.jpg
+popularity        4121.10    11.98    15.330    59.522   pearl.jpg
+popularity        6106.47    10.27    25.973    52.782   starry.jpg
+popularity*       3487.17    14.49    16.989    44.344   [MEAN over 6, 1283ms]
+
+median-cut         103.37    27.99     5.272    11.144   athens.jpg
+median-cut         119.12    27.37     5.262    11.919   liberty.jpg
+median-cut          44.84    31.61     3.956     8.408   monet.jpg
+median-cut          80.47    29.07     4.605     9.585   napoleon.jpg
+median-cut         119.26    27.37     4.397    12.677   pearl.jpg
+median-cut         124.69    27.17     5.652    13.451   starry.jpg
+median-cut*         98.62    28.43     4.857    11.197   [MEAN over 6, 1320ms]
+
+== N = 32 ==
+quantizer             MSE     PSNR    meanDE     p95DE   image
+popularity        1022.71    18.03    11.035    26.242   athens.jpg
+popularity        4873.76    11.25    19.469    70.237   liberty.jpg
+popularity         172.40    25.77     7.225    17.848   monet.jpg
+popularity        1318.07    16.93    13.928    31.901   napoleon.jpg
+popularity        4048.83    12.06    15.049    59.291   pearl.jpg
+popularity        6081.47    10.29    25.976    52.373   starry.jpg
+popularity*       2919.54    15.72    15.447    42.982   [MEAN over 6, 1301ms]
+
+median-cut          57.19    30.56     4.276    10.143   athens.jpg
+median-cut          56.75    30.59     4.117     8.970   liberty.jpg
+median-cut          25.63    34.04     3.208     6.630   monet.jpg
+median-cut          44.25    31.67     3.813     8.191   napoleon.jpg
+median-cut          65.93    29.94     3.486     9.966   pearl.jpg
+median-cut          69.13    29.73     4.649    10.689   starry.jpg
+median-cut*         53.15    31.09     3.925     9.098   [MEAN over 6, 1456ms]
+

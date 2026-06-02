@@ -107,11 +107,6 @@ was staged under `.plans/research/`. Original authorship lineage traces to
 pixelize branch `claude/readme-skill-agent-pixelize-I4GK3`
 (commit `549498cb3aa8ff7b8d7d9a75160d18ad4c83a525`).
 
-`AGENT-MIGRATION-INSTRUCTIONS.md` and `MIGRATION.md` in this folder are the
-**historical migration runbook**, kept for context now that the move is complete.
-They describe how the record reached this repo; the README you are reading is the
-current front door.
-
 ## License
 
 The original research reports, data files, and `notes-*` files are released under

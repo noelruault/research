@@ -23,9 +23,8 @@ They are **© ImageMagick Studio LLC**, licensed under the **ImageMagick License
 They are reproduced here **solely as the analyzed subject** of the
 reverse-engineering write-up — to document exactly which code paths the report's
 conclusions came from. They are **not pixelize code**, are not built into the
-pixelize binary, and carry their own upstream license, not pixelize's. If this
-material is moved to `noelruault/research` (see `../MIGRATION.md`), keep this
-attribution with it.
+pixelize binary, and carry their own upstream license, not pixelize's. This
+attribution must travel with these files wherever they go.
 
 ## What each file is
 

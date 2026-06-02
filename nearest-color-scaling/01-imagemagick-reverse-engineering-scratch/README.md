@@ -11,8 +11,10 @@ The files prefixed `im-` are **verbatim extracts of ImageMagick's own source
 code**, copied during the session from the build that was present on the box:
 
 ```
-ImageMagick 6.9.12-98  —  MagickCore/quantize.c
-(unpacked at /tmp/ImageMagick6-6.9.12-98 during the session)
+ImageMagick 6.9.12-98  —  magick/quantize.c
+(this IM6 tree lays the core out under magick/, not MagickCore/; see
+../01-imagemagick-reverse-engineering.md. Unpacked at
+/tmp/ImageMagick6-6.9.12-98 during the session.)
 ```
 
 They are **© ImageMagick Studio LLC**, licensed under the **ImageMagick License**
@@ -27,7 +29,7 @@ attribution with it.
 
 ## What each file is
 
-Verbatim ImageMagick 6.9.12-98 `MagickCore/quantize.c` extracts:
+Verbatim ImageMagick 6.9.12-98 `magick/quantize.c` extracts:
 
 | file | what it is |
 |------|------------|

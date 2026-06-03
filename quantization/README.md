@@ -39,6 +39,10 @@ raw output sits in the matching `*-data.txt`.
   the brainstorm's candidates *implemented and benchmarked*: PNN, multi-restart,
   error-weighted refine, HyAB — **all discarded with numbers** (none beats the
   OKLab-matched champion on unweighted mean ΔE2000).
+- **[09-crossdomain-fanout.md](09-crossdomain-fanout.md)** (+ data) — far-afield
+  transfers (crypto/databases, astrophysics, statistical mechanics): a **space-
+  filling-curve (Morton) initializer wins at N=256** (beats champion 6/6 and pngquant
+  by 5%); MST/Friends-of-Friends and deterministic annealing measured and discarded.
 - **[10-vs-competition.md](10-vs-competition.md)** (+ data) — the shootout: scored
   identically with CIEDE2000, our quality mode beats **ImageMagick** (octree) at
   every N, and — with OKLab-matched assignment (report 02) — beats **pngquant**

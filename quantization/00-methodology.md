@@ -40,7 +40,7 @@ assemble from the best piece at every step**, proven against the incumbents
 ```
 
 The crux (proved in [nearest-color-scaling](../nearest-color-scaling/) and restated
-in [../aseprite-plugin/02-quantization-survey.md](../aseprite-plugin/02-quantization-survey.md)):
+in [background/survey.md](background/survey.md)):
 **P6 is the operation pixelize already does exactly and fastest.** It is k-means'
 inner loop (P3/P5) *and* the final mapping pass of every divisive method. So this
 investigation only has to win at P1–P5; P6 is a solved, shipped dependency we
@@ -70,7 +70,7 @@ for example, take Wu's selection (P3), seed k-means with it (P4), refine in OKLa
 set the matcher benchmarks used, so numbers are comparable across records. Phase 2
 (competition shootout) adds **CQ100** (100 images + 8,400 precomputed reference
 quantizations with published per-image MSE) so we compare at N∈{4,16,64,256}
-without re-running every tool. See [../aseprite-plugin/03-quantize-design.md](../aseprite-plugin/03-quantize-design.md).
+without re-running every tool. See [background/design.md](background/design.md).
 
 **Color counts.** N ∈ {4, 16, 64, 256}. No dithering for palette-quality runs
 (dither confounds intrinsic selection error); dither is measured separately in P7.

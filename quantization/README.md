@@ -56,6 +56,10 @@ raw output sits in the matching `*-data.txt`.
   a `Quantizer` interface, and the pieces. `go test` checks the metric; `go run .`
   runs the corpus.
 
+- **[background/](background/)** — the early scoping docs this record grew from: a
+  broad prior-art `survey.md` and the initial `design.md` (the seed of the shipped
+  package and the `.plans/quantize` execution plan).
+
 (Report 03, histogram-precision, is the one planned-but-unwritten report; it did not
 gate any decision.)
 

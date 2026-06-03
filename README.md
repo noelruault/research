@@ -28,15 +28,13 @@ binary; it is documentation and data.
   initializer at large N) *and* the many measured discards (PNN, multi-restart,
   HyAB, deterministic annealing, MST/Friends-of-Friends, …).
 
-- **[aseprite-plugin/](aseprite-plugin/)** — bringing pixelize to
-  [Aseprite](https://www.aseprite.org/): a verified extension-quality record
-  (manifest, plugin lifecycle, the script-security sandbox read from source,
-  packaging) and a reverse-engineering of the most polished extensions into an
-  ADOPT / MAYBE / DISCARD UI catalogue. Drives the
-  [pixelize-aseprite](https://github.com/noelruault/pixelize-aseprite) extension.
-
 - **[compression-agent/](compression-agent/)** — a measurement-driven subagent
   that picks the right HTTP compression for a stack by benchmarking, not opinion.
+
+The Aseprite *extension* is a build, not research — its planning (extension-quality
+notes, the reverse-engineered UI catalogue) lives with the code in
+[pixelize-aseprite/.plans/](https://github.com/noelruault/pixelize-aseprite/tree/main/.plans),
+not here.
 
 ## Method
 

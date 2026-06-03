@@ -25,6 +25,10 @@ raw output sits in the matching `*-data.txt`.
   k-means refine; PCA-divisive as the deterministic default) and discards (maximin
   under-performs; OKLab doesn't help under RGB assignment), plus the determinism
   finding (sort the histogram or seeded k-means drifts).
+- **[10-vs-competition.md](10-vs-competition.md)** (+ data) — the shootout: our
+  quality mode beats **pngquant** (libimagequant) at N≤64 and **ImageMagick**
+  (octree) at every N, scored identically with CIEDE2000; pngquant regains N=256.
+  Harness: `bench/compare-quant.sh` + `emit`/`score` modes.
 - **[bench/](bench/)** — the self-contained Go harness (imports nothing from
   pixelize): trustworthy metrics (MSE/PSNR + CIEDE2000 self-tested against Sharma),
   a `Quantizer` interface, and the pieces. `go test` checks the metric; `go run .`

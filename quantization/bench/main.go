@@ -20,6 +20,17 @@ import (
 )
 
 func main() {
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "emit":
+			runEmit(os.Args[2:])
+			return
+		case "score":
+			runScore(os.Args[2:])
+			return
+		}
+	}
+
 	corpus := flag.String("corpus", "../../../pixelize/docs/demo/inputs", "directory of source images")
 	nlist := flag.String("n", "16", "comma-separated palette sizes")
 	flag.Parse()

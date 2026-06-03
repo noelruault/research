@@ -33,10 +33,10 @@ below) does not belong in an application repo long-term. `noelruault/research`
 is its permanent home.
 
 The pixelize-side **planning** files that *consume* this research —
-`.plans/00-overview.md` (the judged synthesis) and `.plans/01-execution-plan.md`
+`.plans/nearest-color-scaling/00-overview.md` (the judged synthesis) and `.plans/nearest-color-scaling/01-execution-plan.md`
 (the phased build plan) — deliberately stayed in pixelize, because they drive the
 build. Only the raw research record moved here. pixelize points back to this
-folder from `.plans/research/MOVED.md` and from its README benchmark section.
+folder from `.plans/nearest-color-scaling/MOVED.md` and from its README benchmark section.
 
 ## Headline findings
 
@@ -70,7 +70,7 @@ folder from `.plans/research/MOVED.md` and from its README benchmark section.
 
 | # | Report | What it establishes |
 |---|--------|---------------------|
-| 00 | *(synthesis — stays in pixelize, `.plans/00-overview.md`)* | The judged verdict-per-regime and dispatch table that drove the build |
+| 00 | *(synthesis — stays in pixelize, `.plans/nearest-color-scaling/00-overview.md`)* | The judged verdict-per-regime and dispatch table that drove the build |
 | 01 | `01-imagemagick-reverse-engineering.md` | Line-by-line trace of IM 6.9.12 `-remap` / `quantize.c`; why its remap is approximate |
 | 02 | `02-algorithms-and-libraries-survey.md` | Survey of search structures, 3D-LUTs, SIMD, metrics, parallelism; ranked shortlist for a Go impl |
 | 03 | `03-experiments.md` | First throwaway-prototype bake-off across palette/image sizes vs IM and the then-current code |

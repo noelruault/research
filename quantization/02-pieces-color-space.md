@@ -74,3 +74,32 @@ quality mode is OKLab-matched refine**, exposed via pixelize's pluggable distanc
   remains above OKLab-Euclidean; and validate at scale on CQ100. The brainstorm
   agents (libimagequant dissection + interdisciplinary codebook optimization) feed
   the next round — perceptual *error weighting* is the likely next lever.
+
+## Addendum — the RGB↔OKLab crossover (low-N sweep)
+
+Sweeping N=4/8/16/32 (six images) alongside the N=64–2048 scaling data (report 09)
+pins where RGB and OKLab trade places. Mean ΔE2000; raw:
+[09c-lown-sweep-data.txt](09c-lown-sweep-data.txt).
+
+| N | refine-RGB | refine-OKLab | winner |
+|---|---|---|---|
+| 4 | **7.010** | 7.247 | RGB |
+| 8 | **5.489** | 5.658 | RGB |
+| 16 | **4.292** | 4.407 | RGB |
+| 32 | **3.554** | 3.559 | tie (crossover) |
+| 64 | 3.088 | **2.980** | OKLab |
+| 256 | 2.111 | **1.968** | OKLab |
+| 2048 | 1.055 | **0.978** | OKLab |
+
+**The crossover is ~N=32–48**, and the mechanism is one idea seen from both ends:
+OKLab is perceptually uniform for *small* color differences. At **low N** palette
+entries are far apart (large differences) — the regime where OKLab is *not* uniform
+and plain RGB Euclidean does better. At **high N** entries are close (small
+differences) — OKLab's home turf. So the right space is a function of palette
+density, not a constant.
+
+**Product implication (pixelize's core regime is N≤64):** ship **RGB-matched refine
+for N≤32** (pixel art: Game Boy 4, PICO-8 16, NES 55-ish, perler ~24–48) and
+**OKLab-matched refine for N≥64** (lego 162, general reduction). Both beat pngquant
+and ImageMagick in their range. Curve-init (report 09) is a high-N-only add and is
+irrelevant below ~64. A single threshold at N≈48 captures the whole picture.

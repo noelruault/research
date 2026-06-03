@@ -10,7 +10,7 @@ execution doc in pixelize's `.plans/` would drive.
 pixelize already owns **palette assignment** — the exact kd-tree nearest-color
 match (`kdtree.go`) and the pluggable `DistanceFunc` (`distance.go`, including a
 perceptual CIEDE2000 option). Every quantizer needs that primitive (see
-[02 §2](02-quantization-survey.md)). So the new package supplies only **palette
+[02 §2](survey.md)). So the new package supplies only **palette
 selection** and reuses the rest:
 
 ```

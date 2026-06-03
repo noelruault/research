@@ -84,7 +84,7 @@ This is the architectural reason B is a *package inside pixelize*, not a new rep
 
 The headline gap: the incumbents optimize **RGB MSE**. None of the common ones
 optimize a **perceptual** objective by default. That is our opening (see
-[03](03-quantize-design.md) and the benchmark).
+[03](design.md) and the benchmark).
 
 ## 4. Astropulse K-Centroid Downscale — the closest neighbor (MIT, public)
 

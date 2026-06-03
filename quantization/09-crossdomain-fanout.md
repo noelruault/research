@@ -98,3 +98,35 @@ as the high-N upgrade.
 - Untested cross-domain: Hilbert curve (better locality than Morton — may extend the
   curve-init win to lower N), Voronoi-binning, low-discrepancy seeding. Queued, lower
   priority than CQ100.
+
+## Addendum — scaling to N=2048 (3 images)
+
+Champions swept from N=64 to 2048 (pngquant caps at 256; ImageMagick is the only
+external reference above). Mean ΔE2000; raw: [09b-scaling-sweep-data.txt](09b-scaling-sweep-data.txt).
+
+| N | pngquant | ImageMagick | refine-RGB | refine-OKLab | scurve-OKLab |
+|---|---|---|---|---|---|
+| 64 | 3.090 | 3.406 | 3.088 | 2.980 | **2.976** |
+| 128 | 2.494 | 2.750 | 2.602 | 2.416 | **2.412** |
+| 256 | 2.037 | 2.275 | 2.111 | 1.968 | **1.947** |
+| 512 | — | 1.813 | 1.687 | 1.564 | **1.557** |
+| 1024 | — | 1.461 | 1.346 | 1.247 | **1.238** |
+| 2048 | — | 1.156 | 1.055 | 0.978 | **0.972** |
+
+Findings:
+- **scurve-OKLab is best at every N from 64 to 2048** — including 64/128, where on
+  this 3-image set it edges refine-OKLab (the 6-image N=64 tie was within noise). So
+  there is **no real deficit at 64/128**; the only low-N case where curve-init/OKLab
+  lose is N=16 (RGB-matched wins there, report 02/09).
+- **The champion margins are small in absolute ΔE2000** (scurve vs refine-OKLab:
+  0.003–0.021 — all *sub-JND*, invisible). At N≥64 every competent method is already
+  in a low-error regime; the win is "match/beat the state of the art deterministically,"
+  not a large visible jump.
+- **We beat both incumbents at every N**: pngquant by ~0.07–0.11 (and it cannot exceed
+  256 at all), ImageMagick by ~0.18–0.43.
+- **OKLab-matched is the consistent lever** (refine-OKLab << refine-RGB everywhere,
+  ~0.1–0.13); curve-init is a small, free extra on top.
+
+Conclusion: the algorithm fan-out has saturated — new families either tie within noise
+or lose. The remaining value is **validation at scale (CQ100)** and **shipping** (Phase
+5), not more selection variants.

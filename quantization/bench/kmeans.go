@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 	"math/rand"
 )
 
@@ -19,17 +20,22 @@ import (
 // output is reproducible.
 
 type KMeans struct {
-	Space Space
-	Init  Quantizer // if non-nil, seed centroids from this palette (e.g. median cut)
-	Seed  string    // used when Init==nil: "maximin" | "kmeans++" | "random"
-	Iters int
+	Space     Space
+	Init      Quantizer // if non-nil, seed centroids from this palette (e.g. median cut)
+	Seed      string    // used when Init==nil: "maximin" | "kmeans++" | "random"
+	Iters     int
+	ErrWeight bool // libimagequant-style: pull centroids harder toward badly-fit colors
 }
 
 func (k KMeans) Name() string {
-	if k.Init != nil {
-		return fmt.Sprintf("kmeans[%s]/%s/i%d", k.Init.Name(), k.Space.Name(), k.Iters)
+	ew := ""
+	if k.ErrWeight {
+		ew = "/ew"
 	}
-	return fmt.Sprintf("kmeans/%s/%s/i%d", k.Seed, k.Space.Name(), k.Iters)
+	if k.Init != nil {
+		return fmt.Sprintf("kmeans[%s]/%s/i%d%s", k.Init.Name(), k.Space.Name(), k.Iters, ew)
+	}
+	return fmt.Sprintf("kmeans/%s/%s/i%d%s", k.Seed, k.Space.Name(), k.Iters, ew)
 }
 
 func (k KMeans) Quantize(img image.Image, n int) color.Palette {
@@ -44,13 +50,35 @@ func (k KMeans) Quantize(img image.Image, n int) color.Palette {
 	}
 
 	cents := k.seed(img, pts, n)
+	assign := make([]int, len(pts))
+	dist := make([]float64, len(pts))
 	for it := 0; it < k.Iters; it++ {
+		// Assignment pass (nearest-centroid = the shipped primitive).
+		var sumD, sumW float64
+		for i, wp := range pts {
+			j := nearestCentroid(wp.P, cents)
+			assign[i] = j
+			if k.ErrWeight {
+				dist[i] = math.Sqrt(wp.P.dist2(cents[j]))
+				sumD += dist[i] * wp.W
+				sumW += wp.W
+			}
+		}
+		meanD := 1.0
+		if k.ErrWeight && sumW > 0 && sumD > 0 {
+			meanD = sumD / sumW
+		}
+		// Update pass: weighted centroid, optionally error-boosted.
 		sums := make([]Vec3, len(cents))
 		wts := make([]float64, len(cents))
-		for _, wp := range pts {
-			j := nearestCentroid(wp.P, cents)
-			sums[j] = sums[j].add(wp.P.scale(wp.W))
-			wts[j] += wp.W
+		for i, wp := range pts {
+			w := wp.W
+			if k.ErrWeight {
+				w = wp.W * (0.5 + dist[i]/meanD) // badly-fit colors pull harder
+			}
+			j := assign[i]
+			sums[j] = sums[j].add(wp.P.scale(w))
+			wts[j] += w
 		}
 		for j := range cents {
 			if wts[j] > 0 {

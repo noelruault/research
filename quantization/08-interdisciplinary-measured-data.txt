@@ -1,0 +1,16 @@
+== N=64 (mean dE2000 over 6; champion=refine-oklab; +pngquant) ==
+  refine-oklab           2.9083
+  refine-oklab-ew        2.9373
+  multirestart-oklab     2.9179
+  hyab-oklab             2.9814
+  pnn-oklab              2.9000
+  pnn-oklab-raw          3.4965
+  pngquant               2.9891
+== N=256 (mean dE2000 over 6; champion=refine-oklab; +pngquant) ==
+  refine-oklab           1.9133
+  refine-oklab-ew        1.9269
+  multirestart-oklab     1.9159
+  hyab-oklab             1.9569
+  pnn-oklab              1.9940
+  pnn-oklab-raw          3.0535
+  pngquant               1.9813

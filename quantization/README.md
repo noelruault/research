@@ -43,6 +43,10 @@ raw output sits in the matching `*-data.txt`.
   transfers (crypto/databases, astrophysics, statistical mechanics): a **space-
   filling-curve (Morton) initializer wins at N=256** (beats champion 6/6 and pngquant
   by 5%); MST/Friends-of-Friends and deterministic annealing measured and discarded.
+- **[11-kodak-validation.md](11-kodak-validation.md)** (+ data) — scale-up to the
+  **Kodak-18** standard benchmark: beats ImageMagick comprehensively (18/18 at N≥16)
+  and edges/matches pngquant at every N (CQ100 itself was unreachable — Mendeley off
+  the allowlist).
 - **[10-vs-competition.md](10-vs-competition.md)** (+ data) — the shootout: scored
   identically with CIEDE2000, our quality mode beats **ImageMagick** (octree) at
   every N, and — with OKLab-matched assignment (report 02) — beats **pngquant**

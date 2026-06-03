@@ -50,7 +50,24 @@ Per-image win counts (ours/refine vs each, lower ΔE2000 wins):
   errors are small — precisely the regime where our plain-RGB, fixed-10-iteration
   refine is weakest.
 
-## Why pngquant pulls ahead at 256 — and the levers to close it
+## UPDATE — the N=256 gap is closed and reversed (see report 02)
+
+The "pngquant wins N=256" result above holds **only for RGB-space assignment.**
+Pulling the first lever below — clustering *and* assigning in OKLab (matched) —
+flips it. With `refine-oklab`, our quality mode now **beats pngquant at every N**:
+
+| N | pngquant | ours best (config) |
+|---|---|---|
+| 16 | 4.440 | **4.292** (refine, RGB) |
+| 64 | 2.989 | **2.908** (refine, OKLab-matched) |
+| 256 | 1.981 | **1.913** (refine, OKLab-matched — wins all 6 images) |
+
+A single config (`refine-oklab`) beats pngquant at all three N; a per-N pick (RGB at
+small N, OKLab at large N) is marginally better still. Details + mechanism in
+[02-pieces-color-space.md](02-pieces-color-space.md). The section below is retained
+as the record of *why* the gap existed.
+
+## Why pngquant pulled ahead at 256 (pre-fix) — and the levers to close it
 
 The N=256 gap is not a mystery; it points straight at three queued pieces:
 

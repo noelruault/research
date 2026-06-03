@@ -29,9 +29,26 @@ func quantizerByName(name string) Quantizer {
 		return KMeans{Space: rgb, Seed: "kmeans++", Iters: 10}
 	case "median":
 		return MedianCut{}
+	case "pca-oklab": // divisive in OKLab
+		return Divisive{Space: OKLabSpace{}, PCA: true}
+	case "refine-oklab": // OKLab-divisive init + k-means refine, all in OKLab
+		return KMeans{Space: OKLabSpace{}, Init: Divisive{Space: OKLabSpace{}, PCA: true}, Iters: 10}
 	default:
 		return nil
 	}
+}
+
+// nearestInSpace finds the palette index minimizing Euclidean distance in sp
+// — a kd-tree-compatible perceptual assignment when sp is OKLab. This is the
+// "matched assignment" lever: cluster AND assign in the same perceptual space.
+func nearestInSpace(palVecs []Vec3, v Vec3) int {
+	best, bestD := 0, v.dist2(palVecs[0])
+	for i := 1; i < len(palVecs); i++ {
+		if d := v.dist2(palVecs[i]); d < bestD {
+			best, bestD = i, d
+		}
+	}
+	return best
 }
 
 func runEmit(args []string) {
@@ -39,7 +56,8 @@ func runEmit(args []string) {
 	in := fs.String("in", "", "source image")
 	out := fs.String("out", "", "output PNG")
 	n := fs.Int("n", 16, "palette size")
-	qname := fs.String("q", "pca", "quantizer: pca | refine | kmeans++ | median")
+	qname := fs.String("q", "pca", "quantizer: pca|refine|kmeans++|median|pca-oklab|refine-oklab")
+	space := fs.String("space", "rgb", "assignment space: rgb | oklab (perceptual, matched)")
 	_ = fs.Parse(args)
 
 	q := quantizerByName(*qname)
@@ -50,14 +68,32 @@ func runEmit(args []string) {
 	img := mustLoad(*in)
 	pal := q.Quantize(img, *n)
 
-	// Assign every pixel to its nearest palette color (Euclidean RGB), the
-	// same mapping pngquant/ImageMagick apply when they write an indexed PNG.
+	// Assignment: Euclidean RGB by default (what pngquant/ImageMagick do when
+	// they write an indexed PNG), or Euclidean OKLab when -space oklab — the
+	// matched perceptual assignment we want to test against the RGB default.
+	var sp Space
+	var palVecs []Vec3
+	if *space == "oklab" {
+		sp = OKLabSpace{}
+		palVecs = make([]Vec3, len(pal))
+		for i, c := range pal {
+			r, g, b, _ := c.RGBA()
+			palVecs[i] = sp.FromRGB(uint8(r>>8), uint8(g>>8), uint8(b>>8))
+		}
+	}
+
 	b := img.Bounds()
 	out2 := image.NewRGBA(b)
 	for y := b.Min.Y; y < b.Max.Y; y++ {
 		for x := b.Min.X; x < b.Max.X; x++ {
 			r, g, bb, _ := img.At(x, y).RGBA()
-			idx := pal.Index(color.RGBA{R: uint8(r >> 8), G: uint8(g >> 8), B: uint8(bb >> 8), A: 255})
+			sr, sg, sb := uint8(r>>8), uint8(g>>8), uint8(bb>>8)
+			var idx int
+			if sp != nil {
+				idx = nearestInSpace(palVecs, sp.FromRGB(sr, sg, sb))
+			} else {
+				idx = pal.Index(color.RGBA{R: sr, G: sg, B: sb, A: 255})
+			}
 			pr, pg, pbv, _ := pal[idx].RGBA()
 			out2.SetRGBA(x, y, color.RGBA{R: uint8(pr >> 8), G: uint8(pg >> 8), B: uint8(pbv >> 8), A: 255})
 		}

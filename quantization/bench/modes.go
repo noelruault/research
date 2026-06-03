@@ -43,6 +43,17 @@ func quantizerByName(name string) Quantizer {
 		return KMeans{Space: OKLabSpace{}, Init: PNN{Space: OKLabSpace{}}, Iters: 10}
 	case "pnn-oklab-raw": // PNN init only (no refine), to isolate init quality
 		return PNN{Space: OKLabSpace{}}
+	// --- cross-domain (report 09) ---
+	case "spacecurve": // crypto/db: Morton Z-order, equal-weight cut
+		return SpaceCurve{}
+	case "spacecurve-refine":
+		return KMeans{Space: OKLabSpace{}, Init: SpaceCurve{}, Iters: 10}
+	case "mst": // astrophysics: MST/FoF single-linkage
+		return MSTCluster{}
+	case "mst-refine":
+		return KMeans{Space: OKLabSpace{}, Init: MSTCluster{}, Iters: 10}
+	case "detanneal": // stat-mech: deterministic annealing
+		return DetAnneal{Init: Divisive{Space: OKLabSpace{}, PCA: true}, Steps: 30}
 	default:
 		return nil
 	}

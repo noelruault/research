@@ -1,0 +1,16 @@
+== N=64 (mean dE2000 over 6; champion=refine-oklab; +pngquant) ==
+  refine-oklab           2.9083
+  spacecurve             3.2672
+  spacecurve-refine      2.9120
+  mst                    5.6457
+  mst-refine             3.4345
+  detanneal              4.1330
+  pngquant               2.9891
+== N=256 (mean dE2000 over 6; champion=refine-oklab; +pngquant) ==
+  refine-oklab           1.9133
+  spacecurve             2.0840
+  spacecurve-refine      1.8819
+  mst                    4.0058
+  mst-refine             2.1542
+  detanneal              3.8020
+  pngquant               1.9813

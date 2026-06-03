@@ -31,8 +31,18 @@ func quantizerByName(name string) Quantizer {
 		return MedianCut{}
 	case "pca-oklab": // divisive in OKLab
 		return Divisive{Space: OKLabSpace{}, PCA: true}
-	case "refine-oklab": // OKLab-divisive init + k-means refine, all in OKLab
+	case "refine-oklab": // OKLab-divisive init + k-means refine, all in OKLab (the champion)
 		return KMeans{Space: OKLabSpace{}, Init: Divisive{Space: OKLabSpace{}, PCA: true}, Iters: 10}
+	case "refine-oklab-ew": // + error-weighted refinement (libimagequant trick)
+		return KMeans{Space: OKLabSpace{}, Init: Divisive{Space: OKLabSpace{}, PCA: true}, Iters: 10, ErrWeight: true}
+	case "multirestart-oklab": // SA substitute: keep-best over restarts
+		return MultiRestart{Space: OKLabSpace{}, Restarts: 8, Iters: 10}
+	case "hyab-oklab": // HyAB metric refinement
+		return HyABKMeans{Init: Divisive{Space: OKLabSpace{}, PCA: true}, Iters: 10}
+	case "pnn-oklab": // PNN agglomerative init + k-means refine
+		return KMeans{Space: OKLabSpace{}, Init: PNN{Space: OKLabSpace{}}, Iters: 10}
+	case "pnn-oklab-raw": // PNN init only (no refine), to isolate init quality
+		return PNN{Space: OKLabSpace{}}
 	default:
 		return nil
 	}

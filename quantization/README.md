@@ -35,6 +35,10 @@ raw output sits in the matching `*-data.txt`.
 - **[07-codebook-brainstorm.md](07-codebook-brainstorm.md)** — interdisciplinary
   fan-out (deterministic annealing, neural gas, ECVQ, SA, GMM, PNN): most ruled out
   at N=256 with reasons; PNN/error-reweighting kept.
+- **[08-interdisciplinary-measured.md](08-interdisciplinary-measured.md)** (+ data) —
+  the brainstorm's candidates *implemented and benchmarked*: PNN, multi-restart,
+  error-weighted refine, HyAB — **all discarded with numbers** (none beats the
+  OKLab-matched champion on unweighted mean ΔE2000).
 - **[10-vs-competition.md](10-vs-competition.md)** (+ data) — the shootout: scored
   identically with CIEDE2000, our quality mode beats **ImageMagick** (octree) at
   every N, and — with OKLab-matched assignment (report 02) — beats **pngquant**

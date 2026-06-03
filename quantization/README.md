@@ -18,6 +18,9 @@ raw output sits in the matching `*-data.txt`.
 - **[01-cross-disciplinary-transfer.md](01-cross-disciplinary-transfer.md)** — what
   to borrow from vector quantization, ANN/PQ, cartography (Jenks/Ckmeans.1d.dp),
   CVT, OKLab, HyAB; the ranked shortlist of pieces to prototype; confirmed dead ends.
+- **[02-pieces-color-space.md](02-pieces-color-space.md)** (+ data) — the matched-
+  assignment breakthrough: clustering **and** assigning in OKLab beats pngquant at
+  **every** N (the fair rematch report 05 demanded).
 - **[04-pieces-selection-baselines.md](04-pieces-selection-baselines.md)** (+ data)
   — the popularity and median-cut floor every piece is measured against.
 - **[05-pieces-fanout-judge.md](05-pieces-fanout-judge.md)** (+ data) — the 12-config
@@ -25,10 +28,17 @@ raw output sits in the matching `*-data.txt`.
   k-means refine; PCA-divisive as the deterministic default) and discards (maximin
   under-performs; OKLab doesn't help under RGB assignment), plus the determinism
   finding (sort the histogram or seeded k-means drifts).
-- **[10-vs-competition.md](10-vs-competition.md)** (+ data) — the shootout: our
-  quality mode beats **pngquant** (libimagequant) at N≤64 and **ImageMagick**
-  (octree) at every N, scored identically with CIEDE2000; pngquant regains N=256.
-  Harness: `bench/compare-quant.sh` + `emit`/`score` modes.
+- **[06-competitive-teardown.md](06-competitive-teardown.md)** — source-level
+  dissection of libimagequant (importance map, 0.57-gamma space, error-weighted
+  refine) and which tricks are objective-safe to port vs which belong to a separate
+  perceptual track.
+- **[07-codebook-brainstorm.md](07-codebook-brainstorm.md)** — interdisciplinary
+  fan-out (deterministic annealing, neural gas, ECVQ, SA, GMM, PNN): most ruled out
+  at N=256 with reasons; PNN/error-reweighting kept.
+- **[10-vs-competition.md](10-vs-competition.md)** (+ data) — the shootout: scored
+  identically with CIEDE2000, our quality mode beats **ImageMagick** (octree) at
+  every N, and — with OKLab-matched assignment (report 02) — beats **pngquant**
+  (libimagequant) at **every** N. Harness: `bench/compare-quant.sh` + `emit`/`score`.
 - **[bench/](bench/)** — the self-contained Go harness (imports nothing from
   pixelize): trustworthy metrics (MSE/PSNR + CIEDE2000 self-tested against Sharma),
   a `Quantizer` interface, and the pieces. `go test` checks the metric; `go run .`

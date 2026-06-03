@@ -1,11 +1,11 @@
 # quantization
 
-The research record behind **pixelize's planned `quantize` module** — deriving a
-palette from an image ("turn any image into N colors / merge similar colors",
-workflow B), built the puzzle way: decompose the pipeline into pieces, enumerate
-many ways to do each (popular **and** cross-disciplinary), benchmark each piece in
-isolation, then stack the winners and benchmark the integration — proving it beats
-the incumbents on a public dataset.
+The research record behind **pixelize's [`quantize`](https://github.com/noelruault/pixelize/tree/main/quantize)
+module** (shipped) — deriving a palette from an image ("turn any image into N
+colors / merge similar colors", workflow B), built the puzzle way: decompose the
+pipeline into pieces, enumerate many ways to do each (popular **and**
+cross-disciplinary), benchmark each piece in isolation, then stack the winners and
+benchmark the integration — proving it beats the incumbents on a public dataset.
 
 Modeled on the sibling [nearest-color-scaling](../nearest-color-scaling/) record:
 numbered reports, each headline number traceable to a reproducible benchmark whose
@@ -56,12 +56,26 @@ raw output sits in the matching `*-data.txt`.
   a `Quantizer` interface, and the pieces. `go test` checks the metric; `go run .`
   runs the corpus.
 
-Reports 02, 03, 05–10 are planned in [00](00-methodology.md) and filled as pieces
-are implemented and measured.
+(Report 03, histogram-precision, is the one planned-but-unwritten report; it did not
+gate any decision.)
 
-## Status
+## Result, and where it shipped
 
-Methodology + harness stand up; CIEDE2000 validated; median-cut baseline measured
-(mean ΔE2000 ≈ 4.86 at N=16 over six paintings). The execution plan that drives the
-build into pixelize lives in `pixelize/.plans/` (per the repo convention — research
-here, build plan there).
+The winning pipeline — **PCA-divisive init + weighted Lloyd refine, in a color space
+chosen by palette size** (RGB for small palettes, OKLab for large; the measured
+crossover is ~N=32–48) — shipped as pixelize's
+[`quantize`](https://github.com/noelruault/pixelize/tree/main/quantize) package and
+its `-palette auto:N` CLI flag. Output is deterministic (the histogram is sorted into
+a canonical order). The space-filling-curve initializer is opt-in, hinted for N≥256.
+
+**Measured quality** (mean CIEDE2000, scored identically, no dither): beats
+ImageMagick's octree at every palette size (decisively — 18/18 Kodak images at N≥16)
+and matches-or-edges libimagequant/pngquant at every size (the honest claim — a
+genuine edge, not a rout; N=16 is roughly a tie). Validated on the **Kodak suite (18
+images) + 6 paintings = 24 images**. True **CQ100** (100 images) was unreachable in
+the build environment (Mendeley off the egress allowlist); the harness
+(`bench/compare-quant.sh`, `emit`/`score`) takes any image directory, so CQ100 is a
+corpus swap, not new code.
+
+The execution plan that drove the build lives in `pixelize/.plans/quantize/` (repo
+convention: research here, build plan there).

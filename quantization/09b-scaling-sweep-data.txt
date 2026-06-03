@@ -1,0 +1,10 @@
+# scaling sweep N=64..2048 — 2026-06-03 09:51:28
+# 3 images (athens,monet,starry); mean dE2000; OKLab-matched; no dither; pngquant caps at 256
+
+N       pngquant imagemagick refineRGB  refineOK  scurveOK
+64        3.0898    3.4056    3.0880    2.9795    2.9758
+128       2.4938    2.7500    2.6023    2.4155    2.4124
+256       2.0374    2.2748    2.1108    1.9682    1.9469
+512           na    1.8133    1.6871    1.5638    1.5571
+1024          na    1.4605    1.3459    1.2472    1.2375
+2048          na    1.1555    1.0548    0.9777    0.9721

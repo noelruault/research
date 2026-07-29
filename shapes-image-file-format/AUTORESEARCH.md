@@ -50,7 +50,8 @@ The programme was optimising bytes against WebP. Report 13 reframes it: the comp
 
 | P | item | why it outranks bytes |
 |---|---|---|
-| **P0** | **Measure segmentation quality** | Blocks every capability application. Never attempted. Cheapest decisive measurement available |
+| ~~P0~~ | ~~Measure segmentation quality~~ | **DONE — report 14. Answered positively.** Heavy-tailed, object-tracing; sky is 2 regions at the capability point. Replaced by P0b below |
+| **P0b** | **Benchmark bytes at the CAPABILITY operating point (1,383 regions, 24.99 dB), not just 28.5 dB** | Report 14: capability is best at 227–1,383 regions, byte work optimised 11,121. The benchmark that matches the product does not exist in nine reports |
 | P1 | WebP + sidecar benchmark, properly steelmanned | The comparison that matches the product; would be the study's strongest result |
 | P2 | Adopt RCT (B10) | +8.3% → ~+4.7% at the mid-axis. *In progress* |
 | P3 | Fix wall-coder legality (#12) | The record contains numbers no decoder can produce; P1 inherits the error |
@@ -79,6 +80,24 @@ The byte queue below stays valid but is now subordinate to the above.
 | B7 | Generalisation: every result is one photograph | The frozen 16-tap template and any colour win may not transfer. Cheapest real test: Kodak-24 at one small size through the existing frontier | OPEN — blocks any "ship it" claim |
 
 ## Log — newest first
+
+### 2026-07-29 — P0 answered: the regions are meaningful (report 14)
+
+Recovered the partitions from the published renders and counted regions inside three named windows.
+
+| regions | PSNR | **sky** | ridge | snow | top-100 cover | median region |
+|---|---|---|---|---|---|---|
+| 227 | 21.99 | **2** | 21 | 19 | **99.4%** | 1,716 px |
+| 1,383 | 24.99 | **2** | 84 | 76 | **90.0%** | 223 px |
+| 11,121 | 28.51 | 11 | 633 | 452 | 65.2% | 34 px |
+
+**Heavy-tailed at every level** — largest region is 3,450× the median at 1,383 regions, where uniform banding would give ~1×. A hundred regions describe 99.4% of a 4K photograph at 227 regions and 90% at 1,383. Visually: the ridge window splits into shadowed rock / lit snow / sunlit peak along the ridgeline and shadow terminator; the sky splits along a contour tracing the cloud edge. At 11,121 the sky bands into 11, and they follow cloud *form*, not horizontal slices.
+
+**The pessimistic reading in report 13 W1 was wrong.** Report 04's observation was incomplete rather than wrong: the sky is split by brightness, but into 2 regions at the capability point — a usable failure, since "select the sky" is a union of two ids.
+
+**The finding worth more than the answer: the capability point and the byte point are different operating points.** Capability is best at 227–1,383 regions (21.99–24.99 dB). Byte competitiveness was optimised at 11,121 (28.51 dB), where the median region is 34 px of texture speckle. Nine reports optimised a rate the applications do not want. **Nobody has ever benchmarked this format against WebP at 1,383 regions**, because 24.99 dB was assumed too low to ship — an assumption that only holds if fidelity is the product.
+
+Limits: three windows, one photograph, contents named by eye rather than against annotated ground truth. No boundary-recall number against a human or SAM segmentation. Strong indicator, not proof.
 
 ### 2026-07-29 — CORRECTION: cancelling lenses 3–6 was not supported by the measurement
 

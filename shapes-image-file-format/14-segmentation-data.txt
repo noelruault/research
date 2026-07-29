@@ -1,0 +1,11 @@
+# P0: are the regions semantically meaningful, or do they follow illumination?
+#
+# A published render is the partition painted with each region's mean colour, so 4-connected runs
+# of one colour ARE the regions. Recovered them and counted how many cover three windows whose
+# content we can name. Code: 14-segmentation/segq.go (stdlib only). Windows are 448x448 at 4K.
+#
+# columns : regions  psnr  bytes  sky_regions  ridge_regions  snow_regions  top100_cover%  median_px  largest_px
+#
+227	21.99	19819	2	21	19	99.4	1716	1038827
+1383	24.99	50016	2	84	76	90.0	223	769330
+11121	28.51	153190	11	633	452	65.2	34	296057

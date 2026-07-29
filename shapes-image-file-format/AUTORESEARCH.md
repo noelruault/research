@@ -54,7 +54,7 @@ The programme was optimising bytes against WebP. Report 13 reframes it: the comp
 | **P0b** | **Benchmark bytes at the CAPABILITY operating point (1,383 regions, 24.99 dB), not just 28.5 dB** | Report 14: capability is best at 227–1,383 regions, byte work optimised 11,121. The benchmark that matches the product does not exist in nine reports |
 | P1 | WebP + sidecar benchmark, properly steelmanned | The comparison that matches the product; would be the study's strongest result |
 | ~~P2~~ | ~~Adopt RCT (B10)~~ | **DONE — report 15.** −9.2% to −36.3% of the colour bill, monotone, decode-verified. Combined with report 09's interleave the 11,121 mark falls 153,190 → **132,280 B**, all of it decodable |
-| **P2b** | **Matched-fidelity WebP comparison at the new total** | 132,280 B sits at 28.51 dB; WebP's 137,033 B is at 28.7 dB. Comparing them is falsification #1's exact error. One quality search settles it — and it is the number the whole study now turns on |
+| ~~P2b~~ | ~~Matched-fidelity WebP comparison~~ | **DONE — report 16. `cwebp -m 6 -q 3` = 131,082 B at 28.52 dB against 132,280 B at 28.51 dB. +0.91%.** The gap is closed to within container overhead |
 | P3 | Fix wall-coder legality (#12) | The record contains numbers no decoder can produce; P1 inherits the error |
 | P4 | Real container | Without a bitstream there is no format |
 | P5 | Second image, then a corpus (B7) | Blocks every generalisation claim |
@@ -81,6 +81,22 @@ The byte queue below stays valid but is now subordinate to the above.
 | B7 | Generalisation: every result is one photograph | The frozen 16-tap template and any colour win may not transfer. Cheapest real test: Kodak-24 at one small size through the existing frontier | OPEN — blocks any "ship it" claim |
 
 ## Log — newest first
+
+### 2026-07-29 — P2b: at matched fidelity the gap is 0.91% (report 16)
+
+`cwebp -m 6 -q 3` = **131,082 B at 28.52 dB**. Shape coder = **132,280 B at 28.51 dB**. **+0.91%**, native versus native, matched on PSNR.
+
+| | walls | colour | total | vs WebP at this fidelity |
+|---|---|---|---|---|
+| as published | 121,047 | 32,143 | 153,190 | +16.9% |
+| + interleave (09) | 105,752 | 32,143 | 137,895 | +5.2% |
+| + RCT (15) | 105,752 | **26,528** | **132,280** | **+0.91%** |
+
+Neither change touched the partition, the fidelity or the region count. One reordered which crack plane is coded first; the other applied a transform WebP has had since 2010. And the published figure was never legal — the 132,280 uses the causal interleaved coder and a decode-verified colour stream.
+
+**Still flattered:** the wall half is an idealised cross-entropy with no container, while WebP's number is a real file. Roughly the remaining 1% is overhead the shape coder does not yet pay, so **parity is plausible and unproven** — building the container (P4) can only move our number up. One photograph. AVIF still 30–50% ahead everywhere and not a target.
+
+**The verdict shifts from "shapes lose by 19%" to "shapes cost about the same as WebP while carrying a segmentation WebP cannot carry at any price."** Report 13 argued that was the claim worth chasing; this is the number that makes it true — at one operating point, on one image.
 
 ### 2026-07-29 — B10 done: colour re-priced, and a modelled number with the wrong sign (report 15)
 

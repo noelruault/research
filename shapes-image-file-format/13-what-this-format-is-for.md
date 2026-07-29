@@ -91,7 +91,7 @@ Marked **[needs P0]** where the claim depends on the regions being *semantically
 
 **W9 — The capability operating point and the byte operating point are different. (New, report 14.)** The segmentation is best at **227–1,383 regions (21.99–24.99 dB)**; every byte result, including the 0.91%, was measured at **11,121 regions (28.51 dB)** where the median region is 34 px of texture speckle. Nine reports optimised a rate the applications do not want, and the rate they *do* want has never been benchmarked against WebP. This is now the largest open question in the programme.
 
-**W8 — Encoder cost is unmeasured and appears large.** The 4K scale-space merge is expensive enough that agents recovered partitions from rendered PNGs to avoid re-running it. If encoding a 4K image takes minutes, entire application classes are excluded. **UNMEASURED.**
+**W8 — ~~Encoder cost is unmeasured~~ — MEASURED, report 18: 3 m 44 s and 2.89 GB at 4K, single-threaded.** 68× `cwebp` at 960×540, ~150× at 4K. It does **not** block the stage-4 applications, which all operate on an already-encoded partition, but it excludes upload-time encoding, interactive re-encode, and mobile/embedded entirely. Decode is unaffected and remains a strength. The number is soft — the encoder is single-threaded on 15 cores, prices all 20 marks when one is wanted, and has never been profiled — so it is a lever (**new P8**), not a wall.
 
 ## Roadmap
 
@@ -103,7 +103,7 @@ Four stages. **Nothing in stage 4 should start before stage 1 finishes** — eve
 |---|---|---|---|
 | ~~P0b~~ | ~~Bytes at the capability rate~~ | **DONE — report 17. A dead heat: 25,399 B at 24.97 dB against WebP's 25,700 B at 24.99 dB, both resampled, −1.2%.** The format is at parity where its structure is useful | — |
 | **P1** | **WebP + region-map sidecar, steelmanned** | The comparison that matches the product. The 41% above rests on our own illegal wall coder; a real sidecar needs a purpose-built region-map codec. If it holds it is the study's strongest result | a day |
-| **P6** | **Encoder cost** | Determines which applications are reachable at all. If a 4K encode takes minutes, interactive editing is out. Never measured | an hour |
+| ~~P6~~ | ~~Encoder cost~~ | **DONE — report 18. 3 m 44 s / 2.89 GB at 4K.** Excludes on-demand encoding; does not block the ranked applications | — |
 
 ### Stage 2 — make it an actual format (weeks)
 
@@ -111,6 +111,7 @@ Four stages. **Nothing in stage 4 should start before stage 1 finishes** — eve
 |---|---|---|
 | **P3** | Fix the wall coder's legality (#12) | The record still contains numbers no decoder can produce. Everything downstream inherits it |
 | **P4** | Build a real container and bitstream | Without it "parity" is unprovable — report 16's remaining 0.91% is roughly the overhead we do not yet pay. **This is the gate on every application** |
+| **P8** | **Profile and parallelise the encoder** | 3 m 44 s single-threaded on 15 cores, pricing 20 marks when one is needed, never profiled. Engineering, not research — and "3.7 minutes" kills adoption arguments before the byte numbers are heard |
 | — | Fix the loop-count hole (P-02) | A decoder cannot tell when the loop list ends. Correctness, not optimisation |
 
 ### Stage 3 — prove it generalises (weeks)

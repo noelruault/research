@@ -86,6 +86,20 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-29 — P6: encode is 3m44s and 2.9 GB at 4K (report 18)
+
+| | shape encoder | `cwebp -m 6` |
+|---|---|---|
+| 960×540 full ladder | **10.2 s** | 0.15 s (68×) |
+| 3840×2160 full ladder | **3 m 44 s** | ~1.5 s (~150×) |
+| peak RSS at 4K | **2.89 GB** | — |
+
+**102–103% CPU on 15 cores — effectively single-threaded.**
+
+**It does not block the ranked applications.** Selection, non-destructive editing and cutout animation all operate on an already-encoded partition, and decode is untouched. What it excludes is upload-time encoding in a web service, interactive re-encode, and anything mobile or embedded — 2.9 GB settles the last one alone.
+
+**The number is soft, and that is the useful part:** single-threaded on 15 cores, prices all 20 marks when a production encoder needs one, and has never been profiled once. Added as **P8 — profile and parallelise** — engineering rather than research, in stage 2 beside the container, because "3.7 minutes" kills an adoption argument before any byte number is heard.
+
 ### 2026-07-29 — P0b: a dead heat at the capability operating point (report 17)
 
 Both coders resampled to 960×540 and upscaled to 4K, scored on the same original:

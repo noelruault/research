@@ -262,6 +262,13 @@ Data: `10-contour-junction-map-data.txt`. Code: `code/lab/contourctx.go`, `code/
 - **#11: the rate ladder was one-sided.** Only WebP got a resolution search below its floor. Given the same knob the shape coder ties rung 1 — **24.59 dB at 20,618 B** vs WebP 24.54 dB at 20,066 B. The published −2.55 dB is retracted.
 - Not done: mixing arm still running; report 08 tables not re-priced; template tested on one image only.
 
+## Parked work
+
+Anything set aside lives in [`PARKED.md`](PARKED.md) with its revive trigger. **Re-read it whenever a baseline here moves** — that is when a parked entry silently becomes valuable. Two entries are already live candidates:
+
+- **P-01, contour turn coding** — a verified, free −6.40% that is worth ~0 only because report 09 moved the CAE/contour crossover. Fixing #12 widens the contour band again and may already have moved it back. **Not recomputed.**
+- **P-07, curve-fitted boundaries** — parked conditional on P0, and **P0 has since been answered positively** (report 14). Its stated condition is satisfied and it has not been re-evaluated.
+
 ## How to resume
 
 1. Read this file, then `README.md`, then `06-corrections-and-falsifications.md` (what is already dead).

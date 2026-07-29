@@ -67,3 +67,11 @@ license — is documentation, not something a binary imports. The application
 repos reference these records (pinned to a commit so the cited evidence stays
 put) and keep only the *planning* that drives the build (e.g.
 `pixelize/.plans/`). This repo is the permanent home for the evidence.
+
+## Parked ideas
+
+Ideas set aside are recorded in [`PARKED.md`](PARKED.md) and in each study's own `PARKED.md`, with the number that parked them, **what they depend on**, and a concrete trigger for reviving them.
+
+The dependency field is the point. An idea is usually parked because of a fact that is true at the time — a baseline, a threshold, a constant — and when that fact moves, the idea can become good again with nobody noticing. That has already happened here: a measured −6.40% improvement to the contour coder became worth zero when an unrelated commit improved a *different* coder and moved the crossover between them. Nothing about the parked work changed.
+
+**Re-read a study's parked register whenever any baseline in that study moves.**

@@ -26,6 +26,8 @@ Data: [`11-colour-entropy-floor-data.txt`](11-colour-entropy-floor-data.txt). Co
 
 **The two rows that matter are adjacent.** The coder is within 0.02% of the best its own model can do — it is a competent implementation of the wrong model. Add a cross-channel transform and 28% falls out. RCT is the thing report 02 catalogued as one of WebP's four transforms in 2026, and the region coder simply never had one.
 
+> **Caveat added by report 12.** The ladder above is *modelled* bytes. Report 12 found a case where that ordering inverts under a real compressor: a predictor refinement that improves the order-0 model by 0.04% makes brotli 0.60% worse, because at 1.305 px/region the residual stream is 37% zeros and brotli lives on the exact-hit rate rather than on residual variance. Treat the modelled rows as ranking *models*, not ranking *streams*. Only the brotli row is a measured stream.
+
 ## This reorders the queue
 
 | lever | measured alone | on top of RCT |

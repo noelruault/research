@@ -55,11 +55,21 @@ The compression *verdict* is settled and is not what this programme is trying to
 | B5 | **Rung 2 of the rate ladder** | No mark within ±5% of 50,016 B; needs a merge run at ~7,800 regions to settle whether WebP's lead there is real | OPEN — one run |
 | B6 | Inconsistent pricing at the lossless row | — | **CLOSED, APPLIED.** Real, verified twice, and it moved a published headline: lossless total 12,159,385 → **11,654,978 B**, 1.58× → **1.51×** WebP. Shapes now sit *under* AVIF and 5% under PNG |
 | B6b | The 512/960/1920 lossless rows | — | **CLOSED, APPLIED.** All four re-priced with `colorBytes2`: 1.400× / 1.352× / 1.352× / 1.510× against WebP-lossless, where the record said 1.48 / 1.41 / 1.40 / 1.58. Curve shape unchanged |
-| B10 | **Adopt the cross-channel transform in `colorBytes2` and re-price the record** | **−28.0% of the colour bill alone**, ~3× B9, and every colour figure in reports 04–09 was measured without it. This is now the top colour item | **OPEN — top of the colour queue** |
+| B10 | **Adopt the cross-channel transform (plus report 12's 8-byte chroma coefficient) in `colorBytes2` and re-price the record** | **−28.0%** of the colour bill, and every colour figure in reports 04–09 was measured without it. Re-pricing must be checked against a general compressor, not only modelled — report 12 showed the two rank differently | **OPEN — top of the colour queue, and the last colour item** |
 | B9 | Residual-context colour model | Was queued as the largest colour win at −10.33%. On top of RCT it is worth **+4.7 pp**, not 10.3 | OPEN — do after B10, and quote the stacked figure |
 | B7 | Generalisation: every result is one photograph | The frozen 16-tap template and any colour win may not transfer. Cheapest real test: Kodak-24 at one small size through the existing frontier | OPEN — blocks any "ship it" claim |
 
 ## Log — newest first
+
+### 2026-07-29 — light lens closed negative; and modelled bytes do not rank like real bytes (report 12)
+
+**The structural claim is dead.** Dividing region colours by a smooth illumination field *raises* their joint entropy 5.9% (13,135,022 → 13,914,233 B) and grows the alphabet 50%, and **every shuffled control beats the real field** — destroying the spatial correspondence helps, which it could not if illumination were being removed. After brotli every transmitted-field arm is a net loss: poly2 +0.016%, grid64 +0.638%, textbook Retinex +13.76%. Not a rename of report 04's killed coarse-field mechanism, and shown rather than asserted: it fails in the 21-parameter form and fails *monotonically worse* as the field gets finer.
+
+**What survived is 8 bytes.** A two-coefficient chroma refinement to RCT: 6,904,345 → **6,898,336 B (−0.087%)**, decode-verified. Re-verified outside the agent's harness byte-exact, with both controls costing *more* than doing nothing (`a` negated +0.342%, `a` on the wrong channel's ratio +0.537%) — so it is information, not capacity. Entire win is the blue channel (`a_B` = +0.136, `a_R` = −0.014), which on a sky photograph is plausible and fragile. Belongs with B10, not as its own mechanism.
+
+**The finding that outlives the lens:** `k`-only improves the order-0 model by 0.04% and makes brotli **0.60% worse**. The lossless residual stream is 37% zeros; brotli lives on the exact-hit rate, so a refinement that lowers residual *variance* while lowering *exact hits* trades away more LZ matches than it wins. **Any colour lever ranked on modelled bytes can invert once a real compressor is the reference — report 11's own ladder ranks these two backwards.** Every bespoke colour figure in reports 04–09 is a modelled number and none has been checked against a general compressor on the same stream. Report 11 now carries this caveat.
+
+**Colour is now bookkeeping, not research.** The lossless colour bill is 6,898,336 B against 6,896,137 B for a WebP colour tie — a gap of **2,199 B**, down from 8,208. At the mid-axis the best arm saves 801 B, 0.52% of that rung against 8.3% needed. **Lenses 3–6 (spectra, vision, matter, biology) are cancelled unrun**: they would compete for ~1% of remaining headroom, in a regime where modelled gains have just been shown to invert under the compressor that would actually ship. Walls own what is left.
 
 ### 2026-07-29 — B6b closed: all four lossless rows re-priced
 

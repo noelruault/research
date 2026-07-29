@@ -1,0 +1,200 @@
+===== 12 — illuminant x albedo lens on the region-colour bill — raw measurement log =====
+# lab copy: $SCRATCH/lightlab2 (repo code/lab + lightx.go), go build -o labx ., go vet clean
+#   labx light <img.png> [labels.bin ...]      LIGHTDUMP=<dir> writes the residual byte streams
+#   labx lightdec <labels.bin> <stream.bin> <rct|mul|mulg|k|a|ka> <ref.png> [planar]
+# every brotli figure below is brotli 1.2.0 -q 11 run on the dumped stream OUTSIDE the Go harness.
+
+===== 0. baselines reproduced before anything was changed =====
+colorBytes2 (published coder, unmodified)      10832608.78 B
+colorBytes2 (published coder, unmodified)         32142.63 B
+published: 10,832,608.78 B lossless / 32,142.63 B at 11,121 regions  -> both match to the printed digit
+brotli -q11 on report 11's own lossless_rct_planar.bin:  6904345 B (file), re-run gave 6904345 B
+
+===== 1. lossless, exact partition, 6,356,392 regions =====
+# /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/hd/src4k.png 3840x2160
+# exact lossless partition, 529557 distinct pixel colours
+
+## lossless — 6356392 regions, 8294400 px, 1.305 px/region
+colorBytes2 (published coder, unmodified)      10832608.78 B
+
+### A. albedo alphabet vs colour alphabet (no coder, order-0)
+field                             H joint B     distinct    H perchan B note
+none (raw region colours)          13135022       529557       17788187 the thing to beat
+poly2                              13914233       793543       17613178 +24 B field
+  CONTROL poly2 shuffled           13422053      1016231              - same rounding, no spatial info
+poly3                              13945704       776739       17504740 +40 B field
+  CONTROL poly3 shuffled           13404122      1016857              - same rounding, no spatial info
+poly5                              14093990       810352       17615376 +84 B field
+  CONTROL poly5 shuffled           13482927      1033927              - same rounding, no spatial info
+grid16                             13906347       863669       17252395 +1024 B field
+  CONTROL grid16 shuffled          13365828      1018703              - same rounding, no spatial info
+grid64                             13786991       941521       16891766 +16384 B field
+  CONTROL grid64 shuffled          12950595       988199              - same rounding, no spatial info
+
+fitted cross-channel coefficients (transmitted, float32):
+  k alone           R 0.92920  B 0.97917      (1.0 == additive RCT)
+  a alone, k=1      R -0.01432  B 0.13591      (0 == additive, 1 == fully multiplicative)
+  k and a jointly   k R 0.91507 B 0.98533   a R 0.02843 B 0.13088
+
+### B + C. adaptive cost, side information paid, on this exact partition
+arm                                    residual B      field B        total B    vs rct
+additive RCT (baseline)                   7800674            0        7800674    +0.00%
+bracket alpha=0.25 (0=add, 1=mult)        7889660            0        7889660    +1.14%
+bracket alpha=0.50 (0=add, 1=mult)        8210713            0        8210713    +5.26%
+multiplicative chroma                     8854351            0        8854351   +13.51%
+multiplicative chroma, guard 16           8823320            0        8823320   +13.11%
+fitted k only  — NO light physics         7797881            8        7797889    -0.04%
+fitted a only  — pure light term          7760237            8        7760245    -0.52%
+fitted k and a — both                     7809480           16        7809496    +0.11%
+CONTROL a negated — wrong direction        7814555            8        7814563    +0.18%
+CONTROL a on the other channel's ratio        7841397            8        7841405    +0.52%
+field poly2 ratio + additive RCT          7800859           24        7800883    +0.00%
+field poly2 ratio + mult chroma           8854494           24        8854518   +13.51%
+field poly3 ratio + additive RCT          7801161           40        7801201    +0.01%
+field poly3 ratio + mult chroma           8854732           40        8854772   +13.51%
+field poly5 ratio + additive RCT          7804657           84        7804741    +0.05%
+field poly5 ratio + mult chroma           8857197           84        8857281   +13.55%
+field grid16 ratio + additive RCT         7806206         1024        7807230    +0.08%
+field grid16 ratio + mult chroma          8859194         1024        8860218   +13.58%
+field grid64 ratio + additive RCT         7826717        16384        7843101    +0.54%
+field grid64 ratio + mult chroma          8867953        16384        8884337   +13.89%
+gain applied to 6231711 regions, dark guard hit 124681 (1.96%)
+mean |chroma residual|: rct 1.2188  alpha0.25 1.3089  alpha0.50 1.6040  mult 2.3297  mult+guard 2.2949
+replay mismatches: rct 0, mul 0, mulguard 0, fields [0 0 0 0 0] (all 0 == causal)
+# lossless took 13s
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_rct_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_mul_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_mulg_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_mul_interleaved.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_k_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_a_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_ka_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_aneg_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_aswap_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_fld_poly2_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_fld_poly3_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_fld_poly5_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_fld_grid16_planar.bin (19069176 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossless_lx_fld_grid64_planar.bin (19069176 B)
+
+===== 2. lossy, 11,121 regions =====
+# /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/hd/src4k.png 3840x2160
+
+## lossy_11121 — 11121 regions, 8294400 px, 745.832 px/region
+colorBytes2 (published coder, unmodified)         32142.63 B
+
+### A. albedo alphabet vs colour alphabet (no coder, order-0)
+field                             H joint B     distinct    H perchan B note
+none (raw region colours)             18585        10731          30962 the thing to beat
+poly2                                 18499        10684          31103 +24 B field
+  CONTROL poly2 shuffled              18445        10582              - same rounding, no spatial info
+poly3                                 18567        10729          31157 +40 B field
+  CONTROL poly3 shuffled              18528        10680              - same rounding, no spatial info
+poly5                                 18609        10826          31191 +84 B field
+  CONTROL poly5 shuffled              18571        10747              - same rounding, no spatial info
+grid16                                18637        10933          31591 +1024 B field
+  CONTROL grid16 shuffled             18561        10768              - same rounding, no spatial info
+grid64                                18580        10859          31818 +16384 B field
+  CONTROL grid64 shuffled             18346        10494              - same rounding, no spatial info
+
+fitted cross-channel coefficients (transmitted, float32):
+  k alone           R 0.92674  B 0.97248      (1.0 == additive RCT)
+  a alone, k=1      R -0.01489  B 0.31516      (0 == additive, 1 == fully multiplicative)
+  k and a jointly   k R 0.88609 B 0.98421   a R 0.08853 B 0.31009
+
+### B + C. adaptive cost, side information paid, on this exact partition
+arm                                    residual B      field B        total B    vs rct
+additive RCT (baseline)                     28580            0          28580    +0.00%
+bracket alpha=0.25 (0=add, 1=mult)          27835            0          27835    -2.61%
+bracket alpha=0.50 (0=add, 1=mult)          28204            0          28204    -1.32%
+multiplicative chroma                       29575            0          29575    +3.48%
+multiplicative chroma, guard 16             29572            0          29572    +3.47%
+fitted k only  — NO light physics           28109            8          28117    -1.62%
+fitted a only  — pure light term            27929            8          27937    -2.25%
+fitted k and a — both                       27774           16          27790    -2.77%
+CONTROL a negated — wrong direction          28623            8          28631    +0.18%
+CONTROL a on the other channel's ratio          29019            8          29027    +1.56%
+field poly2 ratio + additive RCT            28635           24          28659    +0.28%
+field poly2 ratio + mult chroma             29617           24          29641    +3.71%
+field poly3 ratio + additive RCT            28639           40          28679    +0.34%
+field poly3 ratio + mult chroma             29618           40          29658    +3.77%
+field poly5 ratio + additive RCT            28632           84          28716    +0.47%
+field poly5 ratio + mult chroma             29622           84          29706    +3.94%
+field grid16 ratio + additive RCT           28646         1024          29670    +3.81%
+field grid16 ratio + mult chroma            29657         1024          30681    +7.35%
+field grid64 ratio + additive RCT           28659        16384          45043   +57.60%
+field grid64 ratio + mult chroma            29728        16384          46112   +61.34%
+gain applied to 11115 regions, dark guard hit 6 (0.05%)
+mean |chroma residual|: rct 12.4046  alpha0.25 10.2820  alpha0.50 11.3649  mult 16.9520  mult+guard 16.9438
+replay mismatches: rct 0, mul 0, mulguard 0, fields [0 0 0 0 0] (all 0 == causal)
+# lossy_11121 took 0s
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_rct_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_mul_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_mulg_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_mul_interleaved.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_k_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_a_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_ka_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_aneg_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_aswap_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_fld_poly2_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_fld_poly3_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_fld_poly5_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_fld_grid16_planar.bin (33363 B)
+wrote /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/b6b9a54f-1c54-4fe5-a387-22cb90951173/scratchpad/lightout3/lossy_11121_lx_fld_grid64_planar.bin (33363 B)
+
+===== 3. the number that decides it: brotli -q 11 on each dumped stream =====
+# side information is added on top: the a-arm transmits 2 float32 = 8 B, the k+a arm 4 = 16 B.
+
+-- lossless, 6,356,392 regions --
+stream                                             brotli B      +side B vs 6904345
+additive RCT (report 11's own reference)            6904345      6904345    +0.000%
+fitted a only — the light term                      6898328      6898336    -0.087%
+CONTROL a negated                                   6927928      6927936    +0.342%
+CONTROL a on the other channel's ratio              6941430      6941438    +0.537%
+fitted k only — no light physics                    6945856      6945864    +0.601%
+fitted k and a jointly                              6960535      6960551    +0.814%
+field poly2 ratio + additive RCT                    6905453      6905477    +0.016%
+field grid64 ratio + additive RCT                   6932020      6948404    +0.638%
+pure multiplicative chroma                          7854412      7854412   +13.760%
+
+-- lossy, 11,121 regions --
+stream                                             brotli B      +side B   vs 27201
+additive RCT (report 11's own reference)              27201        27201    +0.000%
+fitted k and a jointly                                26384        26400    -2.945%
+fitted a only — the light term                        26520        26528    -2.474%
+fitted k only — no light physics                      26712        26720    -1.768%
+CONTROL a negated                                     27305        27313    +0.412%
+CONTROL a on the other channel's ratio                27635        27643    +1.625%
+field poly5 ratio + additive RCT                      27231        27315    +0.419%
+field grid64 ratio + additive RCT                     27293        43677   +60.571%
+pure multiplicative chroma                            28215        28215    +3.728%
+
+===== 4. why the order-0 ranking and the brotli ranking disagree =====
+# planar lossless streams: what fraction of bytes each arm perturbs, and what that does to sparsity.
+stream        zero%   !=rct%   meanrun
+rct          36.693    0.000    1.5161
+a            36.845    4.731    1.5079   <- raises the exact-hit rate; brotli gains
+k            36.370    8.087    1.4912   <- lowers it; order-0 improves, brotli loses 0.60%
+ka           36.055   10.755    1.4784   <- lowers it further
+
+===== 5. causality and determinism =====
+decoder replay — partition + stream only, nothing else read:
+decode lightout/lossless_lx_rct_planar.bin (rct, planar): 6356392 regions, 0 wrong samples of 24883200, max |delta| 0
+EXACT: the partition plus this byte stream reconstruct the source bit for bit
+decode lightout/lossless_lx_a_planar.bin (a, planar): 6356392 regions, 0 wrong samples of 24883200, max |delta| 0
+EXACT: the partition plus this byte stream reconstruct the source bit for bit
+decode lightout/lossless_lx_k_planar.bin (k, planar): 6356392 regions, 0 wrong samples of 24883200, max |delta| 0
+EXACT: the partition plus this byte stream reconstruct the source bit for bit
+decode lightout/lossy_11121_lx_ka_planar.bin (ka, planar): 11121 regions, 0 wrong samples of 24883200, max |delta| 0
+decode lightout/lossy_11121_lx_k_planar.bin (k, planar): 11121 regions, 0 wrong samples of 24883200, max |delta| 0
+decode lightout/lossy_11121_lx_a_planar.bin (a, planar): 11121 regions, 0 wrong samples of 24883200, max |delta| 0
+decode lightout/lossy_11121_lx_rct_planar.bin (rct, planar): 11121 regions, 0 wrong samples of 24883200, max |delta| 0
+decode lightout/lossy_11121_lx_mul_planar.bin (mul, planar): 11121 regions, 0 wrong samples of 24883200, max |delta| 0
+
+determinism — same binary run twice, both partitions:
+  lossy   : tables identical, all 11 dumped streams byte-identical
+  lossless: tables identical except the elapsed-time line (12s vs 13s); all streams byte-identical
+  the a/k/ka/rct streams are also byte-identical across the build that added the two controls
+
+independent re-run of brotli -q 11 on lossless_lx_a_planar.bin outside the harness: 6898328 B

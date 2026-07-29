@@ -60,6 +60,22 @@ The compression *verdict* is settled and is not what this programme is trying to
 
 ## Log — newest first
 
+### 2026-07-29 — spend limit raised; the six colour lenses run SEQUENTIALLY, floor first
+
+The multi-disciplinary colour lenses that died on the spend limit are being re-run **one at a time**, not fanned out, so a single agent's cost is bounded and each result can redirect the next.
+
+**Order is deliberate and is not the order they were originally written in.** The information-theory lens runs *first and alone*, because it measures `H(region colours | partition)` — the floor every other colour lens is competing for. If that floor sits above the −36% of the colour bill the lossless target needs, the colour programme is finished on arithmetic and the remaining five lenses are cancelled unrun. Floors before levers.
+
+Queue, in order, each gated on the previous:
+1. **information theory** — the entropy floor. *(running)*
+2. light / illuminant × albedo separation — the one with a real structural claim: natural images are a smooth illumination field times a piecewise-constant albedo field, which is the structure a region coder should want.
+3. spectra — reflectance is low-dimensional (3–7 basis functions); measure this image's actual region-colour dimensionality.
+4. vision — chroma acuity and opponency: how few bits a region colour perceptually needs. Note report 04 already killed foveation/CSF as codec-agnostic preprocessing.
+5. matter — coarse-to-fine cascade over the merge hierarchy, which already exists; conditional entropy of a child colour given its parent.
+6. biology — structural colour, Turing patterning. Ranked last: report 04 already killed PDE inpainting, L-systems and stigmergy, so the prior on this lens is worst.
+
+An outside review had recommended cutting 5 and 6 entirely. They are kept but ranked last, so if the floor result cancels the phase they simply never run.
+
 ### 2026-07-29 — B2b/B8 closed: report 09 ate the contour coder's territory
 
 The turn stream is 77–94% of the contour bill, so it looked like the largest unexamined component in the pipeline. Three free context taps — the junction map of the three candidate targets, hard exclusions from decoder-known structure, and absolute direction of travel — take **−6.40% of turns at 11,121 regions**. A junk control of 864 equal-sized contexts *costs* +0.49%, so it is information, not capacity.

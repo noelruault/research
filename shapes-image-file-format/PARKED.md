@@ -22,7 +22,7 @@ Live state and the active queue are in [`AUTORESEARCH.md`](AUTORESEARCH.md). Thi
 
 **Where.** Report `10-contour-turn-data.txt`; code `code/lab/turnx.go`, `turnprice.go`, `turnload.go`; commit `dbfb6bd`.
 
-> **Flagged as the strongest revive candidate in this file.** A working, verified, free improvement that is worth zero solely because of a threshold that has already moved once today and is due to move again when #12 is fixed.
+> **Was flagged as the strongest revive candidate here; downgraded 2026-07-30.** Both thresholds it was waiting on have now moved and neither revived it — the interleave moved the crossover away from it, and the legality repair moved it back only for a coder nobody uses. It stays a working, verified, free improvement worth zero at any operating point the format actually ships.
 
 ---
 
@@ -94,13 +94,13 @@ Live state and the active queue are in [`AUTORESEARCH.md`](AUTORESEARCH.md). Thi
 
 ## P-06 — Re-tuning `bitsPerEdge` / `bitsPerReg` (B3) · `parked`
 
-**What it is.** `potts2.go:15` hardcodes `bitsPerEdge = 1.73` and `bitsPerReg = 25.0`, measured at 512×288, and they drive the RD merge key and the Ising relaxation λ at *every* resolution. Actual wall cost at 4K is 1.22–1.61 bits/edge at the operating rungs and **0.4534 at lossless**.
+**What it is.** `potts2.go:15` hardcodes `bitsPerEdge = 1.73` and `bitsPerReg = 25.0`, measured at 512×288, and they drive the RD merge key and the Ising relaxation λ at *every* resolution. Actual wall cost at 4K is 1.22–1.61 bits/edge at the operating rungs and **0.4854 at lossless** (was 0.4534 before the legality repair — report 20 moved it, so this entry's premise moved with it).
 
 **Why parked.** Not because it is small — plausibly the **largest single win left**. Parked because re-tuning changes the *partitions themselves*, so every published number would need re-running on the new partitions or it reproduces falsification #3. It is the most dangerous item in the queue to do carelessly.
 
-**Depends on.** The wall coder's real cost per edge — which **report 09 already changed** (interleave −12.6%) and #12 will change again. The constant is staler now than when it was flagged.
+**Depends on.** The wall coder's real cost per edge — which **report 09 changed** (interleave −12.6%) and **report 20 changed again** (legality +4.3% to +13.7%). Both have now landed, so the constant is at its stalest and the wall coder is finally stable enough to re-measure against.
 
-**Revive when.** After #12 is fixed and the wall coder is stable, so the constant is re-measured once against a settled coder rather than twice.
+**Revive when.** ~~After #12 is fixed~~ — **that condition is now satisfied (report 20).** The wall coder is legal and the interleave has landed, so the constant can be re-measured once against a settled coder. **This entry is now the strongest revive candidate in the file**, replacing P-01.
 
 **Cost to revive.** High — a full scale-space re-run plus re-pricing every published mark, baseline included.
 

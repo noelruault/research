@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """Builds hd-mirror.html: the 1:1 comparison at 3840x2160, across the whole rate axis.
 
-Every image embedded here is a native-resolution window of a real decoded file, encoded for display as
-lossless WebP. Nothing is resampled and nothing is re-encoded lossily, so what the page shows is each
-encoder's own artefacts and not the display pipeline's.
+Every image embedded here is a 3840x2160-space window of a real decoded file, encoded for display as
+lossless WebP, so what the page shows is each encoder's own artefacts and never the display pipeline's.
+The display path adds no resampling of its own. On steps 1 and 2 the WebP file is itself encoded below
+native and upscaled -- that resampling is the thing being measured, and it happens before the window is
+cut, exactly as it would in a browser.
 
 Numbers come from, and only from:
-  hd/rate/steps.tsv         the byte-matched rate ladder                (rate-build.sh)
-  hd/rate-window-stats.txt  per-window fidelity at every step           (rate-build.sh)
-  hd/ladder_<W>.txt         shape-coder scale-space per resolution      (lab hd)
-  hd/ladder-codecs.txt      WebP + AVIF rate-distortion per resolution  (ladder-sweep.sh)
-Nothing on this page is typed in by hand; if a figure looks wrong, the data file is wrong.
+  hd/rate/steps.tsv          the byte-matched rate ladder               (rate-build.sh)
+  hd/rate/window-stats.tsv   per-window fidelity, keyed by step         (rate-build.sh)
+  hd/ladder_<W>.txt          shape-coder scale-space per resolution     (lab hd)
+  hd/ladder-codecs.txt       WebP + AVIF rate-distortion per resolution (ladder-sweep.sh)
+
+Those four are read at build time and never transcribed. The constants below -- LOSSLESS, EXACT, LADDER,
+PER_WINDOW -- are transcribed, from reports 08 and 05; they are the page's remaining hand-copied numbers
+and the reason the header block can drift when a report is corrected. Check them against the report when
+either changes.
 """
 import base64
 import json
@@ -65,19 +71,24 @@ PER_WINDOW = [
 def load_steps():
     steps = []
     for line in (HD / "rate" / "steps.tsv").read_text().splitlines():
-        i, regions, sb, sp, wq, wb, wp, floored = line.split("\t")
+        i, regions, sb, sp, wq, wb, wp, resampled = line.split("\t")
         steps.append(dict(i=int(i), regions=int(regions), sbytes=int(sb), spsnr=float(sp),
-                          wq=wq, wbytes=int(wb), wpsnr=float(wp), floored=floored == "1"))
+                          wq=wq, wbytes=int(wb), wpsnr=float(wp), resampled=resampled == "1"))
     return steps
 
 
 def load_window_stats(nsteps):
-    """{window: [{shapes, webp}, ...]} in step order, parsed from the build log."""
-    rows = [ln.split() for ln in (HD / "rate-window-stats.txt").read_text().splitlines() if ln.strip()]
+    """{window: [{shapes, webp}, ...]} in step order, keyed explicitly by the build's own step column."""
     out = {w["key"]: [{} for _ in range(nsteps)] for w in WINDOWS}
-    per_step = len(WINDOWS) * 2
-    for n, r in enumerate(rows):
-        out[r[0]][n // per_step][r[1]] = float(r[3])
+    for ln in (HD / "rate" / "window-stats.tsv").read_text().splitlines():
+        if not ln.strip():
+            continue
+        step, window, who, psnr = ln.split("\t")
+        if window in out:  # the build measures more windows than this page embeds
+            out[window][int(step) - 1][who] = float(psnr)
+    missing = [(w, i + 1) for w, rows in out.items() for i, r in enumerate(rows) if len(r) != 2]
+    if missing:
+        raise SystemExit(f"window-stats.tsv is missing shapes/webp rows for {missing} — rebuild it")
     return out
 
 
@@ -103,6 +114,12 @@ def window_blocks():
                 f'alt="{w["title"]}, original" draggable="false">']
         for s in STEPS:
             for who in ("webp", "shapes"):
+                # An exact step's shape render IS the original, pixel for pixel. It still needs its own layer -- one element cannot be both sides of the wipe -- but embedding the same base64 twice would cost ~1 MB, so this layer borrows the orig layer's src at load.
+                if who == "shapes" and s["spsnr"] >= 99:
+                    imgs.append(
+                        f'<img class="lyr" data-k="s{s["i"]}_{who}" data-src-from="orig" '
+                        f'alt="{w["title"]}, step {s["i"]}, exact region partition" draggable="false">')
+                    continue
                 imgs.append(
                     f'<img class="lyr" data-k="s{s["i"]}_{who}" '
                     f'src="{uri(HD / "rate" / f"{w["key"]}_s{s["i"]}_{who}.webp")}" '
@@ -145,17 +162,20 @@ def ladder_table():
 def step_table():
     rows = []
     for s in STEPS:
-        if s["floored"]:
-            verdict = '<span class="bad">WebP cannot go this small</span>'
+        if s["wpsnr"] >= 99 and s["spsnr"] >= 99:
+            # Both coders bit-exact: the only thing left to compare is the bill.
+            verdict = (f'<span class="bad">{s["sbytes"] / s["wbytes"]:.2f}&times; the bytes '
+                       f'for the same pixels</span>')
         elif s["wpsnr"] >= 99:
             verdict = '<span class="bad">WebP is exact, for fewer bytes</span>'
         else:
             d = s["spsnr"] - s["wpsnr"]
             verdict = f'<span class="{"good" if d > 0 else "bad"}">{d:+.2f} dB</span>'
         wdb = "exact" if s["wpsnr"] >= 99 else f'{s["wpsnr"]:.2f} dB'
+        sdb = "exact" if s["spsnr"] >= 99 else f'{s["spsnr"]:.2f} dB'
         rows.append(
             f'<tr><td class="mono num">{s["i"]}</td>'
-            f'<td class="mono num">{s["sbytes"]:,}</td><td class="mono num">{s["spsnr"]:.2f} dB</td>'
+            f'<td class="mono num">{s["sbytes"]:,}</td><td class="mono num">{sdb}</td>'
             f'<td class="mono dim num">{s["regions"]:,}</td>'
             f'<td class="mono num">{s["wbytes"]:,}</td><td class="mono num">{wdb}</td>'
             f'<td class="mono dim">{s["wq"]}</td><td class="num">{verdict}</td></tr>')
@@ -325,11 +345,12 @@ footer {{ margin-top:72px; padding-top:28px; border-top:1px solid var(--line);
 <header>
   <p class="eyebrow"><span>shapes-image-file-format &middot; report 08</span>
     <a href="dashboard.html">&larr; results dashboard</a></p>
-  <h1>At 4K, <b>lossless</b> is where the shape idea runs out.</h1>
+  <h1>At 4K, the shape idea runs out at <b>both ends</b> of the rate axis.</h1>
   <p class="lede">The earlier rounds ran on a 512&times;288 crop, where the region coder appeared to edge
-    WebP below 29.2 dB &mdash; a result that did not survive taking WebP off its default encoder setting.
-    This is the same picture at <strong>3840&times;2160</strong>, its native size, priced by the same
-    coder. Every panel below is a <strong>1:1 window</strong> &mdash; one screen pixel is one image pixel,
+    WebP below 29.2 dB &mdash; a result that did not survive taking WebP off its default encoder setting,
+    and whose last refuge, the very bottom of the rate range, did not survive letting WebP encode small
+    and upscale the way real delivery does. This is the same picture at <strong>3840&times;2160</strong>,
+    its native size, priced by the same coder. Every panel below is a <strong>1:1 window</strong> &mdash; one screen pixel is one image pixel,
     no resampling, and the display copies are lossless so the artefacts are each encoder's own.</p>
   <div class="stats">
     <div class="stat"><div class="k">exact partition</div><div class="v">{EXACT['regions']:,}</div>
@@ -369,8 +390,8 @@ footer {{ margin-top:72px; padding-top:28px; border-top:1px solid var(--line);
 <section>
   <h2>1:1, across the whole rate axis</h2>
   <p class="sub">Drag the slider to change the <strong>file size</strong>; drag inside a window to wipe
-    between the two coders. Wherever WebP can reach the size at all, the two files are byte-matched to
-    within 1.6%, so the only thing left to compare is the picture.</p>
+    between the two coders. Every step is byte-matched to within 2.5%, so the only thing left to compare
+    is the picture &mdash; and the axis ends where both coders are bit-exact and only the bill differs.</p>
 
   <div class="rate">
     <div class="top">
@@ -400,13 +421,17 @@ footer {{ margin-top:72px; padding-top:28px; border-top:1px solid var(--line);
       <th class="dim">setting</th><th class="num">shapes vs WebP</th></tr></thead>
     <tbody>{step_table()}</tbody>
   </table></div>
-  <p class="sub" style="margin-top:20px">Steps 1 and 2 have no real WebP column: at 3840&times;2160
-    <span class="mono">cwebp</span> bottoms out at <span class="mono">q0</span> = 85,102&nbsp;B, so it
-    cannot produce a file as small as the shape coder's 19,819&nbsp;B at all, and the left panel there is
-    that floor rather than a match. Those two rows are the one place on this page where the region coder
-    reaches somewhere WebP does not &mdash; the very bottom of the rate axis, which is exactly where
-    report 05 said the only real argument was. Everywhere WebP <em>can</em> reach, it is ahead, and by
-    more as the rate rises.</p>
+  <p class="sub" style="margin-top:20px">Steps 1 and 2 buy their bytes a second way. At 3840&times;2160
+    <span class="mono">cwebp</span> bottoms out at <span class="mono">q0</span> = 85,102&nbsp;B, so a
+    20&nbsp;KB file cannot be reached by turning quality down &mdash; it is reached the way small images
+    are actually delivered, by encoding at a lower resolution and letting the client scale it up, which
+    still puts 3840&times;2160 pixels on screen. An earlier version of this page pinned those two steps to
+    the native floor and called them the one place the region coder goes where WebP cannot. That was
+    wrong, and it is the tenth claim this study has had to retract: at
+    <span class="mono">-q 18 -resize 960 540</span> WebP lands on the same 20&nbsp;KB and wins by
+    <b>2.55&nbsp;dB</b>. The deficit is <b>U-shaped</b> &mdash; worst at the very bottom of the axis and
+    at the very top, least bad in the middle &mdash; so the low-rate band every earlier round called this
+    idea's best hope is where it does worst.</p>
 </section>
 
 <section>
@@ -479,6 +504,8 @@ function apply() {{
   const s = STEPS[step - 1];
   const orig = leftKind === "orig";
   const wExact = s.wpsnr >= 99;
+  const sExact = s.spsnr >= 99;
+  const sdb = sExact ? "exact" : s.spsnr.toFixed(2) + NB + "dB";
 
   el("nowsize").textContent = fmtB(s.sbytes);
   el("lwho").textContent = orig ? "the original" : "WebP";
@@ -486,22 +513,34 @@ function apply() {{
   el("lsm").textContent = orig ? "the exact pixels both coders were given"
     : (wExact ? "exact \\u00b7 " + s.wq : s.wpsnr.toFixed(2) + " dB whole image \\u00b7 " + s.wq);
   el("rbig").textContent = s.sbytes.toLocaleString() + " B";
-  el("rsm").textContent = s.spsnr.toFixed(2) + " dB whole image \\u00b7 "
+  el("rsm").textContent = (sExact ? "exact" : s.spsnr.toFixed(2) + " dB whole image") + " \\u00b7 "
     + s.regions.toLocaleString() + " regions";
 
   let v;
   if (orig) {{
-    v = "Left is the untouched source. The wipe shows how far the shape coder is from the truth at "
-      + fmtB(s.sbytes) + " \\u2014 " + s.spsnr.toFixed(2) + " dB over the whole image.";
-  }} else if (s.floored) {{
-    v = "<b>WebP cannot produce a file this small.</b> Its floor at this resolution is q0 = 85,102" + NB
-      + "B, over four times the shape coder's " + s.sbytes.toLocaleString() + NB
-      + "B, so the left panel is that floor rather than a match. This is the one place the region coder "
-      + "reaches somewhere WebP does not.";
+    v = sExact
+      ? "Left is the untouched source, and so is the right: this is the exact region partition, which "
+        + "reconstructs every one of the 8,294,400 pixels. The wipe has nothing to show. The cost is "
+        + fmtB(s.sbytes) + ", against " + fmtB(s.wbytes) + " for a WebP that is equally perfect."
+      : "Left is the untouched source. The wipe shows how far the shape coder is from the truth at "
+        + fmtB(s.sbytes) + " \\u2014 " + s.spsnr.toFixed(2) + " dB over the whole image.";
+  }} else if (wExact && sExact) {{
+    v = "<b>Both coders are bit-exact here \\u2014 only the bill differs.</b> The exact region partition "
+      + "costs " + s.sbytes.toLocaleString() + NB + "B against WebP's " + s.wbytes.toLocaleString() + NB
+      + "B, <b>" + (s.sbytes / s.wbytes).toFixed(2) + "\\u00d7</b>. At the exact end there is no geometry "
+      + "left to exploit: the partition is down to 1.3 pixels per region, so the region coder is a raster "
+      + "coder with one predictor where WebP has fourteen.";
+  }} else if (s.resampled) {{
+    v = "<b>Below cwebp's native floor</b> of q0 = 85,102" + NB + "B, so this WebP is encoded at "
+      + s.wq.split("@")[1].replace("x", "\\u00d7") + " and scaled up \\u2014 which is how a file this "
+      + "small is actually delivered, and still 3840\\u00d72160 pixels on screen. Byte-matched to within "
+      + (100 * Math.abs(s.sbytes - s.wbytes) / s.wbytes).toFixed(1) + "%, WebP is <b>"
+      + Math.abs(s.spsnr - s.wpsnr).toFixed(2) + NB + "dB ahead</b>. An earlier version of this page "
+      + "claimed WebP could not reach this size at all; see report 06 #10.";
   }} else if (wExact) {{
     v = "<b>WebP is bit-exact here, in fewer bytes.</b> " + s.wbytes.toLocaleString() + NB
       + "B for a perfect reconstruction, against the shape coder's " + s.sbytes.toLocaleString() + NB
-      + "B for " + s.spsnr.toFixed(2) + NB + "dB.";
+      + "B for " + sdb + ".";
   }} else {{
     const d = s.spsnr - s.wpsnr;
     v = "Byte-matched to within " + (100 * Math.abs(s.sbytes - s.wbytes) / s.wbytes).toFixed(1)
@@ -525,12 +564,14 @@ function apply() {{
       + (orig ? "lossless reference" : s.wbytes.toLocaleString() + " B")
       + (orig ? "" : "<br>" + (wExact ? "exact" : st.webp.toFixed(2) + " dB here")) + "</i>";
     frame.querySelector(".tagR").innerHTML = "<b>shape coder</b><i>"
-      + s.sbytes.toLocaleString() + " B<br>" + st.shapes.toFixed(2) + " dB here</i>";
+      + s.sbytes.toLocaleString() + " B<br>"
+      + (sExact ? "exact" : st.shapes.toFixed(2) + " dB here") + "</i>";
 
     win.querySelector('[data-role="lname"]').textContent = orig ? "original" : "WebP";
     win.querySelector('[data-role="ldb"]').textContent =
       orig ? "exact" : (wExact ? "exact" : st.webp.toFixed(2) + " dB");
-    win.querySelector('[data-role="rdb"]').textContent = st.shapes.toFixed(2) + " dB";
+    win.querySelector('[data-role="rdb"]').textContent =
+      sExact ? "exact" : st.shapes.toFixed(2) + " dB";
     const dd = win.querySelector('[data-role="ddb"]');
     if (here === null) {{ dd.textContent = "\\u2014"; dd.className = ""; }}
     else {{
@@ -571,6 +612,11 @@ document.querySelectorAll(".toggle button").forEach(b =>
       x.setAttribute("aria-pressed", x === b ? "true" : "false"));
     apply();
   }}));
+// Layers that show the same pixels as another layer borrow its src rather than carrying a second copy.
+document.querySelectorAll("img.lyr[data-src-from]").forEach(img => {{
+  const src = img.closest(".frame").querySelector('img.lyr[data-k="' + img.dataset.srcFrom + '"]');
+  if (src) img.src = src.src;
+}});
 document.querySelectorAll(".frame").forEach(wire);
 apply();
 

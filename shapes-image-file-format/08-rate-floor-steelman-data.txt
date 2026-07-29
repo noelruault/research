@@ -1,0 +1,36 @@
+# Can WebP reach the shape coder's two smallest operating points after all?
+#
+# cwebp at native 3840x2160 bottoms out at q0 = 85102 B. Below that the format has no quality setting left -- but it does have a resolution setting, and the delivered pixel count is a choice the shape coder is also making. Both sides here output 3840x2160 and are scored against the same original with this study's RGB PSNR.
+#
+# Part 1 -- joint resolution/quality search at each sub-floor byte target. Upscale is sips (Lanczos).
+# A rung whose bytes miss the target high has not matched it and cannot be counted as a win at that size; 1920x1080 is already at q1 by 31,922 B and simply cannot reach 19,819. Read size_vs_target first.
+# columns : target_B  encode_w  encode_h  q  bytes  size_vs_target  psnr_at_4k  shape_coder_psnr  delta_dB
+#
+19819	1920	1080	1	31922	+61.1%	24.99	21.99	+3.00
+19819	1280	720	4	19350	-2.4%	24.33	21.99	+2.34
+19819	960	540	18	20066	+1.2%	24.54	21.99	+2.55
+19819	640	360	48	19804	-0.1%	24.47	21.99	+2.48
+19819	480	270	78	19508	-1.6%	24.12	21.99	+2.13
+19819	384	216	88	20294	+2.4%	23.81	21.99	+1.82
+50016	1920	1080	8	49454	-1.1%	26.06	24.99	+1.07
+50016	1280	720	33	49774	-0.5%	26.34	24.99	+1.35
+50016	960	540	65	50110	+0.2%	26.02	24.99	+1.03
+50016	640	360	88	49738	-0.6%	25.18	24.99	+0.19
+50016	480	270	97	51406	+2.8%	24.45	24.99	-0.54
+50016	384	216	99	38624	-22.8%	23.93	24.99	-1.06
+#
+# Part 2 -- upsampler control at the 19,819 B target. If the win were an artefact of a good resampler it would disappear under nearest-neighbour. It does not: every filter at every rung beats 21.99 dB.
+# columns : encode_w  encode_h  q  bytes  filter  psnr_at_4k
+#
+1280	720	4	19350	neighbor	24.23
+1280	720	4	19350	bilinear	24.33
+1280	720	4	19350	bicubic	24.36
+1280	720	4	19350	lanczos	24.36
+960	540	18	20066	neighbor	24.29
+960	540	18	20066	bilinear	24.55
+960	540	18	20066	bicubic	24.61
+960	540	18	20066	lanczos	24.60
+640	360	48	19804	neighbor	24.17
+640	360	48	19804	bilinear	24.46
+640	360	48	19804	bicubic	24.62
+640	360	48	19804	lanczos	24.63

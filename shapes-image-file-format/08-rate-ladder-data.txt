@@ -1,15 +1,18 @@
-# Byte-matched rate ladder at 3840x2160: the same two coders at six file sizes across three decades.
+# Byte-matched rate ladder at 3840x2160: the same two coders at seven file sizes, from 20 KB to bit-exact.
 #
-# cwebp's quality is bisected until its file lands near the shape coder's, so at each step the only thing left to compare is the picture.
-# Two steps are NOT matchable and that is a result, not a gap: cwebp bottoms out at q0 = 85,102 B on this image, so it cannot produce a file as small as the shape coder's 19,819 B at all. Those rows are pinned to the floor and flagged.
-# The top step pairs against cwebp -lossless, because past ~8 MB WebP stops being lossy on this image.
+# cwebp's quality is bisected until its file lands near the shape coder's, so at each step the only thing left to compare is the picture. Every step matches to within 2.5%.
+#
+# The two smallest steps need a second search. cwebp bottoms out at q0 = 85,102 B at native resolution, so a 20 KB file cannot be made by turning quality down -- it is made the way small images are actually delivered, by encoding at a lower resolution and upscaling, which still puts 3840x2160 pixels on screen. Those rows carry their encode size in the setting column and are flagged in the last column. An earlier version of this ladder pinned them to the native floor and concluded WebP "cannot go this small"; see 08-rate-floor-steelman-data.txt and report 06 #10.
+#
+# The last two steps both pair against cwebp -lossless: past ~8 MB WebP stops being lossy on this image. Step 6 is the shape coder's best lossy point, step 7 is its exact region partition -- both coders bit-exact, so only the bytes differ. PSNR 99.00 is this harness's sentinel for an exact match.
 #
 # command : bash code/hd/rate-build.sh
-# columns : step  regions  shapes_bytes  shapes_psnr  webp_setting  webp_bytes  webp_psnr  webp_at_floor
+# columns : step  regions  shapes_bytes  shapes_psnr  webp_setting  webp_bytes  webp_psnr  webp_resampled
 #
-1	227	19819	21.99	q0 floor	85102	26.75	1
-2	1383	50016	24.99	q0 floor	85102	26.75	1
+1	227	19819	21.99	q18@960x540	20066	24.54	1
+2	1383	50016	24.99	q33@1280x720	49774	26.34	1
 3	11121	153190	28.51	q6	152834	29.18	0
 4	96359	533107	32.74	q69	536848	35.13	0
 5	710144	2413389	40.42	q97	2452742	43.62	0
 6	3380956	8055367	53.37	lossless	7718506	99.00	0
+7	6356392	12159385	99.00	lossless	7718506	99.00	0

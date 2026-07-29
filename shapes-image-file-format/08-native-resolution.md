@@ -14,7 +14,7 @@ Pricing is **identical to report 04's `frontier`**: the rate-distortion merge, s
 
 WebP is `cwebp -m 6`, AVIF is `avifenc -s 6`, JPEG XL is `cjxl -e 7`. Per report 06 #9, leaving a codec on its defaults is a way of losing an argument you have already won.
 
-Data: [`08-native-resolution-data.txt`](08-native-resolution-data.txt), [`08-resolution-ladder-data.txt`](08-resolution-ladder-data.txt), [`08-rate-ladder-data.txt`](08-rate-ladder-data.txt), [`08-window-fidelity-data.txt`](08-window-fidelity-data.txt). Code: `code/lab/hd.go`, `code/hd/`.
+Data: [`08-native-resolution-data.txt`](08-native-resolution-data.txt), [`08-resolution-ladder-data.txt`](08-resolution-ladder-data.txt), [`08-rate-ladder-data.txt`](08-rate-ladder-data.txt), [`08-rate-floor-steelman-data.txt`](08-rate-floor-steelman-data.txt), [`08-window-fidelity-data.txt`](08-window-fidelity-data.txt). Code: `code/lab/hd.go`, `code/hd/`.
 
 ## Result 1 — lossless: the shape coder ties PNG and loses to everything since
 
@@ -87,22 +87,27 @@ The matched-quality column is the sharper statement of the same fact: **spending
 
 That failure is nameable and therefore looks fixable, which is why report 04 already priced the fix: per-region **affine** colour closes most of the gradient gap and costs more in coefficients than it saves. The bands are the symptom. The explicit boundary is the disease.
 
-## Result 4 — the whole rate axis, byte-matched, and the one place WebP cannot follow
+## Result 4 — the whole rate axis, byte-matched, from 20 KB to exact
 
-Six operating points spanning three decades of file size, each byte-matched by bisecting `cwebp -q` against the shape coder's output ([`08-rate-ladder-data.txt`](08-rate-ladder-data.txt)):
+Seven operating points spanning three decades of file size, each byte-matched against the shape coder's output, ending with both coders bit-exact ([`08-rate-ladder-data.txt`](08-rate-ladder-data.txt)):
 
-| step | shapes | | WebP | | shapes vs WebP |
-|---|---|---|---|---|---|
-| 1 | 19,819 B | 21.99 dB | 85,102 B | 26.75 dB | **WebP cannot go this small** |
-| 2 | 50,016 B | 24.99 dB | 85,102 B | 26.75 dB | **WebP cannot go this small** |
-| 3 | 153,190 B | 28.51 dB | 152,834 B | 29.18 dB | −0.67 dB |
-| 4 | 533,107 B | 32.74 dB | 536,848 B | 35.13 dB | −2.39 dB |
-| 5 | 2,413,389 B | 40.42 dB | 2,452,742 B | 43.62 dB | −3.20 dB |
-| 6 | 8,055,367 B | 53.37 dB | 7,718,506 B | **exact** | WebP is lossless for fewer bytes |
+| step | shapes | | WebP | | | shapes vs WebP |
+|---|---|---|---|---|---|---|
+| 1 | 19,819 B | 21.99 dB | 20,066 B | 24.54 dB | `-q 18 -resize 960 540` | **−2.55 dB** |
+| 2 | 50,016 B | 24.99 dB | 49,774 B | 26.34 dB | `-q 33 -resize 1280 720` | −1.35 dB |
+| 3 | 153,190 B | 28.51 dB | 152,834 B | 29.18 dB | `-q 6` | −0.67 dB |
+| 4 | 533,107 B | 32.74 dB | 536,848 B | 35.13 dB | `-q 69` | −2.39 dB |
+| 5 | 2,413,389 B | 40.42 dB | 2,452,742 B | 43.62 dB | `-q 97` | −3.20 dB |
+| 6 | 8,055,367 B | 53.37 dB | 7,718,506 B | **exact** | `-lossless -z 9` | WebP is exact for fewer bytes |
+| 7 | 12,159,385 B | **exact** | 7,718,506 B | **exact** | `-lossless -z 9` | **1.58× the bytes for the same pixels** |
 
-Steps 3–5 match to within 1.6% on bytes. **The deficit widens monotonically with rate** — 0.67, 2.39, 3.20 dB — which is the resolution ladder's finding restated along the other axis: the more bits there are to spend, the worse an explicit boundary is as a way to spend them.
+Every step matches to within 1.6% on bytes, so at each rung the only thing left to compare is the picture. The top two steps both pair against a bit-exact WebP because past ~8 MB WebP stops being lossy on this image: step 6 is the shape coder's best *lossy* point, still 4.4% larger than a WebP that is already perfect, and step 7 is the shape coder finally being perfect too, for **1.58×** the bytes. That is result 1 arriving as the end of the rate axis rather than as a separate table.
 
-**And there is exactly one thing the region coder can do that WebP cannot.** At 3840×2160 `cwebp` bottoms out at `q0` = **85,102 B**. It has no operating point below that; the format simply does not go there. The shape coder reaches 19,819 B — **4.3× smaller than anything WebP can emit** — at 21.99 dB. That is a real capability, not a rounding win, and it sits at the very bottom of the rate axis, which is where report 05 said the only genuine argument was. It is also the regime nobody serves a 4K photograph in.
+**The deficit is U-shaped, and its worst end is the bottom.** Reading down: −2.55, −1.35, −0.67, −2.39, −3.20 dB. Above step 3 it widens monotonically with rate, which is the resolution ladder's finding restated along the other axis — the more bits there are to spend, the worse an explicit boundary is as a way to spend them. But *below* step 3 it widens again, and faster. The shape coder's best ground on this image is the middle of the axis at ~150 KB and ~29 dB, not the bottom.
+
+**That bottom end is a correction, and a large one.** These two smallest steps were first measured against `cwebp` held at 3840×2160, where it bottoms out at `q0` = 85,102 B and therefore cannot produce a 20 KB file at all. That was published here as the one capability the region coder had which WebP did not — 4.3× smaller than anything WebP can emit. It does not survive letting WebP do what any real delivery pipeline does: encode at a lower resolution and upscale, which still puts 3840×2160 pixels on screen and is scored identically. At 960×540 and `-q 18`, WebP hits the same 20 KB and beats the shape coder by 2.55 dB — as does every other encode rung that can reach 20 KB at all, by +1.82 to +2.55 dB, and so does the same test repeated with nearest-neighbour upscaling. The full search is [`08-rate-floor-steelman-data.txt`](08-rate-floor-steelman-data.txt) and the retraction is report 06 #10.
+
+**So the rate axis has no gap in it.** There is no file size on this image at which WebP has no answer, and the shape coder's largest deficit now sits exactly where every earlier round had placed its best hope.
 
 ## Caveats, load-bearing
 
@@ -113,6 +118,6 @@ Steps 3–5 match to within 1.6% on bytes. **The deficit widens monotonically wi
 
 ## What this changes
 
-Report 05's crossover is gone twice over: once because WebP was configured below its shipping settings (report 06 #9), and again because whatever survived that was a small-image effect. **There is no measured regime on this image — no rate, no resolution, not lossless — where a shape representation is reliably smaller than a well-configured WebP.**
+Report 05's crossover is gone three times over: once because WebP was configured below its shipping settings (report 06 #9), again because whatever survived that was a small-image effect, and finally because the low-rate end where it was supposed to live is served by a pipeline the comparison had never allowed WebP to use (report 06 #10). **There is no measured regime on this image — no rate, no resolution, not lossless — where a shape representation is reliably smaller than a well-configured WebP, and none where it is reliably better at the same size.**
 
-What survives is narrower and unchanged by any of this: at 24–28 dB the two representations cost about the same, and in that band the geometry is cheap enough to keep the properties that were never about bytes — editability, restyling, resolution independence where the geometry is authored above the pixel grid, and semantic addressability. That is the same conclusion report 04 reached from four directions. This round removes the one number that had been arguing otherwise.
+The "cost about the same at 24–28 dB" band that earlier rounds fell back on does not survive this round either. At 512×288 it was real; at 3840×2160 with WebP allowed to pick its encode resolution, that band is where the shape coder loses hardest — 1.35 to 2.55 dB. What survives is therefore not a rate band at all, and it is not a bytes claim: editability, restyling, resolution independence where the geometry is authored above the pixel grid, semantic addressability. That is the same conclusion report 04 reached from four directions, now with nothing numerical left standing beside it.

@@ -1,6 +1,6 @@
-# 06 — The nine claims this investigation killed
+# 06 — The ten claims this investigation killed
 
-Every claim below was produced *by this investigation*, believed, written down, and in most cases committed to a repo README — then falsified by a later measurement in the same investigation. They are collected here because the failure pattern is more useful than any single number: **six of the nine were a measurement compared against the wrong baseline, one was a measurement compared against itself run once, one was a bug class declared closed after fixing a single instance, and one was a real result generalised past the one axis the eval had frozen.**
+Every claim below was produced *by this investigation*, believed, written down, and in most cases committed to a repo README — then falsified by a later measurement in the same investigation. They are collected here because the failure pattern is more useful than any single number: **seven of the ten were a measurement compared against the wrong baseline, one was a measurement compared against itself run once, one was a bug class declared closed after fixing a single instance, and one was a real result generalised past the one axis the eval had frozen.**
 
 ## 1. "Beats WebP by 31%"
 
@@ -104,6 +104,29 @@ The predictor is the already-decoded neighbour sharing the longest wall, selecte
 
 **Lesson.** Steelman the baseline's *settings*, not just its identity. Before claiming a few percent over a shipping codec, spend ten minutes finding out whether its flags were left at defaults — the margin you are claiming is often smaller than the margin the defaults gave away.
 
+## 10. "WebP cannot go this small" — the baseline was WebP with resampling forbidden
+
+**Claimed.** Report 08 result 4, and the README headline it earned within the hour: at 3840×2160 `cwebp` bottoms out at `q0` = 85,102 B, so the shape coder's 19,819 B file is **4.3× smaller than anything WebP can emit**. Written up as the one capability the region coder has that WebP does not — the single survivor of a study that had killed everything else.
+
+**Why it was wrong.** The floor is real, and it is the floor of `cwebp` *at a fixed encode resolution*. Nobody delivers a 20 KB rendering of a 4K photograph by turning quality down at 4K; they encode at a smaller size and let the client scale it up. `srcset` has been that pipeline for a decade. Its output is still 3840×2160 pixels on screen, scored against the same original on the same metric, so it was always in the same contest — the measurement had simply never been run, because the ladder's byte-matching searched quality and nothing else.
+
+**Corrected.** Searching resolution and quality jointly at the shape coder's own two sub-floor byte targets:
+
+| target | best WebP | its size | WebP PSNR | shape coder | verdict |
+|---|---|---|---|---|---|
+| 19,819 B | `-q 18 -resize 960 540` | 20,066 B | 24.54 dB | 21.99 dB | WebP **+2.55 dB** |
+| 50,016 B | `-q 33 -resize 1280 720` | 49,774 B | 26.34 dB | 24.99 dB | WebP **+1.35 dB** |
+
+This is not one lucky resolution. At 19,819 B **every rung that can reach the target wins** — 1280×720, 960×540, 640×360, 480×270 and 384×216, by +1.82 to +2.55 dB. (1920×1080 is already at `-q 1` by 31,922 B and cannot reach that size at all, which is the same floor effect one rung down.) At 50,016 B the win is narrower and does run out: the top four rungs take it by +0.19 to +1.35 dB, and the two most aggressive downscales *lose*, by −0.54 and −1.06 dB, because past some point the resample destroys more than the saved bitrate buys back. The rate ladder therefore quotes the best rung at each target, which is the steelman: `-q 18 -resize 960 540` and `-q 33 -resize 1280 720`.
+
+Nor is the win an artefact of a good resampler. Repeated with ffmpeg's nearest-neighbour — the worst filter available, and worse than anything a browser would use — WebP still scores 24.17–24.29 dB across the three matched rungs, against the shape coder's 21.99. Data: [`08-rate-floor-steelman-data.txt`](08-rate-floor-steelman-data.txt).
+
+**So the last thing this study claimed the shape idea could do, it cannot.** The rate slider's two smallest steps now compare against a real byte-matched WebP instead of a floor, and WebP wins them by a wider margin than it wins anywhere else on the axis — 2.55 dB at the bottom against 0.67 dB in the middle. The bottom of the rate range, which every previous round had identified as the shape coder's best ground, is where it loses worst.
+
+**This is #9's error one level up.** #9 steelmanned the baseline's flags; this one needed its *pipeline* steelmanned. "`cwebp` cannot produce this file" was true of the command line that was run and false of the format, and the distance between those two statements is where most of this table lives.
+
+**Lesson.** When a baseline appears to have a hard floor, establish whether the floor belongs to the format or to the invocation. A capability claim is a claim about what the other side *cannot* do — the hardest kind to verify, the easiest to want to believe, and the one this study fell for last.
+
 ## The pattern
 
 | # | Claim | Failure mode |
@@ -117,5 +140,6 @@ The predictor is the already-decoded neighbour sharing the longest wall, selecte
 | 7 | the merge is deterministic now | fixed one instance, not the class — two more randomizers survived |
 | 8 | beats WebP below 29.2 dB | true at the eval's size only — the frozen axis was never varied |
 | 9 | 1–6% at low rate | wrong baseline — WebP was left on its default `-m 4` |
+| 10 | WebP cannot go this small | wrong baseline — WebP was forbidden to resample |
 
-Six of nine are baseline errors, and every one of them flattered the hypothesis under test. None was caught by reasoning; each was caught by a later measurement that happened to overlap. The only structural defence found was the rule applied to the four investigating agents in report 04 — **reproduce the shared eval before your findings are believed** — which caught a fifth error in flight, when one agent's contradicting headline turned out to come from it silently substituting a different image.
+Seven of ten are baseline errors, and every one of them flattered the hypothesis under test. None was caught by reasoning; each was caught by a later measurement that happened to overlap. The only structural defence found was the rule applied to the four investigating agents in report 04 — **reproduce the shared eval before your findings are believed** — which caught a fifth error in flight, when one agent's contradicting headline turned out to come from it silently substituting a different image.

@@ -1,6 +1,6 @@
 # 08 — Native resolution, and the lossless end
 
-**See it:** [1:1 mirror at 4K](https://claude.ai/code/artifact/4ca0a875-4377-457a-8ace-9e83deaa896f) — drag-to-wipe comparison at true native pixels, plus the ladder chart. Local copy: [`hd-mirror.html`](hd-mirror.html).
+**See it:** [1:1 mirror at 4K](https://claude.ai/code/artifact/4ca0a875-4377-457a-8ace-9e83deaa896f) — drag-to-wipe comparison at true native pixels, on a rate slider across the six byte-matched operating points of result 4, plus the lossless table and the ladder chart. Local copy: [`hd-mirror.html`](hd-mirror.html).
 
 **Question.** Every round of this investigation ran on one image at 512×288. Fixing the eval is what made the rounds comparable — and it froze resolution, so nothing measured could say whether the results were about shapes or about small pictures. This round varies the frozen axis, and adds the one operating point never tested: **lossless**, where WebP is bit-exact and there is nothing to trade.
 
@@ -14,7 +14,7 @@ Pricing is **identical to report 04's `frontier`**: the rate-distortion merge, s
 
 WebP is `cwebp -m 6`, AVIF is `avifenc -s 6`, JPEG XL is `cjxl -e 7`. Per report 06 #9, leaving a codec on its defaults is a way of losing an argument you have already won.
 
-Data: [`08-native-resolution-data.txt`](08-native-resolution-data.txt), [`08-resolution-ladder-data.txt`](08-resolution-ladder-data.txt). Code: `code/lab/hd.go`, `code/hd/`.
+Data: [`08-native-resolution-data.txt`](08-native-resolution-data.txt), [`08-resolution-ladder-data.txt`](08-resolution-ladder-data.txt), [`08-rate-ladder-data.txt`](08-rate-ladder-data.txt), [`08-window-fidelity-data.txt`](08-window-fidelity-data.txt). Code: `code/lab/hd.go`, `code/hd/`.
 
 ## Result 1 — lossless: the shape coder ties PNG and loses to everything since
 

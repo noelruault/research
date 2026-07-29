@@ -16,6 +16,8 @@ Nothing here is compiled, imported, or shipped by any binary. The `code/` direct
 
 - **It does not beat WebP either, once WebP is configured the way anyone would ship it.** The claimed 1–6% win below ~29.2 dB was measured against `cwebp` on its *default* `-m 4`; at `-m 6` the win becomes a wash that alternates sign between adjacent samples, and the curves meet at ~26.1 dB instead (report 06 #9). At **3840×2160** even the wash is gone: the deficit grows monotonically with resolution, reaching **+19.3%** at the eval's own fidelity (report 08). This still appears to be the first matched-fidelity measurement of a region coder against a modern codec; the classical "geometry wins at low bitrate" literature benchmarks against JPEG-2000, not VP8/AV1-era codecs. *(That novelty claim is unverified — see the caveat in report 04.)*
 
+- **The one thing it does that WebP cannot is exist below WebP's floor.** At 3840×2160 `cwebp` bottoms out at `q0` = **85,102 B** and has no operating point beneath it; the shape coder reaches **19,819 B**, **4.3× smaller than anything WebP can emit**, at 21.99 dB (report 08 result 4). That is a reach claim, not an efficiency one — WebP's floor file is both larger *and* better at 26.75 dB — and across the four byte-matched steps where WebP can follow, the deficit widens monotonically with rate: −0.67, −2.39, −3.20 dB, then a lossless WebP that is smaller than the shape coder's 53.37 dB file.
+
 - **At lossless it ties PNG and loses to everything since.** The exact region partition of a 4K photograph costs **12,159,385 B** against WebP-lossless's 7,718,506 (**1.58×**) and JPEG XL's 6,468,598 (**1.88×**). The partition degenerates to 1.305 px per region, the walls become nearly free at 0.45 bits/edge, and **93% of the bill is colour** — at which point the region coder simply *is* a raster coder with one predictor where WebP has fourteen.
 
 - **The mechanism is an isoperimetric argument with a sign change.** Boundary cost grows as √(region count) while a block codec keeps paying per-block mode and coefficient bits that do not shrink as fast under deep quantization. So shapes win where regions are few, and lose as soon as fidelity forces the region count up. Measured at the operating point, region walls are **2.22× longer** than compact cells of the same areas — and that excess *is* the image information, which is why emergent (cheap) geometry is also uninformative geometry.
@@ -35,9 +37,9 @@ Nothing here is compiled, imported, or shipped by any binary. The `code/` direct
 | 05 | [`05-low-rate-crossover.md`](05-low-rate-crossover.md) | The apparent low-rate win over WebP, and its two corrections — both tables kept in place |
 | 06 | [`06-corrections-and-falsifications.md`](06-corrections-and-falsifications.md) | The **nine** claims this investigation produced and then killed, and the measurement that killed each |
 | 07 | [`07-method-what-worked.md`](07-method-what-worked.md) | The practices that caught real errors here — fixed eval, reproduce-before-believing, regenerate-don't-transcribe, run-it-twice — written for whoever runs the next one |
-| 08 | [`08-native-resolution.md`](08-native-resolution.md) | The same picture at **3840×2160**: what lossless costs, and why the low-rate wash decays with resolution |
+| 08 | [`08-native-resolution.md`](08-native-resolution.md) | The same picture at **3840×2160**: what lossless costs, why the low-rate wash decays with resolution, and a byte-matched rate ladder over six operating points — two of which WebP cannot produce at all |
 
-Data companions: [`03-corpus-dictionary-data.txt`](03-corpus-dictionary-data.txt), [`04-region-merge-frontier-data.txt`](04-region-merge-frontier-data.txt), [`05-codec-rd-sweep-data.txt`](05-codec-rd-sweep-data.txt), [`05-matched-fidelity-comparison-data.txt`](05-matched-fidelity-comparison-data.txt).
+Data companions: [`03-corpus-dictionary-data.txt`](03-corpus-dictionary-data.txt), [`04-region-merge-frontier-data.txt`](04-region-merge-frontier-data.txt), [`05-codec-rd-sweep-data.txt`](05-codec-rd-sweep-data.txt), [`05-codec-rd-sweep-strong-data.txt`](05-codec-rd-sweep-strong-data.txt), [`05-matched-fidelity-comparison-data.txt`](05-matched-fidelity-comparison-data.txt), [`08-native-resolution-data.txt`](08-native-resolution-data.txt), [`08-resolution-ladder-data.txt`](08-resolution-ladder-data.txt), [`08-rate-ladder-data.txt`](08-rate-ladder-data.txt), [`08-window-fidelity-data.txt`](08-window-fidelity-data.txt).
 
 ## The eval
 
@@ -61,16 +63,18 @@ None of that is fixed by more effort on the encoder. It is fixed by building a r
 
 ## Verdict
 
-**The compression ambition is dead, not parked.** A shape representation ties a properly configured WebP at the very bottom of the rate range on a small image, falls behind it as resolution rises, loses to AVIF everywhere by 15–52%, and at lossless ties PNG while losing 58% to WebP and 88% to JPEG XL. There is no measured regime — no rate, no resolution, not lossless — where it is reliably smaller.
+**The compression ambition is dead, not parked.** A shape representation ties a properly configured WebP at the very bottom of the rate range on a small image, falls behind it as resolution rises, loses to AVIF everywhere by 15–52%, and at lossless ties PNG while losing 58% to WebP and 88% to JPEG XL. There is no measured regime — no rate, no resolution, not lossless — where it is reliably smaller *at matched fidelity*.
 
-What survives is not a bytes claim: ~1,700 named, editable, independently animatable regions instead of 32,924 anonymous rects; immediate-mode drawing with no decode step; per-region addressability; a truncatable progressive stream; and per-pixel error bounds. Those are real properties no raster codec offers, and they happen to matter most in exactly the low-rate band where the byte numbers are also least bad.
+The one exception is a reach result rather than an efficiency one, and it is worth keeping separate: below `cwebp`'s `q0` floor of 85,102 B at 4K there is no WebP file to compare against at all, and the shape coder still emits one at 19,819 B. It is a real capability at the very bottom of the rate axis — and it is also the regime nobody serves a 4K photograph in.
+
+What survives is otherwise not a bytes claim: ~1,700 named, editable, independently animatable regions instead of 32,924 anonymous rects; immediate-mode drawing with no decode step; per-region addressability; a truncatable progressive stream; and per-pixel error bounds. Those are real properties no raster codec offers, and they happen to matter most in exactly the low-rate band where the byte numbers are also least bad.
 
 ## See it
 
 | | |
 |---|---|
 | [Results dashboard](https://claude.ai/code/artifact/05746c1e-460e-4901-a8d6-79dff1c1c3e7) | Real encoded files at three matched-fidelity bands, the rate-distortion curve, the full ranking, and the killed list. Local copy: [`dashboard.html`](dashboard.html) |
-| [1:1 mirror at 4K](https://claude.ai/code/artifact/4ca0a875-4377-457a-8ace-9e83deaa896f) | Drag-to-wipe comparison at native pixels, the lossless table, and the resolution ladder. Local copy: [`hd-mirror.html`](hd-mirror.html) |
+| [1:1 mirror at 4K](https://claude.ai/code/artifact/4ca0a875-4377-457a-8ace-9e83deaa896f) | A rate slider across six byte-matched operating points from 20 KB to 8 MB, drag-to-wipe at true native pixels against either WebP or the untouched original, with every panel stating its own file size and both its whole-image and per-window PSNR — plus the lossless table and the resolution ladder. Local copy: [`hd-mirror.html`](hd-mirror.html) |
 
 Both pages are self-contained HTML with every image embedded, so they render offline straight from this folder. They are generated by `code/dashboard/gen.py` and `code/dashboard/genhd.py` from the same data files the reports cite.
 

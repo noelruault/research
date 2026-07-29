@@ -1,6 +1,6 @@
-# 06 — The ten claims this investigation killed
+# 06 — The twelve claims this investigation killed
 
-Every claim below was produced *by this investigation*, believed, written down, and in most cases committed to a repo README — then falsified by a later measurement in the same investigation. They are collected here because the failure pattern is more useful than any single number: **seven of the ten were a measurement compared against the wrong baseline, one was a measurement compared against itself run once, one was a bug class declared closed after fixing a single instance, and one was a real result generalised past the one axis the eval had frozen.**
+Every claim below was produced *by this investigation*, believed, written down, and in most cases committed to a repo README — then falsified by a later measurement in the same investigation. They are collected here because the failure pattern is more useful than any single number: **eight of the twelve were a measurement compared against the wrong baseline, one was a measurement compared against itself run once, one was a bug class declared closed after fixing a single instance, one was a real result generalised past the one axis the eval had frozen, and one was a coder that turned out not to be decodable at all.** Note that #11 breaks the pattern in an instructive way: it is the first baseline error that flattered *against* the hypothesis, and it was caused by over-correcting #10.
 
 ## 1. "Beats WebP by 31%"
 
@@ -127,6 +127,38 @@ Nor is the win an artefact of a good resampler. Repeated with ffmpeg's nearest-n
 
 **Lesson.** When a baseline appears to have a hard floor, establish whether the floor belongs to the format or to the invocation. A capability claim is a claim about what the other side *cannot* do — the hardest kind to verify, the easiest to want to believe, and the one this study fell for last.
 
+## 11. "The deficit is U-shaped and the low-rate band is where it loses hardest" — only WebP was allowed to resample
+
+**Claimed.** Report 08 result 4, written within an hour of #10: across the byte-matched rate ladder the deficit is −2.55, −1.35, −0.67, −2.39, −3.20 dB, so the low-rate band every earlier round called the shape idea's best hope is where it now does worst.
+
+**Why it was wrong.** #10 established that below `cwebp`'s native floor a 20 KB file is reached by encoding at a lower resolution and upscaling. The ladder was then rebuilt to give WebP exactly that — `rate-build.sh` runs a joint resolution-and-quality search whenever the target sits below the floor. **It never offered the shape coder the same knob.** Rungs 1 and 2 pit a resampled WebP against a shape coder still encoding at native 3840×2160. The delivered pixel count is a choice *both* sides get to make, and only one side was making it.
+
+**Corrected.** Giving the shape coder the same search and the identical `sips` upscale, at the same byte target:
+
+| rung 1, ~20 KB | bytes | PSNR at 4K |
+|---|---|---|
+| shapes, native 4K — as published | 19,819 B | 21.99 dB |
+| WebP `-q 18 -resize 960 540` ↑ | 20,066 B | 24.54 dB |
+| **shapes, 960×540 (2,075 regions) ↑** | **20,618 B** | **24.59 dB** |
+
+**That is a tie, not −2.55 dB**, and the U-shape's left arm goes with it. Rung 2 is **unresolved**: no scale-space mark lands within the ladder's ±5% byte tolerance of 50,016 B, and the nearest (53,121 B, +6.2%) scores 25.66 dB against WebP's 26.34 — so WebP probably still leads rung 2 by roughly half the published margin, but that is not byte-matched and interpolating it by hand is precisely falsification #6. It needs a merge run.
+
+**#10 survives; its margin does not.** "Shapes reach a rate WebP cannot" is still dead. "And WebP wins there by 2.55 dB" is now dead too. At 20 KB both coders deliver 3840×2160 and they are level.
+
+**This is the first error in this ledger that flattered *against* the hypothesis**, and it was produced by correcting the one before it. Seven earlier entries were baseline errors in the hypothesis's favour; the reflex built up to catch them steelmanned the baseline and forgot to steelman the subject. The failure mode is not bias toward a conclusion — it is asymmetric effort, applied wherever the last mistake was.
+
+**Lesson.** After retracting a claim, check whether the correction is symmetric. Any knob you hand the baseline — encoder effort, encode resolution, delivery pipeline — the thing under test must be offered too, or the retraction becomes the next error.
+
+## 12. The wall coder's published numbers came from a coder that cannot be decoded
+
+**Claimed.** Implicitly, in every report from 02 onward: the crack-edge CAE coster prices a real bitstream.
+
+**Why it was wrong.** `potts.go:311` reads `get(Hz, x+1, y)` into the `Hz` context — a crack edge to the right in the same row, not yet coded. The same context also reads `Hz(x-1,y)` and `Hz(x-2,y)`, so no scan order supplies all three: left-to-right lacks the right tap, right-to-left lacks the left pair. A decoder-side replay that rebuilds each context only from bits the schedule has actually reached reports **21,554 mismatching contexts at 512×288 and 51,995 at 960×540**.
+
+**Corrected.** Repairing the tap costs **+3.4% of the wall bill at 6,417 regions, +4.6% at 11,121, +6.3% at 19,338, +11.9% at 96,359 and +12.7% at 710,144**. Wherever CAE is the chosen wall coder — which is everywhere above ~1,400 regions at 4K — the published wall figures are optimistic by that much, and report 08's tables have not yet been re-priced. Report 09 result 3 has the detail.
+
+**Lesson.** A cross-entropy coster is not a codec, and nothing forces it to be implementable. If a pricing function is going to stand in for a bitstream across eight reports, it needs a decoder-side replay asserting every context is causal — a few dozen lines, written once, at the start.
+
 ## The pattern
 
 | # | Claim | Failure mode |
@@ -141,5 +173,7 @@ Nor is the win an artefact of a good resampler. Repeated with ffmpeg's nearest-n
 | 8 | beats WebP below 29.2 dB | true at the eval's size only — the frozen axis was never varied |
 | 9 | 1–6% at low rate | wrong baseline — WebP was left on its default `-m 4` |
 | 10 | WebP cannot go this small | wrong baseline — WebP was forbidden to resample |
+| 11 | the low-rate band is where it loses hardest | wrong baseline — only WebP was allowed to resample, and this one flattered *against* the hypothesis |
+| 12 | the CAE wall numbers price a bitstream | the coster was not decodable — one context tap reads a bit that has not been coded |
 
-Seven of ten are baseline errors, and every one of them flattered the hypothesis under test. None was caught by reasoning; each was caught by a later measurement that happened to overlap. The only structural defence found was the rule applied to the four investigating agents in report 04 — **reproduce the shared eval before your findings are believed** — which caught a fifth error in flight, when one agent's contradicting headline turned out to come from it silently substituting a different image.
+Eight of twelve are baseline errors, and every one of them flattered the hypothesis under test. None was caught by reasoning; each was caught by a later measurement that happened to overlap. The only structural defence found was the rule applied to the four investigating agents in report 04 — **reproduce the shared eval before your findings are believed** — which caught a fifth error in flight, when one agent's contradicting headline turned out to come from it silently substituting a different image.

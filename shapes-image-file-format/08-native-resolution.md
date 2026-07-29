@@ -1,5 +1,11 @@
 # 08 — Native resolution, and the lossless end
 
+> **Two corrections from report 09, not yet applied to the tables below.**
+>
+> **(1) Result 4's rung 1 is retracted (report 06 #11).** The ladder gave WebP a joint resolution-and-quality search below its native floor but never offered the shape coder the same knob. Allowed to encode at 960×540 and upscale identically, the shape coder reaches **24.59 dB at 20,618 B** against WebP's 24.54 dB at 20,066 B — a tie, not −2.55 dB. Rung 2 is unresolved pending a byte-matched merge run. The U-shape's left arm does not survive.
+>
+> **(2) Every wall figure here is optimistic (report 06 #12).** The CAE coster reads one context tap that no decoder can supply. Legality costs **+3.4% to +12.7%** of the wall bill depending on the operating point. These tables have not been re-priced.
+
 **See it:** [1:1 mirror at 4K](https://claude.ai/code/artifact/4ca0a875-4377-457a-8ace-9e83deaa896f) — drag-to-wipe comparison at true native pixels, on a rate slider across the six byte-matched operating points of result 4, plus the lossless table and the ladder chart. Local copy: [`hd-mirror.html`](hd-mirror.html).
 
 **Question.** Every round of this investigation ran on one image at 512×288. Fixing the eval is what made the rounds comparable — and it froze resolution, so nothing measured could say whether the results were about shapes or about small pictures. This round varies the frozen axis, and adds the one operating point never tested: **lossless**, where WebP is bit-exact and there is nothing to trade.

@@ -50,9 +50,13 @@ func paletteColorBytes(lab []int32, cols [][3]float64, w, h int) (float64, int) 
 	totals := make([]uint32, np+1)
 	bits := float64(np) * 24 // the palette itself is transmitted once
 	for r := 0; r < n; r++ {
+		// Same total order as colorBytes: ties on shared-wall length go to the lowest neighbour id, so Go's randomised map iteration cannot choose the predictor.
 		best, bestLen := int32(-1), 0
 		for nb, ln := range share[r] {
-			if int(nb) < r && ln > bestLen {
+			if int(nb) >= r {
+				continue
+			}
+			if ln > bestLen || (ln == bestLen && best >= 0 && nb < best) {
 				best, bestLen = nb, ln
 			}
 		}

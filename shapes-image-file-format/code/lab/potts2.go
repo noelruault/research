@@ -125,13 +125,27 @@ func relax(im *Img, lab []int32, n int, lambda float64, sweeps int) []int32 {
 				continue
 			}
 			ns := nbrs(p)
-			cand := map[int32]bool{}
+			// A 4-neighbourhood offers at most four distinct destination regions, so collect them into a fixed array kept in ascending id order rather than a map.
+			// The map this replaces was both an allocation per pixel and a third place where Go's randomised iteration chose between equally good moves; ascending id makes the tie-break deterministic.
+			var cand [4]int32
+			nc := 0
 			for _, q := range ns {
-				if lab[q] != a {
-					cand[lab[q]] = true
+				r := lab[q]
+				if r == a {
+					continue
 				}
+				i := 0
+				for i < nc && cand[i] < r {
+					i++
+				}
+				if i < nc && cand[i] == r {
+					continue
+				}
+				copy(cand[i+1:nc+1], cand[i:nc])
+				cand[i] = r
+				nc++
 			}
-			if len(cand) == 0 {
+			if nc == 0 {
 				continue
 			}
 			ca := mean(a)
@@ -139,7 +153,7 @@ func relax(im *Img, lab []int32, n int, lambda float64, sweeps int) []int32 {
 			dOut := -(area[a] / (area[a] - 1)) * d2(p, ca)
 			var bestR int32 = -1
 			bestD := -1e-9
-			for r := range cand {
+			for _, r := range cand[:nc] {
 				cb := mean(r)
 				dIn := (area[r] / (area[r] + 1)) * d2(p, cb)
 				// boundary change: edges to a become walls, edges to r stop being walls
@@ -367,6 +381,10 @@ func frontier(path string) {
 			tot := math.Min(bb, ct) + bc
 			fmt.Printf("%-20s %7d %7.2f %8d %8s %8.3f %8s %8s %8s %7.3f\n",
 				tag, nr, ps, cl, kb(bb), bb*8/float64(cl), kb(ct), kb(bc), kb(tot), tot*8/float64(npix))
+			if sw == 30 {
+				// every fully-relaxed mark gets a render, so the dashboard can show the actual picture at each operating point instead of only at the eval's
+				rec.writePNG(fmt.Sprintf("render_%04d_%.2f.png", nr, ps))
+			}
 			if ps >= 28.60 && ps <= 28.70 && sw == 6 {
 				rec.writePNG(fmt.Sprintf("frontier_%d_%d.png", nr, sw))
 				scaling(im, lab, nr, cl, bb, bc)

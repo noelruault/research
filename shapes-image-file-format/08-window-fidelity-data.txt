@@ -1,0 +1,16 @@
+iso-byte  WebP q14: 200024 B
+iso-look  WebP q8 : 165042 B
+sky    shapes-hi psnr 53.07  mae 0.3102  max 3  pct>1 0.51  pct>2 0.00  pct>4 0.00  pct>8 0.00
+sky    shapes-lo psnr 36.90  mae 2.8280  max 21  pct>1 66.91  pct>2 47.65  pct>4 19.28  pct>8 2.63
+sky    webp-lo   psnr 42.29  mae 1.4955  max 12  pct>1 41.68  pct>2 18.53  pct>4 2.53  pct>8 0.02
+sky    webp-iso  psnr 41.61  mae 1.6079  max 14  pct>1 44.44  pct>2 21.26  pct>4 3.73  pct>8 0.10
+ridge  shapes-hi psnr 54.67  mae 0.2044  max 3  pct>1 0.88  pct>2 0.00  pct>4 0.00  pct>8 0.00
+ridge  shapes-lo psnr 26.01  mae 9.2598  max 97  pct>1 87.49  pct>2 79.29  pct>4 64.12  pct>8 40.38
+ridge  webp-lo   psnr 26.44  mae 8.7457  max 95  pct>1 86.05  pct>2 77.36  pct>4 61.54  pct>8 37.77
+ridge  webp-iso  psnr 25.57  mae 9.5898  max 98  pct>1 86.84  pct>2 78.61  pct>4 63.52  pct>8 40.81
+snow   shapes-hi psnr 54.10  mae 0.2344  max 3  pct>1 0.92  pct>2 0.00  pct>4 0.00  pct>8 0.00
+snow   shapes-lo psnr 26.82  mae 8.4725  max 96  pct>1 86.82  pct>2 78.27  pct>4 62.36  pct>8 37.21
+snow   webp-lo   psnr 27.39  mae 7.7682  max 84  pct>1 84.34  pct>2 74.68  pct>4 57.43  pct>8 32.78
+snow   webp-iso  psnr 26.61  mae 8.4527  max 86  pct>1 85.35  pct>2 76.18  pct>4 59.76  pct>8 35.74
+--- asset weight ---
+2.8M	/private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/23e7d4b1-17da-4b78-8110-6154f88a8011/scratchpad/hd/mirror

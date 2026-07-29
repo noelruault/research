@@ -358,9 +358,13 @@ func colorBytes(lab []int32, cols [][3]float64, w, h int) float64 {
 	bits := 0.0
 	for r := 0; r < n; r++ {
 		var pred [3]float64
+		// Total order, not just length order. Equal shared-wall lengths are the common case at fine partitions (most adjacent pairs touch along a single crack edge) and Go randomises map iteration, so `ln > bestLen` alone let the predictor be chosen at random and made this function return a different answer on every call. Lowest neighbour id wins the tie.
 		best, bestLen := int32(-1), 0
 		for nb, ln := range share[r] {
-			if int(nb) < r && ln > bestLen {
+			if int(nb) >= r {
+				continue
+			}
+			if ln > bestLen || (ln == bestLen && best >= 0 && nb < best) {
 				best, bestLen = nb, ln
 			}
 		}

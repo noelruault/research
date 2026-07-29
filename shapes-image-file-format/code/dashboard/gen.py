@@ -21,14 +21,17 @@ def kb(n):
     return f"{n/1024:.1f} KB" if n >= 1024 else f"{n} B"
 
 
-def card(rid, note="", win=None):
+def card(rid, note="", vs=None):
     r = rows[rid]
     # bar length is byte count relative to the heaviest card on the page that is not the source, so file weight reads as form and not only as a number
     frac = min(1.0, r["bytes"] / 28000)
     badge = ""
-    if win is not None:
-        cls = "win" if win < 0 else "loss"
-        badge = f'<span class="badge {cls}">{win:+.1f}%</span>'
+    if vs is not None:
+        # Derived from the two real files in the manifest, never typed in by hand.
+        # Their PSNRs differ slightly and both are printed on the cards, so the comparison stays checkable.
+        d = 100 * (r["bytes"] - rows[vs]["bytes"]) / rows[vs]["bytes"]
+        cls = "win" if d < 0 else "loss"
+        badge = f'<span class="badge {cls}">{d:+.1f}% vs WebP</span>'
     return f'''<figure class="card {r['fam']}">
   <img src="{r['uri']}" alt="{r['label']}" width="512" height="288" loading="lazy">
   <figcaption>
@@ -40,19 +43,18 @@ def card(rid, note="", win=None):
 </figure>'''
 
 
-WEBP = [(23.53,2508),(24.54,3642),(24.84,4060),(25.32,4742),(25.59,5306),(25.86,5790),
-        (26.16,6352),(26.65,7344),(27.07,8310),(27.47,9234),(27.86,10286),(28.22,11100),
-        (28.63,12350),(28.99,13404),(29.37,14454),(29.72,15510),(30.04,16592)]
-AVIF = [(22.17,2145),(22.80,2368),(23.32,2606),(23.71,2838),(24.05,3047),(24.34,3262),
-        (24.65,3534),(25.56,4400),(26.20,5112),(27.08,6258),(27.72,7242),(28.71,8911),
-        (29.41,10263),(30.56,12797)]
+WEBP = [(23.48,2444),(24.44,3500),(24.76,3894),(25.25,4528),(25.51,5050),(25.73,5466),(26.05,
+        5984),(26.5,6814),(26.9,7652),(27.32,8548),(27.69,9434),(28.05,10200),(28.43,11252),
+        (28.82,12326),(29.18,13240),(29.54,14362)]
+AVIF = [(24.36,3160),(25.01,3740),(25.88,4587),(26.46,5276),(27.3,6388),(28.03,7506),(29.08,
+        9327),(29.75,10704),(30.88,13132)]
 SHAPES = [(24.03,2986),(24.52,3465),(25.10,4295),(26.09,6156),(26.44,6488),(27.10,7870),
           (27.60,9124),(28.12,10543),(28.66,12202),(29.17,13990),(29.70,16091)]
 
 RANK = [
-    ("AVIF q30", 8911, 28.71, "avif", ""),
+    ("AVIF q28 −s 0", 8681, 28.69, "avif", ""),
+    ("WebP q36 −m 6", 11762, 28.62, "webp", ""),
     ("shape coder — research only, not built", 12202, 28.66, "shapes", "1,685 regions"),
-    ("WebP q34", 12350, 28.63, "webp", ""),
     ("JPEG q36", 19503, 28.77, "jpeg", ""),
     ("indexed PNG of the n=16 grid", 27802, 28.61, "png", "lossless raster"),
     ("SVG rect cover — what ships today", 113562, 28.61, "shipped", "32,924 rects"),
@@ -83,13 +85,16 @@ FALSIFIED = [
     ("Renders at 8K for the same bytes", "Fake vectorness. A rect cover of a quantized grid <em>is</em> nearest-neighbour upscaling."),
     ("9.8× smaller than the source", "The win was the downscale. Against the same pixels it is 6.9× <em>larger</em>."),
     ("3–9% better at low rate", "Taken from one run of a nondeterministic merge, interpolated by eye. Truth: 1–6%."),
+    ("The merge is deterministic now", "Fixed one instance, not the class. Two more map-iteration randomizers survived, found only at 4K."),
+    ("1–6% better at low rate", "The baseline was <code>cwebp</code> on its default <code>-m 4</code>. At <code>-m 6</code> it is a wash that alternates sign."),
+    ("Beats WebP below 29.2 dB", "True at 512×288 only. The deficit grows monotonically with resolution — +19.3% at 4K."),
 ]
 
 rank_rows = "".join(
     f'<tr class="{c}"><td class="rk">{n+1}</td><td class="nm"><span class="dot"></span>{lbl}'
     f'{f"<em>{note}</em>" if note else ""}</td>'
     f'<td class="nu">{b:,}</td><td class="nu dim">{p:.2f}</td>'
-    f'<td class="nu">{b/8911:.2f}×</td></tr>'
+    f'<td class="nu">{b/8681:.2f}×</td></tr>'
     for n, (lbl, b, p, c, note) in enumerate(RANK))
 
 killed_rows = "".join(
@@ -141,6 +146,7 @@ body {{
 
 /* ---- masthead ---- */
 header {{ padding:72px 0 40px; border-bottom:1px solid var(--line); }}
+.eyebrow a {{ color:var(--shapes); }}
 .eyebrow {{
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px;
   letter-spacing:.16em; text-transform:uppercase; color:var(--ink3); margin:0 0 20px;
@@ -253,7 +259,7 @@ footer a {{ color:var(--ink2); }}
 
 <div class="wrap">
 <header>
-  <p class="eyebrow">Research record &middot; noelruault/shapes-image-file-format</p>
+  <p class="eyebrow">Research record &middot; noelruault/shapes-image-file-format &nbsp;&middot;&nbsp; <a href="https://claude.ai/code/artifact/4ca0a875-4377-457a-8ace-9e83deaa896f">see it 1:1 at 4K &rarr;</a></p>
   <h1>Can an image made of <b>shapes</b> beat WebP?</h1>
   <p class="lede">Reduce a photograph to regions, code the boundaries, ship the geometry. Five rounds of measurement against the codecs that already exist. <strong>The answer is no &mdash; with one narrow exception, and it is not worth adopting a format for.</strong></p>
 
@@ -271,15 +277,15 @@ footer a {{ color:var(--ink2); }}
 
 <section>
   <h2>The rate&ndash;distortion curve</h2>
-  <p class="sub">Every point is one encoder setting on one 512&times;288 photograph, measured on a single RGB&nbsp;PSNR definition. Down and to the right is better. The shape coder tracks WebP closely and crosses it at ~29.2&nbsp;dB &mdash; below that it is genuinely smaller; above, WebP pulls away. AVIF sits under both across the whole range.</p>
+  <p class="sub">Every point is one encoder setting on one 512&times;288 photograph, measured on a single RGB&nbsp;PSNR definition. Down and to the right is better. Both codecs are at their strong settings (<span class="mono">cwebp -m 6</span>, <span class="mono">avifenc -s 0</span>), not CLI defaults &mdash; running WebP on its default was worth more than the entire effect this study once claimed. The shape coder now lies <em>on</em> the WebP curve below ~26&nbsp;dB, alternating sign between samples, and falls behind above it. AVIF sits under both across the whole range.</p>
   <div class="chartbox">
     <canvas id="rd" width="1120" height="500" role="img"
-      aria-label="Rate-distortion chart. AVIF is cheapest at every fidelity. The shape coder is slightly below WebP up to about 29.2 dB, then above it."></canvas>
+      aria-label="Rate-distortion chart. AVIF is cheapest at every fidelity. The shape coder lies on top of the WebP curve below about 26 dB and above it thereafter."></canvas>
     <div class="legend">
       <span style="color:var(--shapes)"><i style="background:currentColor"></i>shape coder</span>
       <span style="color:var(--webp)"><i style="background:currentColor"></i>WebP</span>
       <span style="color:var(--avif)"><i style="background:currentColor"></i>AVIF</span>
-      <span style="color:var(--ink3)"><i style="background:currentColor;height:0;border-top:2px dashed currentColor"></i>crossover &asymp;29.2 dB</span>
+      <span style="color:var(--ink3)"><i style="background:currentColor;height:0;border-top:2px dashed currentColor"></i>curves meet &asymp;26.1 dB</span>
     </div>
   </div>
 </section>
@@ -291,12 +297,12 @@ footer a {{ color:var(--ink2); }}
   <div class="band">
     <div class="bandhead">
       <h3>Band A</h3><span class="fid mono">~28.7 dB</span>
-      <p>The evaluation fidelity. The shape coder ties WebP and loses to AVIF by 1.37&times;. What the project ships is 9&times; heavier than its own best result.</p>
+      <p>The evaluation fidelity. The shape coder is <strong>behind</strong> a properly configured WebP and 1.41&times; behind AVIF. What the project ships is 9.7&times; heavier than the WebP of the same picture.</p>
     </div>
     <div class="grid">
       {card('source', 'The uncompressed reference every row is measured against.')}
       {card('a_avif', 'The one to beat. Nothing here reaches it.')}
-      {card('a_shapes', 'Research only — an idealised entropy estimate, no container. Not built.', -1.2)}
+      {card('a_shapes', 'Research only — an idealised entropy estimate, no container. Not built, and still behind a real WebP file.', 'a_webp')}
       {card('a_webp')}
       {card('a_jpeg')}
       {card('a_shipped', 'Same pixels as the indexed PNG (27.8 KB) — the geometry is pure overhead.')}
@@ -306,12 +312,12 @@ footer a {{ color:var(--ink2); }}
   <div class="band">
     <div class="bandhead">
       <h3>Band B</h3><span class="fid mono">~26.4 dB</span>
-      <p>The low-rate band, where the shape coder does its best work: fewer, larger regions mean the perimeter tax stays small while a block codec keeps paying per-block overhead.</p>
+      <p>The low-rate band, where the two representations come closest: fewer, larger regions keep the perimeter tax small while a block codec keeps paying per-block overhead. This is the shape coder's best sample point on the whole curve, and adjacent samples put it back behind.</p>
     </div>
     <div class="grid">
-      {card('b_shapes', 'Its widest margin over WebP anywhere on the curve.', -6.2)}
+      {card('b_shapes', 'Its best showing against WebP anywhere on the curve — and the sign flips again two samples away.', 'b_webp')}
       {card('b_webp')}
-      {card('b_avif', 'Still 26% cheaper than the shape coder at matched fidelity.')}
+      {card('b_avif', 'Still 23% cheaper than the shape coder at matched fidelity.')}
     </div>
   </div>
 
@@ -321,7 +327,7 @@ footer a {{ color:var(--ink2); }}
       <p>The floor. The merge bottoms out near 150 regions; WebP bottoms out at q0. Note the failure modes diverge completely &mdash; posterized flat regions against blur and blocking. PSNR scores them equal; an eye would not.</p>
     </div>
     <div class="grid">
-      {card('c_shapes', 'Flat regions with hard edges. Reads as a poster, not as a damaged photo.')}
+      {card('c_shapes', 'Flat regions with hard edges. Reads as a poster, not as a damaged photo. No badge here: WebP q0 is 0.55 dB worse, so the two are not at matched fidelity.')}
       {card('c_webp', 'WebP at its lowest setting — lower fidelity than the shape coder, in fewer bytes.')}
     </div>
   </div>
@@ -347,8 +353,8 @@ footer a {{ color:var(--ink2); }}
 </section>
 
 <section>
-  <h2>Six claims this research killed &mdash; its own</h2>
-  <p class="sub">Every one was produced by this investigation, believed, written into a README, then falsified by a later measurement in the same investigation. Five of the six were the same error: the wrong baseline, always in the direction that flattered the hypothesis.</p>
+  <h2>Nine claims this research killed &mdash; its own</h2>
+  <p class="sub">Every one was produced by this investigation, believed, written into a README, then falsified by a later measurement in the same investigation. Six of the nine were the same error: the wrong baseline, always in the direction that flattered the hypothesis. The last three were found only after the study looked finished.</p>
   <ol class="fals">{fals_rows}</ol>
   <div class="callout"><b>None was caught by reasoning.</b> Each was caught by a later measurement that happened to overlap. The only structural defence that worked was requiring every investigating agent to reproduce the shared evaluation before its findings were believed &mdash; which caught a false headline in flight, from an agent that had silently substituted a different image.</div>
 </section>
@@ -386,7 +392,7 @@ function draw(){{
   }}
   // crossover marker
   cx.save(); cx.setLineDash([5,5]); cx.strokeStyle=css('--ink3'); cx.globalAlpha=.75;
-  cx.beginPath(); cx.moveTo(X(29.17),T); cx.lineTo(X(29.17),H-B); cx.stroke(); cx.restore();
+  cx.beginPath(); cx.moveTo(X(26.09),T); cx.lineTo(X(26.09),H-B); cx.stroke(); cx.restore();
 
   const line=(pts,col,w)=>{{
     cx.strokeStyle=col; cx.lineWidth=w; cx.lineJoin='round';
@@ -398,7 +404,7 @@ function draw(){{
   line(SHAPES,css('--shapes'),2.75);
 
   cx.fillStyle=css('--ink3'); cx.font='10.5px ui-monospace,Menlo,monospace';
-  cx.textAlign='left'; cx.textBaseline='top'; cx.fillText('crossover',X(29.17)+7,T+4);
+  cx.textAlign='left'; cx.textBaseline='top'; cx.fillText('curves meet',X(26.09)+7,T+4);
   cx.save(); cx.translate(15,H/2); cx.rotate(-Math.PI/2); cx.textAlign='center';
   cx.fillText('file size',0,0); cx.restore();
 }}

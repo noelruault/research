@@ -1,6 +1,6 @@
-# 06 — The six claims this investigation killed
+# 06 — The nine claims this investigation killed
 
-Every claim below was produced *by this investigation*, believed, written down, and in most cases committed to a repo README — then falsified by a later measurement in the same investigation. They are collected here because the failure pattern is more useful than any single number: **five of the six were a measurement compared against the wrong baseline, and the sixth was a measurement compared against itself run once.**
+Every claim below was produced *by this investigation*, believed, written down, and in most cases committed to a repo README — then falsified by a later measurement in the same investigation. They are collected here because the failure pattern is more useful than any single number: **six of the nine were a measurement compared against the wrong baseline, one was a measurement compared against itself run once, one was a bug class declared closed after fixing a single instance, and one was a real result generalised past the one axis the eval had frozen.**
 
 ## 1. "Beats WebP by 31%"
 
@@ -66,6 +66,44 @@ Every claim below was produced *by this investigation*, believed, written down, 
 
 **Lesson.** Run it twice before you publish it once. A result you have not seen reproduce is a sample, not a measurement — and `range` over a Go map is a silent randomizer that will not announce itself.
 
+## 7. "The merge is deterministic now"
+
+**Claimed.** Implicitly, by #6: the heap comparator was the randomizer, it has a total order, the coder is deterministic.
+
+**Why it was wrong.** The heap was one of **three** places where `range` over a Go map chose between equally good options. The other two were only found because pricing the coder at 3840×2160 forced a rewrite — `colorBytes` builds one `map[int32]int` per region to find each region's predictor, which at six million regions is a gigabyte of maps before any counting starts, so it was replaced with a sort over adjacency records. The rewrite disagreed with the original by 338 B on a 132,674-region partition. That looked like a bug in the rewrite. It was not: **six calls to the original `colorBytes` on one fixed partition inside one process returned six different answers**, spanning 224 B.
+
+```
+262835.47   262725.65   262836.15   262735.37   262949.40   262748.13    B
+```
+
+The predictor is the already-decoded neighbour sharing the longest wall, selected with `ln > bestLen` while ranging over a map. At fine partitions most adjacent pairs touch along a *single* crack edge, so ties are not an edge case — they are the common case, and the winner was whichever one Go's randomized iteration offered first. The same shape of loop sat in `paletteColorBytes` and in the Ising relaxation's candidate selection.
+
+**Corrected.** All three now carry a total order: longest wall first, lowest region id on a tie. `colorBytes` returns an identical value on six consecutive calls, agrees to the last bit with the sorted rewrite on both a 132,674-region and a 7,040-region partition, and the relaxation fix leaves `frontier`'s output **byte-identical** to the committed data file.
+
+**What it changed in the published numbers: nothing.** The frontier prices colours with `colorBytes2`, which predicts from the boundary-length-weighted mean of *all* decoded neighbours — a sum, with no argmax to break — so it was never exposed. The bug lived only in the paths the published headlines do not rest on. It would have contaminated the first new number it touched, which is exactly what the 4K work was about to produce.
+
+**Lesson.** One instance of a bug class is evidence about the class, not about the instance. Having found once that map iteration order had leaked into a result, the correct next move was to grep every `range` over a map whose body picks a winner — not to fix the one that had already caused visible damage and call the category closed.
+
+## 8. "The shape coder beats WebP below ~29.2 dB"
+
+**Claimed.** Report 05, corrected and believed: at matched fidelity the region coder is 1–6% smaller than WebP below a crossover at ~29.2 dB.
+
+**Why it was incomplete.** True, and measured on one image at one size: **512×288**. The eval was fixed early and never varied, which is what made every round comparable — and which meant resolution was never a variable at all. Report 08 puts the identical coder on the same picture at 3840×2160, 1920×1080, 960×540 and 512×288, and the deficit against WebP grows monotonically at every fidelity as resolution rises. See report 08 for the table.
+
+**Lesson.** A fixed eval buys comparability across rounds and hides whatever it holds constant. Before generalising a win, vary the one axis the eval froze.
+
+## 9. "1–6% better than WebP below 29.2 dB" — the baseline was WebP on its default setting
+
+**Claimed.** Report 05, after correction #6 and believed for the rest of the investigation: below a crossover at ~29.2 dB the shape coder is 1–6% smaller than WebP at matched fidelity.
+
+**Why it was wrong.** The sweep ran `cwebp -q N`. `cwebp`'s default method is **4**; `-m 6` costs encode time, changes nothing about decoding, and is what any build pipeline emitting WebP actually uses. On this image `-m 6` is **5.6–8.9% smaller** — bigger than the whole effect being claimed. `avifenc -s 4` was likewise not AVIF's best. So the comparison was against a WebP that had been left with bytes on the table, and the shape coder was credited with them.
+
+**Corrected.** Re-running the identical sweep at `-m 6` and `-s 0`: the crossover falls from **29.17 dB to 26.09 dB**, the figure at the eval's own fidelity goes from **−1.9% to +2.7%**, and across the low band the sign alternates between adjacent samples — −2.1, −3.7, −0.9, +1.6, −3.2, −2.6, −1.0, +1.4. That is a wash, not a win. Both tables are kept side by side in report 05 and both are printed by `code/compare.py`.
+
+**This is the same error as #1, #3, #4 and #5**, in its least obvious dress. Those compared against the wrong *thing*; this compared against the right thing turned down. A default flag is easy to read as neutral, and it is not — it is a configuration choice made on the encoder author's behalf by whoever picked a speed/size trade-off for the CLI, and it favoured the hypothesis.
+
+**Lesson.** Steelman the baseline's *settings*, not just its identity. Before claiming a few percent over a shipping codec, spend ten minutes finding out whether its flags were left at defaults — the margin you are claiming is often smaller than the margin the defaults gave away.
+
 ## The pattern
 
 | # | Claim | Failure mode |
@@ -76,5 +114,8 @@ Every claim below was produced *by this investigation*, believed, written down, 
 | 4 | renders at 8K free | wrong baseline — property was in the comparison, not the format |
 | 5 | 9.8× smaller than source | wrong baseline — credited the downscale to the format |
 | 6 | 3–9% at low rate | unreproduced single run + hand interpolation |
+| 7 | the merge is deterministic now | fixed one instance, not the class — two more randomizers survived |
+| 8 | beats WebP below 29.2 dB | true at the eval's size only — the frozen axis was never varied |
+| 9 | 1–6% at low rate | wrong baseline — WebP was left on its default `-m 4` |
 
-Five of six are baseline errors, and every one of them flattered the hypothesis under test. None was caught by reasoning; each was caught by a later measurement that happened to overlap. The only structural defence found was the rule applied to the four investigating agents in report 04 — **reproduce the shared eval before your findings are believed** — which caught a fifth error in flight, when one agent's contradicting headline turned out to come from it silently substituting a different image.
+Six of nine are baseline errors, and every one of them flattered the hypothesis under test. None was caught by reasoning; each was caught by a later measurement that happened to overlap. The only structural defence found was the rule applied to the four investigating agents in report 04 — **reproduce the shared eval before your findings are believed** — which caught a fifth error in flight, when one agent's contradicting headline turned out to come from it silently substituting a different image.

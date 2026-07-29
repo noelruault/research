@@ -1,0 +1,46 @@
+# The shape coder at native resolution: 3840x2160, 8,294,400 px.
+#
+# Source: the macOS Sierra wallpaper at native size, decoded from a q95 JPEG.
+# The "original" therefore carries JPEG artefacts and film grain that the 512x288 eval, being a downscale, had averaged away. See the caveats in report 08.
+#
+# Pricing is identical to report 04's frontier: runRD merge, 6 sweeps of Ising wall relaxation, walls = min(CAE, contour coder), colours = colorBytes2.
+# No container, no header -- an idealised lower bound competing against real files.
+#
+# command : ./lab hd src4k.png renders4k
+#
+distinct_colours 529557
+regions 6356392
+px_per_region 1.305
+crack_edges 14508938
+lossless_walls_B 822369
+lossless_walls_bits_per_edge 0.4534
+lossless_colours_B 11337015
+lossless_total_B 12159385
+lossless_bpp 11.7278
+regions        crack     psnr      wallB       colB     totalB      bpp
+3380956     10817374    53.37    1188279    6867088    8055367   7.7695
+2005132      8126384    47.97    1095834    4444781    5540615   5.3440
+1189921      5826291    43.70     880981    2787108    3668089   3.5379
+710144       4225540    40.42     691767    1721622    2413389   2.3277
+423771       3174037    37.85     546225    1054031    1600256   1.5435
+255860       2414900    35.80     426563     650757    1077320   1.0391
+156860       1882863    34.14     340505     408017     748522   0.7220
+96359        1491273    32.74     276163     256943     533107   0.5142
+58506        1194857    31.56     227270     159950     387220   0.3735
+33964         944544    30.46     184194      95215     279409   0.2695
+19338         746605    29.44     148233      55277     203511   0.1963
+11121         603086    28.51     121047      32143     153190   0.1478
+6417          476863    27.50      93577      18694     112271   0.1083
+3794          393410    26.63      72041      11188      83229   0.0803
+2274          326360    25.76      56576       6804      63379   0.0611
+1383          274890    24.99      45797       4219      50016   0.0482
+849           232086    24.25      37518       2654      40172   0.0387
+536           187411    23.38      29674       1708      31382   0.0303
+344           155284    22.72      24106       1108      25215   0.0243
+227           124884    21.99      19079        740      19819   0.0191
+
+# --- the lossless raster wall on the identical PNG ---
+webp-ll    -           7718506    99.00    7.4445
+avif-ll    -          11969137    99.00   11.5443
+jxl-ll     -           6468598    99.00    6.2390
+png        -          12278280    99.00   11.8425

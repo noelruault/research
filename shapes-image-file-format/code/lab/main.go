@@ -30,6 +30,18 @@ func main() {
 		lossless(os.Args[2])
 	case "frontier":
 		frontier(os.Args[2])
+	case "crop":
+		cropCmd(os.Args[2:])
+	case "diff":
+		diffCmd(os.Args[2:])
+	case "stat":
+		statCmd(os.Args[2:])
+	case "hdnd":
+		hdnd(os.Args[2])
+	case "hdcheck":
+		hdcheck(os.Args[2])
+	case "hd":
+		hd(os.Args[2], os.Args[3])
 	case "affine":
 		affine(os.Args[2])
 	default:

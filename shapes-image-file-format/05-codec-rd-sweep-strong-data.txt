@@ -1,0 +1,36 @@
+# Codec rate-distortion sweep at STRONG encoder settings, 512x288 eval image.
+#
+# Report 05's original sweep (05-codec-rd-sweep-data.txt) used `cwebp -q N` and `avifenc -q N -s 4`.
+# cwebp's default method is 4, and -m 6 -- what anyone shipping the file would use -- is 5.6-8.9% smaller on this image. avifenc -s 0 is the slowest and best setting.
+# Leaving both codecs below their shipping settings credited the shape coder with bytes that were simply left on the table, so this file re-runs the identical sweep at settings neither codec is embarrassed by.
+# The shape coder is priced as an idealised cross-entropy with no container and no header at all, so if either side is still being flattered it is the shape coder.
+#
+# command : bash code/lab/strongsweep.sh
+# metric  : the repo's RGB PSNR, the same definition as every other round
+#
+codec    q    bytes      bpp    PSNR
+webp     0     2444   0.1326   23.48
+webp     1     3500   0.1899   24.44
+webp     2     3894   0.2113   24.76
+webp     4     4528   0.2457   25.25
+webp     6     5050   0.2740   25.51
+webp     8     5466   0.2965   25.73
+webp    10     5984   0.3246   26.05
+webp    14     6814   0.3697   26.50
+webp    18     7652   0.4151   26.90
+webp    22     8548   0.4637   27.32
+webp    26     9434   0.5118   27.69
+webp    30    10200   0.5534   28.05
+webp    34    11252   0.6105   28.43
+webp    38    12326   0.6687   28.82
+webp    42    13240   0.7183   29.18
+webp    46    14362   0.7792   29.54
+avif     6     3160   0.1714   24.36
+avif    10     3740   0.2029   25.01
+avif    14     4587   0.2489   25.88
+avif    18     5276   0.2862   26.46
+avif    22     6388   0.3466   27.30
+avif    26     7506   0.4072   28.03
+avif    30     9327   0.5060   29.08
+avif    34    10704   0.5807   29.75
+avif    38    13132   0.7125   30.88

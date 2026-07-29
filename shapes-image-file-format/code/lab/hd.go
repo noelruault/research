@@ -137,7 +137,8 @@ func hd(path, outDir string) {
 	n := len(cols)
 	cl := crackLen(lab, im.W, im.H)
 	wallB := caeBytes(lab, im.W, im.H)
-	colB := colorBytesLean(lab, cols, im.W, im.H)
+	// colorBytes2, not colorBytesLean: the scale-space below prices every lossy rung with colorBytes2, and report 08 states colorBytes2 as the method for the whole table. Pricing this one row with the single-longest-neighbour predictor instead made the lossless figure 4.45% worse than the coder the rest of the table uses, which is the study comparing itself against a weaker version of itself.
+	colB := colorBytes2(lab, cols, im.W, im.H)
 	fmt.Printf("# lossless, exact region partition of %s (%dx%d, %d px)\n", path, im.W, im.H, npix)
 	fmt.Printf("distinct_colours %d\n", ncol)
 	fmt.Printf("regions %d\n", n)

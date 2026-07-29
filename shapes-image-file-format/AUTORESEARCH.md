@@ -61,6 +61,25 @@ The compression *verdict* is settled and is not what this programme is trying to
 
 ## Log — newest first
 
+### 2026-07-29 — CORRECTION: cancelling lenses 3–6 was not supported by the measurement
+
+I closed the colour lens programme after report 12 on the grounds that only ~1% of headroom remained and that colour had become bookkeeping. Challenged on it, and the challenge is right on both counts.
+
+**The floor is not proven.** Report 11 states its own limit explicitly: *brotli is an upper bound on achievable, never a lower bound on entropy — the true floor is below 6,904,345.* The ~1.2% headroom I quoted came from a static oracle **inside the same family**: predict, then code a residual. A lens proposing a different *representation* — spectra's low-dimensional reflectance manifold is the live example — is not bounded by that oracle at all. I inferred a ceiling from a measurement that does not establish one.
+
+**And colour is not bookkeeping at the mid-axis.** Recomputing: after report 09's interleave, 28.7 dB stands at +8.3% over WebP. Colour is ~32,143 B of that 153,190 B rung, and RCT+brotli takes −15.4% of it = −4,942 B, moving **+8.3% → +4.7%**. Colour is worth roughly **a third of the entire remaining mid-axis gap**. The correct claim is "walls must close most of it", not "colour cannot help".
+
+Evidence against my own reasoning, which I should have weighted: the light lens was the one I expected least from and it produced both a real lever and the modelled-vs-real ranking finding — which the floor ladder did not predict and which is worth more than the lever.
+
+**Lenses 3–6 are restored to the queue**, ordered by whether they propose a different representation (not bounded by the residual floor) or a better model (bounded by it):
+
+1. **spectra** — reflectance is 3–7 dimensional; a per-image colour manifold is a different representation, so the residual-family floor does not bound it. Highest value of the four.
+2. **matter** — coarse-to-fine cascade over the merge hierarchy that already exists; targets the lossy end, where colour is 21–71% of the bill.
+3. **vision** — perceptual; lossy end only, and report 04 already killed foveation/CSF as codec-agnostic preprocessing.
+4. **biology** — weakest prior; report 04 killed PDE inpainting, L-systems and stigmergy.
+
+**Sequencing, and the reason it is not cancellation:** each must be measured against the **post-RCT** baseline (6,898,336 B lossless), not the pre-RCT 10,832,609 — otherwise every one of them will claim a win that RCT already banked. So they run after B10 lands, one at a time. Running spectra now would produce a number nobody could use.
+
 ### 2026-07-29 — light lens closed negative; and modelled bytes do not rank like real bytes (report 12)
 
 **The structural claim is dead.** Dividing region colours by a smooth illumination field *raises* their joint entropy 5.9% (13,135,022 → 13,914,233 B) and grows the alphabet 50%, and **every shuffled control beats the real field** — destroying the spatial correspondence helps, which it could not if illumination were being removed. After brotli every transmitted-field arm is a net loss: poly2 +0.016%, grid64 +0.638%, textbook Retinex +13.76%. Not a rename of report 04's killed coarse-field mechanism, and shown rather than asserted: it fails in the 21-parameter form and fails *monotonically worse* as the field gets finer.
@@ -69,7 +88,7 @@ The compression *verdict* is settled and is not what this programme is trying to
 
 **The finding that outlives the lens:** `k`-only improves the order-0 model by 0.04% and makes brotli **0.60% worse**. The lossless residual stream is 37% zeros; brotli lives on the exact-hit rate, so a refinement that lowers residual *variance* while lowering *exact hits* trades away more LZ matches than it wins. **Any colour lever ranked on modelled bytes can invert once a real compressor is the reference — report 11's own ladder ranks these two backwards.** Every bespoke colour figure in reports 04–09 is a modelled number and none has been checked against a general compressor on the same stream. Report 11 now carries this caveat.
 
-**Colour is now bookkeeping, not research.** The lossless colour bill is 6,898,336 B against 6,896,137 B for a WebP colour tie — a gap of **2,199 B**, down from 8,208. At the mid-axis the best arm saves 801 B, 0.52% of that rung against 8.3% needed. **Lenses 3–6 (spectra, vision, matter, biology) are cancelled unrun**: they would compete for ~1% of remaining headroom, in a regime where modelled gains have just been shown to invert under the compressor that would actually ship. Walls own what is left.
+**Lenses 3–6 were cancelled here, and that was reversed within the hour as unsupported. See the correction entry above this one.**
 
 ### 2026-07-29 — B6b closed: all four lossless rows re-priced
 

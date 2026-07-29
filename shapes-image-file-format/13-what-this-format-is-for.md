@@ -101,7 +101,7 @@ Four stages. **Nothing in stage 4 should start before stage 1 finishes** — eve
 
 | # | item | why now | cost |
 |---|---|---|---|
-| **P0b** | **Bytes at the capability rate (1,383 regions, 24.99 dB) vs matched-fidelity WebP** | Report 16 proved near-parity at 11,121 regions; report 14 proved the segmentation is *good* at 1,383 and mediocre at 11,121. **The rate the applications want has never been benchmarked.** | one merge mark + one quality search |
+| ~~P0b~~ | ~~Bytes at the capability rate~~ | **DONE — report 17. A dead heat: 25,399 B at 24.97 dB against WebP's 25,700 B at 24.99 dB, both resampled, −1.2%.** The format is at parity where its structure is useful | — |
 | **P1** | **WebP + region-map sidecar, steelmanned** | The comparison that matches the product. The 41% above rests on our own illegal wall coder; a real sidecar needs a purpose-built region-map codec. If it holds it is the study's strongest result | a day |
 | **P6** | **Encoder cost** | Determines which applications are reachable at all. If a 4K encode takes minutes, interactive editing is out. Never measured | an hour |
 

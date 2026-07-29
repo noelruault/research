@@ -86,6 +86,23 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-29 — P0b: a dead heat at the capability operating point (report 17)
+
+Both coders resampled to 960×540 and upscaled to 4K, scored on the same original:
+
+| ~24.98 dB, 4K output | bytes | PSNR |
+|---|---|---|
+| `cwebp -m 6 -q 28 -resize 960 540` | 25,700 B | 24.99 |
+| **shape coder, 3,546 regions** | **25,399 B** | 24.97 |
+
+**−1.2%.** Walls 17,346 → **16,700** (interleave, measured via a `wallxexact` dispatch that report 09 wrote but never wired in); colour 10,312 → **8,699** (RCT + brotli + 8 B). Both baselines reproduced exactly first.
+
+**I made falsification #11 again, in the session that documented it.** The first run compared a *native-resolution* shape file against a *resampled* WebP and produced +87.9%. Giving both sides the same knob turned a 2× loss into a dead heat. The error is seductive because the asymmetry is invisible unless you name which knobs each side was allowed.
+
+**Where the format now stands on bytes:** +0.91% at 28.51 dB (report 16), **−1.2% at the capability point** (report 17), and it carries 3,546 addressable regions WebP cannot deliver at any size. Report 13's requirement — "not meaningfully larger, while carrying what WebP cannot" — is met at both points measured.
+
+**Unchanged caveats, now load-bearing:** the wall half is an idealised cross-entropy against WebP's real file, so parity is plausible and unproven until the container exists (P4); and every number is one photograph (P5).
+
 ### 2026-07-29 — P2b: at matched fidelity the gap is 0.91% (report 16)
 
 `cwebp -m 6 -q 3` = **131,082 B at 28.52 dB**. Shape coder = **132,280 B at 28.51 dB**. **+0.91%**, native versus native, matched on PSNR.

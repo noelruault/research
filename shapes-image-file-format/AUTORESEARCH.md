@@ -53,7 +53,8 @@ The programme was optimising bytes against WebP. Report 13 reframes it: the comp
 | ~~P0~~ | ~~Measure segmentation quality~~ | **DONE — report 14. Answered positively.** Heavy-tailed, object-tracing; sky is 2 regions at the capability point. Replaced by P0b below |
 | **P0b** | **Benchmark bytes at the CAPABILITY operating point (1,383 regions, 24.99 dB), not just 28.5 dB** | Report 14: capability is best at 227–1,383 regions, byte work optimised 11,121. The benchmark that matches the product does not exist in nine reports |
 | P1 | WebP + sidecar benchmark, properly steelmanned | The comparison that matches the product; would be the study's strongest result |
-| P2 | Adopt RCT (B10) | +8.3% → ~+4.7% at the mid-axis. *In progress* |
+| ~~P2~~ | ~~Adopt RCT (B10)~~ | **DONE — report 15.** −9.2% to −36.3% of the colour bill, monotone, decode-verified. Combined with report 09's interleave the 11,121 mark falls 153,190 → **132,280 B**, all of it decodable |
+| **P2b** | **Matched-fidelity WebP comparison at the new total** | 132,280 B sits at 28.51 dB; WebP's 137,033 B is at 28.7 dB. Comparing them is falsification #1's exact error. One quality search settles it — and it is the number the whole study now turns on |
 | P3 | Fix wall-coder legality (#12) | The record contains numbers no decoder can produce; P1 inherits the error |
 | P4 | Real container | Without a bitstream there is no format |
 | P5 | Second image, then a corpus (B7) | Blocks every generalisation claim |
@@ -80,6 +81,24 @@ The byte queue below stays valid but is now subordinate to the above.
 | B7 | Generalisation: every result is one photograph | The frozen 16-tap template and any colour win may not transfer. Cheapest real test: Kodak-24 at one small size through the existing frontier | OPEN — blocks any "ship it" claim |
 
 ## Log — newest first
+
+### 2026-07-29 — B10 done: colour re-priced, and a modelled number with the wrong sign (report 15)
+
+RCT helps at **every** operating point, monotone from **−9.24% at 227 regions to −36.26% at lossless**, decode-verified at both ends (0 wrong of 24,883,200 samples). All six anchors from reports 11 and 12 reproduced exactly from an independent code path before anything was believed.
+
+**The finding that matters more than the lever: at 227, 344, 536 and 849 regions the modelled cost of RCT is *worse* than the baseline while the compressed stream is *better*.** At 227 regions modelled says +7.4%, brotli says −9.2%. Not mis-ranked — **wrong sign**. A modelled evaluation would have rejected the study's largest colour win outright at four of twenty-one operating points. Every colour figure in reports 04–09 is a cross-entropy and none was ever checked against a real compressor.
+
+**Combined with report 09's interleave, the 11,121-region mark goes 153,190 → 132,280 B (−13.6%)**, and unlike the published figure every component is decodable.
+
+**Not claimed:** WebP's 137,033 B is at 28.7 dB and this mark is at 28.51 dB. Comparing them is falsification #1's error and I refused to. **P2b — the matched-fidelity comparison — is now the number the whole study turns on**, and it is one quality search.
+
+**Process failure recorded:** `recolour.go` was written by an agent that died before running it, and it was swept into commit `0f05539` by a `git add -A` whose message is entirely about report 13 documentation. I committed code I had not read. It was reviewed before use here and is sound, but the commit is misleading and the habit is the problem.
+
+### 2026-07-29 — parked entries re-evaluated against new evidence (no spawns)
+
+- **P-01 contour turn coding: trigger did NOT fire.** Its revive condition was "#12's repair widens the contour band". Recomputed: report 09's replay showed `interAsym` is *already causal* — the illegal tap is in the published `base` coder, not the interleave. Legal comparison at 1,383 regions is interAsym 44,726 B vs contour 45,797 B, so CAE still wins and the crossover holds. **Stays parked, and the entry's "not recomputed" caveat is now discharged.**
+- **P-07 curve-fitted boundaries: trigger fired, still deferred.** Report 14 satisfied its P0 condition. But it is the most expensive item in the queue and report 14 created P0b, a far cheaper measurement of the same question. Deferred on cost, explicitly not on doubt.
+- **P-08 per-region affine colour: trigger fired, expected value dropped.** Its premise was "one side of the comparison has since improved 28%". Report 15's sweep shows RCT is worth only −12.7% at 849 regions and −13.4% at 1,383 — the operating points where report 04 tested affine — not the −28% seen at lossless. The comparison moves far less than the entry assumed. **Entry updated rather than revived.**
 
 ### 2026-07-29 — P0 answered: the regions are meaningful (report 14)
 

@@ -1,0 +1,42 @@
+# B10: the colour column re-priced with a cross-channel transform, at every published mark.
+#
+# Reports 11 and 12 established two things: the region colour coder never had a cross-channel
+# transform, and modelled bytes do not rank like real bytes. This applies both to every operating
+# point at 3840x2160, on the SAME labels, and reports the compressed stream as the headline.
+#
+# Partitions are the exact 4-connected partition of each published render (the recovery trick from
+# reports 09-12); the lossless mark is the exact partition of the source. colorBytes2 is re-measured
+# on those recovered labels, and `published` shows the drift so recovery error is visible not hidden.
+#
+# rct_brotli / a_brotli are `brotli -q11` on the actual dumped residual stream, planar. a_brotli
+# includes the 8 B of transmitted chroma coefficients from report 12. Both arms are decode-verified:
+# partition + stream (+ 8 B) rebuild the image with 0 wrong samples of 24,883,200.
+#
+# NOTE the sign flip at low region counts: at 227 regions rct_modelled is +7.4% WORSE than
+# colorBytes2 while rct_brotli is -9.2% BETTER. The modelled column is not merely mis-ranked there,
+# it has the wrong sign. Quote the brotli columns.
+#
+# command : lab recolour <render.png> <tag> <regions> <src.png>, then brotli -q11 on the dumps
+# columns : regions psnr colorBytes2 rct_modelled a_modelled rct_brotli a_brotli d_brotli_pct
+#
+227	21.99	740	795	799	672	674	-9.24
+344	22.72	1108	1174	1167	996	1008	-10.14
+536	23.38	1708	1780	1763	1504	1488	-11.96
+849	24.25	2654	2700	2671	2317	2292	-12.69
+1383	24.99	4219	4189	4126	3652	3571	-13.44
+2274	25.76	6804	6593	6481	5861	5742	-13.86
+3794	26.63	11188	10559	10335	9623	9408	-13.99
+6417	27.50	18694	17160	16774	16003	15607	-14.39
+11121	28.51	32143	28580	27937	27201	26528	-15.37
+19338	29.44	55277	47718	46755	46102	45138	-16.60
+33964	30.46	95215	80247	78874	78311	76973	-17.75
+58506	31.56	159943	132814	130900	130707	128890	-18.28
+96359	32.74	256936	211288	208708	208732	206393	-18.76
+156860	34.14	408015	332751	329334	329115	326307	-19.34
+255860	35.80	650726	525215	520596	519220	516003	-20.21
+423771	37.85	1053980	839163	832634	827280	822059	-21.51
+710144	40.42	1721406	1348719	1339110	1317392	1312707	-23.47
+1189921	43.70	2786698	2145377	2130462	2050625	2046102	-26.41
+2005132	47.97	4443366	3356194	3333411	3136298	3126546	-29.42
+3380956	53.37	6863309	5076591	5044763	4635675	4625993	-32.46
+6356392	+Inf	10832609	7800674	7760245	6904345	6898336	-36.26

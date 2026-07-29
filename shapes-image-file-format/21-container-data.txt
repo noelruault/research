@@ -1,0 +1,139 @@
+# P4: a real container and a real bitstream. Raw measurement log.
+#
+# Every byte figure in twenty reports is a cross-entropy: binModel.cost accumulates -log2(p) and returns a float.
+# This is the first time this codebase has emitted a byte. The two headlines - +0.91% against WebP at 28.51 dB
+# (report 16) and -1.2% at the capability point (report 17) - compared that idealised number against a real WebP
+# file with a real container. Both are now measured as real files.
+#
+# code    : code/lab/container.go, verbs `lab p4enc <render.png> <out.shpc>` and `lab p4dec <in.shpc> <out.png> [ref.png]`
+# check   : code/lab/container_test.go (`go test ./...`), plus the round trip below
+# coder   : carry-propagating binary range coder, LZMA shape, driven by the SAME binModel counts priceVariant prices
+# walls   : `interAsym` from crossplane.go - the interleaved V/Hz schedule both headlines quote, `lab wallcheck` decodable
+# colour  : recolour.go's `a` arm, planar RCT residual, `brotli -q 11`, plus 8 B of transmitted chroma coefficients
+# partition: the exact 4-connected partition of the published render, the recovery trick reports 09-20 all use
+
+# ---------------------------------------------------------------------------------------------------------------
+# anchors reproduced before anything was built
+# ---------------------------------------------------------------------------------------------------------------
+#
+# quantity                                   expected     measured
+# interleaved walls, 11,121 regions 4K       105,752 B    105,752 B   (lab wallxexact, interAsym row)
+# colour stream + 8 B, 11,121 regions         26,528 B     26,528 B   (brotli -q11 of r11121_a_planar.bin = 26,520, +8)
+# interleaved walls, 3,546 regions 960        16,700 B     16,700 B
+# colour stream + 8 B, 3,546 regions           8,699 B      8,699 B   (8,691 + 8)
+#
+# All four exact. `lab recolour` also reproduced colorBytes2 = 32,142.63 / 10,311.62 and drift +0.0000% at both marks.
+
+# ---------------------------------------------------------------------------------------------------------------
+# THE RESULT: real files
+# ---------------------------------------------------------------------------------------------------------------
+#
+# columns : mark  cross-entropy_estimate  real_file  overhead_B  overhead_pct  round_trip
+#
+11121_4K	132280	132301	+21	+0.0159%	EXACT 0/24883200
+3546_960	25399	25418	+19	+0.0748%	EXACT 0/1555200
+
+# ---------------------------------------------------------------------------------------------------------------
+# do the headlines survive?  YES, both, essentially unmoved
+# ---------------------------------------------------------------------------------------------------------------
+#
+# WebP re-measured today, not quoted from the record.
+#
+# mark        webp                                bytes    PSNR    shapes file  PSNR    delta published_estimate
+# 28.5 dB     cwebp -m 6 -q 3                   131,082   28.52       132,301   28.51   +0.930%   +0.91%
+# capability  cwebp -m 6 -q 28 -resize 960 540   25,700   24.99        25,418   24.97   -1.097%   -1.2%
+#
+# The capability-point PSNR is the 960x540 file upscaled to 3840x2160 with the same `sips -z 2160 3840` call
+# report 17 used, scored against src4k.png with `lab psnr`, which is this study's own RGB definition.
+
+# ---------------------------------------------------------------------------------------------------------------
+# where the overhead is
+# ---------------------------------------------------------------------------------------------------------------
+#
+# The container costs tens of bytes, not the ~1% report 16 budgeted for it. The range coder is the cheap part.
+#
+# component                                      11,121 / 4K        3,546 / 960
+# range coder vs its own cross-entropy               +4.46 B            +4.08 B
+# header and chunk framing (excl. the 8 B coef)     +17 B              +16 B
+# brotli stdin vs the anchor's -o file form           0 B               -1 B
+# total                                             +21.46 B           +19.08 B
+#
+# walls   coded 105,756 B against a 105,751.54 B cross-entropy;  16,704 B against 16,699.92 B
+# colour  brotli -q11 26,520 B from 33,363 B raw;  8,690 B from 10,638 B raw
+# header  25 B at 4K (magic 4 + version 1 + varints 12 + coefficients 8), 24 B at 960 (varints 11)
+#
+# The coder's ~4 B at both marks is its terminator: one leading carry-catcher byte plus a five-byte flush, less
+# what full-precision interval splitting wins back against the cross-entropy. It does not scale with the file.
+
+# ---------------------------------------------------------------------------------------------------------------
+# file layout, SHPC v1
+# ---------------------------------------------------------------------------------------------------------------
+#
+# offset  bytes  field
+# 0       4      magic "SHPC"
+# 4       1      version = 1
+# 5       v      uvarint width
+#         v      uvarint height
+#         v      uvarint region count
+#         v      uvarint wall chunk length
+#         v      uvarint colour chunk length
+#         8      chroma coefficients aR, aB, little-endian float32
+#         ...    wall chunk   - range-coded crack planes under the interleaved V/Hz schedule
+#         ...    colour chunk - brotli -q11 of the planar RCT residual
+#
+# The region count is derivable from the decoded partition. It is transmitted anyway as a 2-3 byte consistency
+# check that catches a truncated wall chunk before the colour stream is misread against the wrong region ids,
+# and it is paid for in the totals above.
+
+# ---------------------------------------------------------------------------------------------------------------
+# round trip - the deliverable
+# ---------------------------------------------------------------------------------------------------------------
+#
+# `lab p4dec <file>.shpc <out>.png` reads the file and nothing else: it decodes both crack planes, floods the
+# partition back out of them in raster first-appearance order (the order relabelComponents produces, which is the
+# order the colour stream is written against), rebuilds the adjacency graph, and replays the colour predictor.
+#
+# 11121_4K   0 wrong samples of 24,883,200, max |delta| 0
+# 3546_960   0 wrong samples of  1,555,200, max |delta| 0
+#
+# Stronger than required at the 4K mark: the decoder's output PNG is byte-identical to hd_00011121.png as a file,
+# not merely pixel-identical.
+#
+# Causality is now enforced by the format rather than asserted beside it. The decoder builds its context out of
+# the planes it is filling in, so a tap that read undecoded data would produce a different context here than at
+# encode time and the round trip would fail. Falsification #12 cannot hide in this path.
+
+# ---------------------------------------------------------------------------------------------------------------
+# determinism - run twice
+# ---------------------------------------------------------------------------------------------------------------
+#
+# 5a3f453de9592045d79387662b2480fd1f0e84e02ed19c300694dfe75061911f  cap_1.shpc   25,418 B
+# 5a3f453de9592045d79387662b2480fd1f0e84e02ed19c300694dfe75061911f  cap_2.shpc   25,418 B
+# bdbfc8147dea4e30560047a9b507b1d5d9d76c2fd46b95ba4380db9fafb480ce  mid_1.shpc  132,301 B
+# bdbfc8147dea4e30560047a9b507b1d5d9d76c2fd46b95ba4380db9fafb480ce  mid_2.shpc  132,301 B
+#
+# Encode 0.7 s at 4K, decode 1.9 s. Both single-threaded. This is the serialisation only; report 18's 3 m 44 s is
+# the merge and the RD sweep, which are untouched.
+
+# ---------------------------------------------------------------------------------------------------------------
+# regression fixed on the way through
+# ---------------------------------------------------------------------------------------------------------------
+#
+# `lab wallxexact` and `lab wallx` exited 1 before printing a row. Both assert that one crossplane.go variant
+# reprices potts.go's caeBytes exactly. That variant was "base" until report 20 made caeBytes read V(x+1,y);
+# the tap set caeBytes now codes is "baseFix". The index was stale, so the assertion compared the illegal coder
+# against the legal one and fired on the legality cost - 1,500.19 B at 960x540, 5,536 B at 4K.
+#
+# Fixed by pointing the cross-check at baseFix (new const wallxRef) and pinned by TestWallxRefRepricesCae.
+# The "%.2f%% vs base" column label was also wrong for the same reason and now reads "vs caeBytes".
+# No number in the record changes: every published figure comes from the interAsym row, which was never affected.
+
+# ---------------------------------------------------------------------------------------------------------------
+# what this does not settle
+# ---------------------------------------------------------------------------------------------------------------
+#
+# One photograph (B7 / P5), unchanged and now gating three headlines.
+# Two operating points. The container is priced where the headlines are, not across the ladder.
+# No error resilience, no progressive truncation, no metadata, no alpha, no colour space tag. SHPC v1 is the
+# minimum that carries these two marks and proves the round trip; a shippable format needs more and would cost more.
+# The colour chunk depends on an external `brotli` binary at both ends.

@@ -71,14 +71,17 @@ func main() {
 	case "floordump": // floordump <image.png> <dir> — write the exact lossless partition for floordec
 		floorDump(os.Args[2], os.Args[3])
 	// Report 13, B10: the cross-channel transform adopted and the colour column re-priced (recolour.go).
-	// Report 09's cross-plane pricer was written but never wired into dispatch; wallxexact prices every
-	// wall variant on the exact partition of whatever image it is given, which for a published render is
-	// that mark's own partition.
+	// Report 09's cross-plane pricer was written but never wired into dispatch; wallxexact prices every wall variant on the exact partition of whatever image it is given, which for a published render is that mark's own partition.
 	// P3: the decoder-side causality check for the wall variants. Written with report 09, never wired in.
 	case "wallcheck": // wallcheck <image.png>
 		wallCheck(os.Args[2])
 	case "wallxexact": // wallxexact <image.png>
 		wallxExact(os.Args[2])
+	// P4, the container (container.go): a real file, and a decoder that reads it and nothing else.
+	case "p4enc": // p4enc <render.png> <out.shpc>
+		p4EncCmd(os.Args[2:])
+	case "p4dec": // p4dec <in.shpc> <out.png> [ref.png]
+		p4DecCmd(os.Args[2:])
 	case "recolour": // recolour <image.png> <tag> [publishedRegions] [src.png]; RCDUMP=<dir> writes the streams
 		rcCmd(os.Args[2:])
 	case "rcdec": // rcdec <labels.bin> <stream.bin> <rct|a> <ref.png> [coef.bin] — the decodability check

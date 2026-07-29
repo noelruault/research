@@ -46,7 +46,7 @@ Report 13 argued the requirement was never "smaller than WebP" but "not meaningf
 
 ## Load-bearing caveats
 
-- **The wall half is still an idealised cross-entropy** with no container, while WebP's 25,700 B is a real file including its container. The colour half is a real brotli stream. So the shape number is flattered by roughly the container it does not yet pay — **parity is plausible and remains unproven** until report 13's P4 is built. This is the same caveat as report 16 and it has not moved.
+- **~~The wall half is still an idealised cross-entropy~~ — SETTLED, report 21.** The container was built and costs **19 bytes**. The real file is **25,418 B** against WebP's 25,700 B: **−1.097%**, round-tripping bit-exactly. The estimate below was honest to within tens of bytes.
 - **One photograph.** B7 stands, and it now gates a headline rather than a footnote.
 - **Region count versus resolution.** 3,546 regions at 960×540 is 146 px/region. Report 14's segmentation-quality measurements were taken at 4K, where 1,383 regions is 6,000 px/region. The two regimes are not identical, and **whether the segmentation is as good at this specific mark has not been measured** — only that region counts in this range behave well at 4K.
 - PSNR only, and upscaling makes both sides blurrier in ways PSNR treats generously.

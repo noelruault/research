@@ -70,12 +70,12 @@ func keyBefore(a, b [3]int) bool {
 }
 
 type wallVariant struct {
-	name     string
-	mode     int
-	tapsV    []tap // context for a V bit
-	tapsH    []tap // context for an Hz bit
-	nonCausal bool // set only for the published baseline, whose Hz context reads Hz(x+1,y)
-	note     string
+	name      string
+	mode      int
+	tapsV     []tap // context for a V bit
+	tapsH     []tap // context for an Hz bit
+	nonCausal bool  // set only for the published baseline, whose Hz context reads Hz(x+1,y)
+	note      string
 }
 
 // checkCausal fails loudly if any tap reads a crack the decoder has not decoded yet.
@@ -199,6 +199,10 @@ var baseTapsH = []tap{{1, -1, 0}, {1, 0, -1}, {1, -1, -1}, {1, 1, -1}, {1, 1, 0}
 
 // the same ten-tap shape as baseTapsV, transposed onto the Hz plane: a fully causal own-plane-only context
 var ownTapsH = []tap{{1, -1, 0}, {1, -2, 0}, {1, 0, -1}, {1, -1, -1}, {1, 1, -1}, {1, 2, -1}, {1, 0, -2}, {1, -1, -2}, {1, 1, -2}, {1, -2, -1}}
+
+// wallxRef indexes the variant that must reprice caeBytes to the byte, which is the cross-check that keeps this file and potts.go honest about each other.
+// It is "baseFix" since report 20 made caeBytes read V(x+1,y); before that it was "base", index 0.
+const wallxRef = 2
 
 func variants() []wallVariant {
 	return []wallVariant{
@@ -332,9 +336,12 @@ func wallx(path string) {
 			cl := crackLen(lab, im.W, im.H)
 
 			rows := wallxRow(lab, im.W, im.H)
-			// The "base" variant must reproduce caeBytes exactly; if it does not, nothing below is comparable.
-			if d := math.Abs(rows[0].bV + rows[0].bH - bb); d > 1e-6 {
-				fmt.Fprintf(os.Stderr, "fatal: base variant disagrees with caeBytes by %.6f B at %d regions\n", d, nr)
+			// One variant must reproduce caeBytes exactly, or nothing below is comparable.
+			// That variant was "base" until report 20 (P3) made caeBytes legal, and the tap set caeBytes now codes is "baseFix", so the cross-check moved with it.
+			// Checking "base" here is what left this verb exiting 1 before it printed anything.
+			if d := math.Abs(rows[wallxRef].bV + rows[wallxRef].bH - bb); d > 1e-6 {
+				fmt.Fprintf(os.Stderr, "fatal: %s variant disagrees with caeBytes by %.6f B at %d regions\n",
+					variants()[wallxRef].name, d, nr)
 				os.Exit(1)
 			}
 			fmt.Printf("%-9d %10d %8.2f", nr, cl, ps)
@@ -483,13 +490,14 @@ func wallxExact(path string) {
 	bb := caeBytes(lab, im.W, im.H)
 	rows := wallxRow(lab, im.W, im.H)
 	fmt.Printf("# %s %dx%d exact partition: %d crack edges, caeBytes %.0f B\n", path, im.W, im.H, cl, bb)
-	if d := math.Abs(rows[0].bV + rows[0].bH - bb); d > 1e-6 {
-		fmt.Fprintf(os.Stderr, "fatal: base variant disagrees with caeBytes by %.6f B\n", d)
+	if d := math.Abs(rows[wallxRef].bV + rows[wallxRef].bH - bb); d > 1e-6 {
+		fmt.Fprintf(os.Stderr, "fatal: %s variant disagrees with caeBytes by %.6f B\n", variants()[wallxRef].name, d)
 		os.Exit(1)
 	}
 	for i, v := range variants() {
 		t := rows[i].bV + rows[i].bH
-		fmt.Printf("%-9s %10.0f B  (V %.0f / Hz %.0f)  %+.2f%% vs base\n",
+		// The percentage is against caeBytes, which is the baseFix tap set since report 20, not against the "base" row.
+		fmt.Printf("%-9s %10.0f B  (V %.0f / Hz %.0f)  %+.2f%% vs caeBytes\n",
 			v.name, t, rows[i].bV, rows[i].bH, 100*(t-bb)/bb)
 	}
 }

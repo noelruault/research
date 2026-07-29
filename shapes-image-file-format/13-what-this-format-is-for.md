@@ -4,6 +4,8 @@
 
 Nothing here is a new measurement. Every number is drawn from reports 01–12, and anything unmeasured is labelled **UNMEASURED** rather than argued.
 
+> **Refreshed after reports 14, 15 and 16.** Three claims below were superseded within hours of writing: W1 ("nobody has checked whether the regions are meaningful") was answered positively by report 14; W3's byte gap went from the +8.3% quoted here to **+0.91%** at matched fidelity (report 16); and P0 and P2 are both done. The updates are inline and marked. A new weakness — W9, the capability point and the byte point being different operating points — comes from report 14 and did not exist when this was written.
+
 ## The baseline was wrong
 
 The comparison that matches this product is not WebP. It is **WebP plus a region-map sidecar**, because that is what a consumer would have to assemble to get the same capabilities.
@@ -38,7 +40,7 @@ The comparison that matches this product is not WebP. It is **WebP plus a region
 
 ## Applications, by domain
 
-Marked **[needs P0]** where the claim depends on the regions being *semantically* meaningful — which has never been measured.
+Marked **[needs P0]** where the claim depends on the regions being *semantically* meaningful. **Report 14 has since answered P0 positively** — heavy-tailed partitions, sky is 2 regions, a hundred regions cover 90–99% of the image — but only at **227–1,383 regions**. At 11,121 the median region is 34 px of speckle, so these marks now mean "holds at the capability rate, degrades above it".
 
 ### Photo editing
 
@@ -73,11 +75,11 @@ Marked **[needs P0]** where the claim depends on the regions being *semantically
 
 ## Weaknesses, ranked by how much they block the above
 
-**W1 — Nobody has ever checked whether the regions are semantically meaningful. UNMEASURED.** This is the single biggest hole in the entire programme. Every capability marked [needs P0] rests on regions landing on *objects*. Report 04 found flat interiors band badly on smooth sky, which hints that regions may be following *illumination gradients* rather than object boundaries. A segmentation that splits the sky into twelve bands and merges a person with the wall behind them is useless for "select the person", regardless of how cheaply it codes. Twelve reports measured whether regions are *cheap*. None measured whether they are *right*.
+**W1 — ~~Nobody has ever checked whether the regions are semantically meaningful~~ — ANSWERED, report 14.** The pessimism here was wrong. The partitions are heavy-tailed (largest region 3,450× the median at 1,383 regions, where uniform banding would give ~1×), the sky is **2 regions**, and a hundred regions describe **99.4%** of a 4K photograph at 227 regions and 90% at 1,383. Regions follow *tonal* boundaries, which on this image means they follow objects wherever tone and object coincide, and trace cloud form in the sky. Report 04's observation was incomplete rather than wrong: the sky *is* split by brightness, but into 2 regions — a usable failure, since selecting it is a union of two ids. **Residual gap:** no boundary-recall number against annotated ground truth or SAM; three windows, one photograph.
 
 **W2 — The capability band is narrow, and it is not where fidelity is good.** The shape story holds from ~227 to ~11,000 regions = **21.99 to 28.5 dB**. At 4K lossless the partition degenerates to **1.305 px/region** — 6.36M "regions", no shapes at all, just a raster coder with extra steps. The honest pitch is *structure in exchange for mid fidelity*, never *structure for free*.
 
-**W3 — Still behind on bytes, though far less than it was.** At 28.7 dB, +19.3% over WebP became **+8.3%** after report 09's interleave, and RCT should take it to roughly **+4.7%** (report 11). Higher up the axis it is +32.7% at 30.0 dB and +48.6% at 31.5 dB. **AVIF is 30–50% ahead everywhere** and is not a target. For the capability pitch the requirement is not "smaller than WebP" — it is "not *meaningfully larger* than WebP", and that is now within reach at the operating point that matters.
+**W3 — ~~Still behind on bytes~~ — essentially closed at the mid-axis, report 16.** At **matched fidelity** the shape coder is **132,280 B against WebP's 131,082 B — +0.91%**, with every component decodable. The +19.3% this document was written around described a coder with an illegal wall coster and no cross-channel transform. **What remains:** the wall half is still an idealised cross-entropy while WebP's number is a real file, so roughly that last 1% is container overhead not yet paid — parity is plausible and **unproven** until W6 is fixed. Higher up the axis the gap is larger and has not been re-measured. **AVIF is still 30–50% ahead everywhere** and is not a target.
 
 **W4 — Not resolution-independent.** Boundaries are crack edges on a pixel lattice. Report 06 #4 already killed "renders at 8K for the same bytes" as a baseline error. It upscales *gracefully* (strength 7), which is not the same thing. True resolution independence needs curve-fitted boundaries, and nobody has priced that.
 
@@ -87,25 +89,51 @@ Marked **[needs P0]** where the claim depends on the regions being *semantically
 
 **W7 — One photograph.** Every number in the record comes from the same macOS Sierra wallpaper. No corpus, no BD-rate, no content diversity. Nothing here can be claimed to generalise.
 
+**W9 — The capability operating point and the byte operating point are different. (New, report 14.)** The segmentation is best at **227–1,383 regions (21.99–24.99 dB)**; every byte result, including the 0.91%, was measured at **11,121 regions (28.51 dB)** where the median region is 34 px of texture speckle. Nine reports optimised a rate the applications do not want, and the rate they *do* want has never been benchmarked against WebP. This is now the largest open question in the programme.
+
 **W8 — Encoder cost is unmeasured and appears large.** The 4K scale-space merge is expensive enough that agents recovered partitions from rendered PNGs to avoid re-running it. If encoding a 4K image takes minutes, entire application classes are excluded. **UNMEASURED.**
 
-## Priorities — ranked by value unlocked, not bytes saved
+## Roadmap
 
-**P0 — Measure segmentation quality.** Blocks W1 and most of the applications. Do the regions follow objects or illumination? Cheapest decisive version: take the 1,383 and 11,121-region partitions, overlay them on the source, and measure boundary recall against a human or SAM-derived object segmentation; plus a qualitative look at whether "the sky", "the ridge", "the snow" are single regions or shattered. **If regions do not follow objects, the capability pitch collapses and we should know that before building anything on it.** This is the highest-value measurement available and it has never been attempted.
+Four stages. **Nothing in stage 4 should start before stage 1 finishes** — every application rests on numbers that are one measurement away from existing.
 
-**P1 — Run the WebP + sidecar benchmark properly, across the ladder.** This is the comparison that matches the product, and the 41% headline above is currently a hypothesis resting on our own illegal wall coder. Steelman the sidecar with a purpose-built region-map codec. If it holds, it is the strongest result in the entire study; if it fails, the positioning above is wrong and we need to know immediately.
+### Stage 1 — prove the product is real (days, cheap)
 
-**P2 — Adopt the cross-channel transform (B10).** Takes the mid-axis from +8.3% to roughly +4.7% over WebP. Cheap, measured, and it is what turns "structure costs 20%" into "structure costs almost nothing". *In progress.*
+| # | item | why now | cost |
+|---|---|---|---|
+| **P0b** | **Bytes at the capability rate (1,383 regions, 24.99 dB) vs matched-fidelity WebP** | Report 16 proved near-parity at 11,121 regions; report 14 proved the segmentation is *good* at 1,383 and mediocre at 11,121. **The rate the applications want has never been benchmarked.** | one merge mark + one quality search |
+| **P1** | **WebP + region-map sidecar, steelmanned** | The comparison that matches the product. The 41% above rests on our own illegal wall coder; a real sidecar needs a purpose-built region-map codec. If it holds it is the study's strongest result | a day |
+| **P6** | **Encoder cost** | Determines which applications are reachable at all. If a 4K encode takes minutes, interactive editing is out. Never measured | an hour |
 
-**P3 — Fix the wall coder's legality (#12).** The record contains numbers no decoder can produce. Everything downstream inherits the error, including P1.
+### Stage 2 — make it an actual format (weeks)
 
-**P4 — Build a real container.** Without a bitstream there is no format, only a study. Required before any application work.
+| # | item | why |
+|---|---|---|
+| **P3** | Fix the wall coder's legality (#12) | The record still contains numbers no decoder can produce. Everything downstream inherits it |
+| **P4** | Build a real container and bitstream | Without it "parity" is unprovable — report 16's remaining 0.91% is roughly the overhead we do not yet pay. **This is the gate on every application** |
+| — | Fix the loop-count hole (P-02) | A decoder cannot tell when the loop list ends. Correctness, not optimisation |
 
-**P5 — A second image, then a corpus (W7).** Blocks every generalisation claim. Cheapest useful version: Kodak-24 at one small size through the existing frontier.
+### Stage 3 — prove it generalises (weeks)
 
-**P6 — Measure encoder cost (W8).** Determines which applications are even reachable. Trivial to measure and nobody has.
+| # | item | why |
+|---|---|---|
+| **P5** | A second image, then Kodak-24 | Every number in sixteen reports is one photograph. Blocks every general claim |
+| — | Boundary recall vs SAM / annotated ground truth | Report 14's residual gap: regions were judged meaningful by eye on three windows |
+| — | Perceptual metrics (SSIMULACRA2, butteraugli) | PSNR only, and report 04 already found the two disagree on flat interiors |
 
-**P7 — Curve-fitted boundaries** for genuine resolution independence. Large, speculative, and only worth it if P0 says the regions are meaningful.
+### Stage 4 — build on it (only after stage 1)
+
+Ordered by how much they exercise strengths that no raster format has:
+
+1. **Selection primitives** — select-by-colour-proximity, region merge, contiguous-area grow. Pure graph queries over `share[]`, which already exists. This is the "remove background" / "select the sky" demo, and at 1,383 regions the sky is *2 ids*.
+2. **Non-destructive editing** — recolour, adjust, replace per region with no generational loss. Strength 3, needs no new research.
+3. **Cutout animation** — per-region transforms with stable ids. What `pixelize` and `sprites` already want.
+4. **Semantic LOD for games** — the nested hierarchy already exists in `hdMarks`; needs the container, not research.
+5. **Bounded-error archival** — needs the container plus a stated error guarantee.
+
+### Deferred, with triggers in [`PARKED.md`](PARKED.md)
+
+P7 curve-fitted boundaries (trigger fired, deferred on cost); the four remaining colour lenses (blocked until each can be measured against the post-RCT baseline); P-01 contour turns and P-02 loop channel (crossover moved against them); P-08 affine colour (expected value dropped after report 15).
 
 ## The shift this implies
 

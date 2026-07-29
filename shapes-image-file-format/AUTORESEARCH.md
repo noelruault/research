@@ -42,6 +42,10 @@ The compression *verdict* is settled and is not what this programme is trying to
 | match WebP lossless | cut 33.8% of total ≈ 36% of the colour bill (was 36.5% before the B6 correction) |
 | beat AVIF anywhere | 30–50% — treat as out of reach, do not aim here |
 
+## The roadmap lives in report 13
+
+[`13-what-this-format-is-for.md`](13-what-this-format-is-for.md) holds strengths, applications by domain, weaknesses and the four-stage roadmap, refreshed against reports 14–16. **Top item: P0b — benchmark bytes at 1,383 regions, the rate where report 14 found the segmentation is actually good and which has never been measured.**
+
 ## Priorities changed on 2026-07-29 — read report 13 first
 
 The programme was optimising bytes against WebP. Report 13 reframes it: the comparison that matches the product is **WebP + a region-map sidecar**, against which the shape coder appears **41% smaller** (153,190 B vs 258,080 B at 28.5 dB) — hypothesis, not result, because that sidecar figure is our own illegal wall coder.

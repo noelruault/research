@@ -1,0 +1,22 @@
+# P1: steelmanning the raster + region-map sidecar baseline.
+#
+# The label map encoded five ways, so the sidecar is priced with the best coder available rather
+# than with ours by assumption. Code: 19-sidecar/sidecar.go (stdlib), then brotli -q11 / xz -9e.
+#
+# columns : partition  encoding  bytes
+#
+11121_4K	labels16.png	597572
+11121_4K	boundary+xz	364296
+11121_4K	labels16+brotli	276958
+11121_4K	labels16+xz	259624
+11121_4K	labels16_dx+xz	332832
+11121_4K	OURS_interleave	105752
+3546_960	labels16.png	84012
+3546_960	boundary+xz	45168
+3546_960	labels16+brotli	40116
+3546_960	labels16+xz	37504
+3546_960	OURS_interleave	16700
+#
+# totals, matched fidelity, both sides delivering the same partition:
+#   28.5dB  shapes 132280 | WebP 131082 + ours 105752 = 236834 (-44.1%) | + best generic 259624 = 390706 (-66.1%)
+#   24.98dB shapes  25399 | WebP  25700 + ours  16700 =  42400 (-40.1%) | + best generic  37504 =  63204 (-59.8%)

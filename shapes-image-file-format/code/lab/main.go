@@ -74,6 +74,9 @@ func main() {
 	// Report 09's cross-plane pricer was written but never wired into dispatch; wallxexact prices every
 	// wall variant on the exact partition of whatever image it is given, which for a published render is
 	// that mark's own partition.
+	// P3: the decoder-side causality check for the wall variants. Written with report 09, never wired in.
+	case "wallcheck": // wallcheck <image.png>
+		wallCheck(os.Args[2])
 	case "wallxexact": // wallxexact <image.png>
 		wallxExact(os.Args[2])
 	case "recolour": // recolour <image.png> <tag> [publishedRegions] [src.png]; RCDUMP=<dir> writes the streams

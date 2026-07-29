@@ -307,8 +307,12 @@ func caeBytes(lab []int32, w, h int) float64 {
 	mh := make([]binModel, 1024)
 	for y := 0; y < h-1; y++ {
 		for x := 0; x < w; x++ {
+			// Bit 4 read Hz(x+1,y) until 2026-07-30 — a crack edge to the RIGHT on the row being coded,
+			// which no decoder has yet, and which no scan order can supply alongside Hz(x-1,y) and
+			// Hz(x-2,y) below. Falsification #12. Swapped for V(x+1,y), which a V-first schedule
+			// genuinely holds because the whole V plane is transmitted before Hz starts.
 			ctx := get(Hz, x-1, y) | get(Hz, x, y-1)<<1 | get(Hz, x-1, y-1)<<2 | get(Hz, x+1, y-1)<<3 |
-				get(Hz, x+1, y)<<4 | get(V, x, y)<<5 | get(V, x-1, y)<<6 | get(V, x, y+1)<<7 |
+				get(V, x+1, y)<<4 | get(V, x, y)<<5 | get(V, x-1, y)<<6 | get(V, x, y+1)<<7 |
 				get(V, x-1, y+1)<<8 | get(Hz, x-2, y)<<9
 			bits += mh[ctx].cost(int(Hz[y*w+x]))
 		}

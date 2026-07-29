@@ -1,0 +1,43 @@
+# Shared-dictionary test on a BEST-CASE corpus.
+#
+# Hypothesis: entropy-coded rasters have near-zero cross-file byte redundancy,
+# structured shape data has a lot, so a dictionary shared across an asset set
+# should favour shapes. Built the corpus to favour it as hard as possible:
+# 8 images, ONE shared 16-colour palette (pico8), identical 96x96 dimensions.
+#
+# method: brotli -q 11, leave-one-out (dictionary = the other 7 files concatenated)
+# corpus: pixelize demo inputs, quantized via 'pixelize -size 96x96 -palette pico8'
+
+=== webp-lossless (already entropy-coded) ===
+  athens      solo    2405   +dict    2352   1.02x
+  liberty     solo    2193   +dict    2193   1.00x
+  monet       solo    1017   +dict    1017   1.00x
+  napoleon    solo    2067   +dict    2009   1.03x
+  pearl       solo    1697   +dict    1697   1.00x
+  starry      solo    2117   +dict    2117   1.00x
+  sugarhigh   solo    1571   +dict    1571   1.00x
+  who-king    solo    2427   +dict    2427   1.00x
+  TOTAL       SUM    15494   SUM     15383   1.01x
+
+=== .shapes JSON ===
+  athens      solo    8373   +dict    8210   1.02x
+  liberty     solo    7750   +dict    7577   1.02x
+  monet       solo    4323   +dict    4167   1.04x
+  napoleon    solo    7387   +dict    7210   1.02x
+  pearl       solo    5478   +dict    5362   1.02x
+  starry      solo    8944   +dict    8844   1.01x
+  sugarhigh   solo    4892   +dict    4739   1.03x
+  who-king    solo    7790   +dict    7680   1.01x
+  TOTAL       SUM    54937   SUM     53789   1.02x
+
+=== .svg ===
+  athens      solo    6691   +dict    6472   1.03x
+  liberty     solo    6497   +dict    6290   1.03x
+  monet       solo    2529   +dict    2347   1.08x
+  napoleon    solo    5534   +dict    5329   1.04x
+  pearl       solo    4646   +dict    4479   1.04x
+  starry      solo    7188   +dict    7000   1.03x
+  sugarhigh   solo    4067   +dict    3851   1.06x
+  who-king    solo    6613   +dict    6374   1.04x
+  TOTAL       SUM    43765   SUM     42142   1.04x
+

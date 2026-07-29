@@ -1,0 +1,73 @@
+# Potts / piecewise-constant Mumford-Shah region merge (Koepfler-Lopez-Morel scale-space)
+# + zero-temperature Ising wall relaxation (relax6 / relax30 = sweep passes)
+#
+# eval image : macOS Sierra wallpaper, 512x288 (147,456 px)
+# PSNR       : the repo's RGB definition, so external codecs are on the same metric
+# contour    : adaptive binary arithmetic coding of the crack-edge map, measured as cross-entropy
+# colours    : per-region mean colour, entropy-coded
+# total      : contour + colours. NO container, NO header -- an idealised lower bound.
+#
+# command    : ./lab frontier sierra.png
+# determinism: verified identical across 3 consecutive runs (see 06 report)
+
+image 512x288
+
+variant              regions    PSNR crackLen      CAE   b/edge  contour  colours    total     bpp
+merge only n=128         128   23.79    13717   3.0 KB    1.793   2.7 KB   0.4 KB   3.1 KB   0.173
++relax6 n=128            154   24.02    12466   2.6 KB    1.697   2.4 KB   0.5 KB   2.9 KB   0.162
++relax30 n=128           153   24.03    12457   2.6 KB    1.691   2.4 KB   0.5 KB   2.9 KB   0.162
+merge only n=180         180   24.38    16039   3.5 KB    1.774   3.2 KB   0.6 KB   3.8 KB   0.212
++relax6 n=180            202   24.52    14097   2.8 KB    1.646   2.7 KB   0.6 KB   3.4 KB   0.188
++relax30 n=180           202   24.52    14079   2.8 KB    1.638   2.7 KB   0.6 KB   3.4 KB   0.188
+merge only n=256         256   24.94    18345   3.9 KB    1.746   3.8 KB   0.8 KB   4.6 KB   0.257
++relax6 n=256            288   25.10    16411   3.3 KB    1.649   3.4 KB   0.9 KB   4.2 KB   0.234
++relax30 n=256           288   25.10    16396   3.3 KB    1.640   3.4 KB   0.9 KB   4.2 KB   0.233
+merge only n=384         384   25.71    22017   4.6 KB    1.713   4.7 KB   1.2 KB   5.8 KB   0.323
++relax6 n=384            545   26.09    21152   4.3 KB    1.683   4.8 KB   1.7 KB   6.0 KB   0.335
++relax30 n=384           546   26.09    21139   4.3 KB    1.677   4.8 KB   1.7 KB   6.0 KB   0.334
+merge only n=512         512   26.19    24318   5.0 KB    1.700   5.4 KB   1.6 KB   6.6 KB   0.369
++relax6 n=512            615   26.44    22340   4.5 KB    1.642   5.0 KB   1.9 KB   6.4 KB   0.354
++relax30 n=512           615   26.44    22321   4.5 KB    1.635   5.0 KB   1.9 KB   6.3 KB   0.352
+merge only n=700         700   26.82    27839   5.7 KB    1.678   6.3 KB   2.1 KB   7.8 KB   0.435
++relax6 n=700            841   27.10    25897   5.2 KB    1.637   6.0 KB   2.5 KB   7.7 KB   0.429
++relax30 n=700           840   27.10    25866   5.2 KB    1.632   6.0 KB   2.5 KB   7.7 KB   0.427
+merge only n=900         900   27.31    30547   6.2 KB    1.659   7.1 KB   2.7 KB   8.9 KB   0.494
++relax6 n=900           1079   27.60    28784   5.7 KB    1.629   6.9 KB   3.2 KB   8.9 KB   0.496
++relax30 n=900          1080   27.60    28752   5.7 KB    1.625   6.9 KB   3.2 KB   8.9 KB   0.495
+merge only n=1100       1100   27.82    34628   6.9 KB    1.643   8.2 KB   3.3 KB  10.2 KB   0.567
++relax6 n=1100          1317   28.12    32725   6.4 KB    1.612   8.0 KB   3.9 KB  10.3 KB   0.573
++relax30 n=1100         1317   28.12    32706   6.4 KB    1.608   7.9 KB   3.9 KB  10.3 KB   0.572
+merge only n=1400       1400   28.35    38009   7.5 KB    1.624   9.2 KB   4.1 KB  11.6 KB   0.646
++relax6 n=1400          1684   28.66    36210   7.1 KB    1.598   9.0 KB   4.9 KB  11.9 KB   0.663
+
+--- scaling at the operating point (1684 regions, 36210 crack edges) ---
+Pareto alpha (xmin=2 px, n=1550): 1.459
+Pareto alpha (xmin=4 px, n=1336): 1.555
+Pareto alpha (xmin=8 px, n=1038): 1.647
+top   9% of regions by size:  80.2% of area,  50.0% of total perimeter
+top  50% of regions by size:  97.2% of area,  87.8% of total perimeter
+regions <=16 px: 994 of 1684 (59%), holding 16.8% of the wall length
+wall length vs lattice-optimal compact cells: 72420 vs 38537  (excess factor 1.88)
+if walls were FREE : 4978 B ; if colours were FREE : 7235 B ; actual 12213 B
++relax30 n=1400         1685   28.66    36202   7.1 KB    1.596   9.0 KB   4.9 KB  11.9 KB   0.662
+merge only n=1800       1800   28.87    41151   8.1 KB    1.607  10.3 KB   5.2 KB  13.3 KB   0.736
++relax6 n=1800          2128   29.17    39444   7.6 KB    1.584  10.1 KB   6.0 KB  13.7 KB   0.759
++relax30 n=1800         2131   29.17    39439   7.6 KB    1.582  10.1 KB   6.1 KB  13.7 KB   0.759
+merge only n=2200       2200   29.35    44358   8.6 KB    1.590  11.3 KB   6.2 KB  14.9 KB   0.826
++relax6 n=2200          2659   29.69    43108   8.3 KB    1.573  11.4 KB   7.4 KB  15.7 KB   0.873
++relax30 n=2200         2660   29.70    43100   8.3 KB    1.572  11.4 KB   7.4 KB  15.7 KB   0.873
+merge only n=2800       2800   29.97    48821   9.3 KB    1.569  12.7 KB   7.8 KB  17.2 KB   0.954
++relax6 n=2800          3277   30.28    47170   8.9 KB    1.552  12.7 KB   9.0 KB  18.0 KB   0.999
++relax30 n=2800         3279   30.28    47148   8.9 KB    1.550  12.7 KB   9.1 KB  18.0 KB   0.998
+merge only n=3500       3500   30.62    53981  10.2 KB    1.549  14.2 KB   9.6 KB  19.8 KB   1.103
++relax6 n=3500          4053   30.93    52413   9.8 KB    1.530  14.2 KB  11.0 KB  20.8 KB   1.157
++relax30 n=3500         4054   30.93    52400   9.8 KB    1.528  14.2 KB  11.0 KB  20.8 KB   1.157
+merge only n=4500       4500   31.38    59277  11.0 KB    1.527  15.9 KB  12.2 KB  23.2 KB   1.291
++relax6 n=4500          5079   31.67    57505  10.5 KB    1.500  15.8 KB  13.6 KB  24.1 KB   1.342
++relax30 n=4500         5084   31.68    57496  10.5 KB    1.498  15.8 KB  13.6 KB  24.1 KB   1.341
+merge only n=6000       6000   32.34    65696  12.0 KB    1.502  17.9 KB  16.0 KB  28.0 KB   1.556
++relax6 n=6000          6660   32.63    64152  11.6 KB    1.477  17.9 KB  17.6 KB  29.2 KB   1.620
++relax30 n=6000         6661   32.63    64131  11.6 KB    1.476  17.9 KB  17.6 KB  29.1 KB   1.619
+merge only n=8000       8000   33.44    73287  13.2 KB    1.474  20.2 KB  20.9 KB  34.1 KB   1.895
++relax6 n=8000          8638   33.70    71727  12.7 KB    1.449  20.1 KB  22.5 KB  35.2 KB   1.953
++relax30 n=8000         8638   33.70    71699  12.7 KB    1.448  20.1 KB  22.5 KB  35.1 KB   1.952

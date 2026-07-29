@@ -1,0 +1,38 @@
+# Full-range rate-distortion sweep of the shipping codecs on the same eval image,
+# measured with the project's own RGB PSNR so every row is on one metric.
+# 512x288 = 147,456 px.  bytes = whole file (container included).
+#
+# container floor, measured on an 8x8 flat image:  avif 297 B   webp 44 B
+
+codec     q    bytes       bpp    PSNR
+webp      0     2508   0.13607   23.53
+webp      1     3642   0.19759   24.54
+webp      2     4060   0.22027   24.84
+webp      4     4742   0.25727   25.32
+webp      6     5306   0.28787   25.59
+webp      8     5790   0.31413   25.86
+webp     10     6352   0.34462   26.16
+webp     14     7344   0.39844   26.65
+webp     18     8310   0.45085   27.07
+webp     22     9234   0.50098   27.47
+webp     26    10286   0.55805   27.86
+webp     30    11100   0.60221   28.22
+webp     34    12350   0.67003   28.63
+webp     38    13404   0.72721   28.99
+webp     42    14454   0.78418   29.37
+webp     46    15510   0.84147   29.72
+webp     50    16592   0.90017   30.04
+avif      0     2145   0.11637   22.17
+avif      2     2368   0.12847   22.80
+avif      3     2606   0.14138   23.32
+avif      4     2838   0.15397   23.71
+avif      6     3047   0.16531   24.05
+avif      8     3262   0.17697   24.34
+avif     10     3534   0.19173   24.65
+avif     14     4400   0.23872   25.56
+avif     18     5112   0.27734   26.20
+avif     22     6258   0.33952   27.08
+avif     26     7242   0.39290   27.72
+avif     30     8911   0.48345   28.71
+avif     34    10263   0.55680   29.41
+avif     38    12797   0.69428   30.56

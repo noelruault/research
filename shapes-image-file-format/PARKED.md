@@ -14,7 +14,9 @@ Live state and the active queue are in [`AUTORESEARCH.md`](AUTORESEARCH.md). Thi
 
 **Depends on.** (a) The CAE/contour crossover position — currently ~849–1,383 regions at 4K. (b) The CAE coder's strength; anything that makes CAE *worse* widens the contour band. (c) The operating point the product ships at — report 14 found the capability sweet spot is 227–1,383 regions, which is **inside or adjacent to the contour band**.
 
-**Revive when.** Any of: the crossover moves back above ~3,000 regions; the CAE coder is made legal per #12 (its repair costs +3.4–12.7%, which *widens* the contour band and may already have moved the crossover — **this has not been recomputed and should be**); or the product settles on 227–1,383 regions as its operating point, where contour is the coder actually used.
+**Revive when.** Any of: the crossover moves back above ~3,000 regions; or the product settles on 227–1,383 regions as its operating point, where contour is the coder actually used.
+
+**Trigger checked 2026-07-30 and it did NOT fire.** The legality repair landed (report 20) and it does widen the contour band — at 11,121 regions the legal *published-style* CAE goes above contour, so that coder switches. But the coder actually chosen there is the **interleaved** one at 105,752 B, which beats contour's 126,291 and is itself confirmed decodable. So contour remains unchosen above ~849 regions and this entry stays parked. The "has not been recomputed" caveat is now discharged twice.
 
 **Cost to revive.** Low — the code exists and reproduces. Re-run and re-price.
 

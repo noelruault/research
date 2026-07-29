@@ -86,6 +86,18 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — P3: the wall coder is legal, and the headlines never depended on it (report 20)
+
+`potts.go` read `Hz(x+1,y)` into the Hz context — a bit no decoder has, unsupplyable alongside `Hz(x-1,y)` and `Hz(x-2,y)`. Now reads `V(x+1,y)`, which a V-first schedule genuinely holds.
+
+**Verified with a decoder replay written alongside report 09 and never wired into dispatch until now**: `base` NOT DECODABLE, 51,995 differing contexts at 960×540 — matching report 09 exactly — while `interVH`, `interAsym` and `baseFix` come back clean.
+
+**That check settled the bigger question.** Reports 16, 17 and 19 quote *interleaved* walls, and interAsym is confirmed decodable, so **+0.91% at 28.5 dB, −1.2% at the capability point, and the 40–44% sidecar margin are all legal and unmoved.**
+
+Report 08 was regenerated from the legal coder: **+4.33% to +13.71%** where CAE is chosen, **0.00%** below ~6,400 regions where contour wins `min()` regardless. Lossless total 11,654,978 → **11,713,104 B**, 1.51× → **1.52×** WebP, still under AVIF.
+
+**P-01's revive trigger was checked and did not fire.** Legality does push the published-style CAE above contour at 11,121 regions — but the interleaved coder at 105,752 B still beats contour's 126,291 and is the one actually chosen. Recorded in `PARKED.md`; the entry's outstanding caveat is discharged.
+
 ### 2026-07-29 — P6: encode is 3m44s and 2.9 GB at 4K (report 18)
 
 | | shape encoder | `cwebp -m 6` |

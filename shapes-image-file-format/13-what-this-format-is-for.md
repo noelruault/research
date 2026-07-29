@@ -83,7 +83,7 @@ Marked **[needs P0]** where the claim depends on the regions being *semantically
 
 **W4 — Not resolution-independent.** Boundaries are crack edges on a pixel lattice. Report 06 #4 already killed "renders at 8K for the same bytes" as a baseline error. It upscales *gracefully* (strength 7), which is not the same thing. True resolution independence needs curve-fitted boundaries, and nobody has priced that.
 
-**W5 — The wall coder is not decodable.** Report 06 #12: one context tap reads a bit that has not been coded. Legality costs **+3.4% to +12.7%** of the wall bill, and the record still carries the illegal figures. Every capability claim that quotes a size inherits this.
+**W5 — ~~The wall coder is not decodable~~ — FIXED, report 20.** `potts.go` reads `V(x+1,y)` where it read the uncoded `Hz(x+1,y)`, and report 08 is regenerated from the legal coder. Measured cost: **+4.33% to +13.71%** where CAE is chosen, 0.00% below ~6,400 regions. The parity and sidecar headlines never depended on it — they use the interleaved coder, independently confirmed decodable by `lab wallcheck`.
 
 **W6 — There is no container and no bitstream.** Every byte figure in twelve reports is an idealised adaptive-arithmetic cross-entropy with no header, no framing, no error resilience. Real files are bigger. A capability pitch requires an actual format, and none exists.
 
@@ -109,7 +109,7 @@ Four stages. **Nothing in stage 4 should start before stage 1 finishes** — eve
 
 | # | item | why |
 |---|---|---|
-| **P3** | Fix the wall coder's legality (#12) | The record still contains numbers no decoder can produce. Everything downstream inherits it |
+| ~~P3~~ | ~~Fix the wall coder's legality (#12)~~ | **DONE — report 20. `potts.go` now reads `V(x+1,y)`; report 08 regenerated from the legal coder.** Cost +4.33% to +13.71% where CAE is chosen, 0.00% below ~6,400 regions. **The parity and sidecar headlines were already legal** — they use the interleaved coder, confirmed decodable |
 | **P4** | Build a real container and bitstream | Without it "parity" is unprovable — report 16's remaining 0.91% is roughly the overhead we do not yet pay. **This is the gate on every application** |
 | **P8** | **Profile and parallelise the encoder** | 3 m 44 s single-threaded on 15 cores, pricing 20 marks when one is needed, never profiled. Engineering, not research — and "3.7 minutes" kills adoption arguments before the byte numbers are heard |
 | — | Fix the loop-count hole (P-02) | A decoder cannot tell when the loop list ends. Correctness, not optimisation |

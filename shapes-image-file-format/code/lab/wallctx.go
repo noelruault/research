@@ -18,13 +18,13 @@ import (
 // Partitions come from the published renders (flat region colours) rather than from a fresh multi-hour merge.
 // wallctx asserts the recovered region count and the recovered caeBytes against the published numbers before it reports anything, so a mis-recovered partition cannot be mistaken for a result.
 
-// tap is one context bit: a sample of plane p at offset (dx,dy) from the crack edge being coded.
-type tap struct {
+// wtap is one context bit: a sample of plane p at offset (dx,dy) from the crack edge being coded.
+type wtap struct {
 	p      int // 0 = V plane (crack between (x,y) and (x+1,y)), 1 = Hz plane (crack between (x,y) and (x,y+1))
 	dx, dy int
 }
 
-func (t tap) String() string {
+func (t wtap) String() string {
 	n := "V"
 	if t.p == 1 {
 		n = "H"
@@ -32,7 +32,7 @@ func (t tap) String() string {
 	return fmt.Sprintf("%s(%+d,%+d)", n, t.dx, t.dy)
 }
 
-func tapsStr(ts []tap) string {
+func tapsStr(ts []wtap) string {
 	s := make([]string, len(ts))
 	for i, t := range ts {
 		s[i] = t.String()
@@ -42,40 +42,24 @@ func tapsStr(ts []tap) string {
 
 // baseVTaps and baseHTaps are exactly the ten context bits caeBytes uses, element i being bit i.
 // Kept as the prefix of every variant so the comparison is like-for-like.
-var baseVTaps = []tap{
+var baseVTaps = []wtap{
 	{0, -1, 0}, {0, -2, 0}, {0, 0, -1}, {0, -1, -1}, {0, 1, -1},
 	{0, 2, -1}, {0, 0, -2}, {0, -1, -2}, {0, 1, -2}, {0, -2, -1},
 }
 
 // Note bit 4, H(+1,0): that sample is to the right on the same row, so the Hz plane is coded in raster order and it has not been coded yet.
 // The baseline is therefore very slightly non-causal and a real decoder could not use it. It is left in place because removing it would change the baseline this study published; caeCausalDelta measures what it is worth.
-var baseHTaps = []tap{
+var baseHTaps = []wtap{
 	{1, -1, 0}, {1, 0, -1}, {1, -1, -1}, {1, 1, -1}, {1, 1, 0},
 	{0, 0, 0}, {0, -1, 0}, {0, 0, 1}, {0, -1, 1}, {1, -2, 0},
 }
 
-// crackPlanes derives the two crack-edge bitmaps from a label field, identically to caeBytes.
-func crackPlanes(lab []int32, w, h int) ([]byte, []byte) {
-	V := make([]byte, w*h)
-	Hz := make([]byte, w*h)
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			p := y*w + x
-			if x < w-1 && lab[p] != lab[p+1] {
-				V[p] = 1
-			}
-			if y < h-1 && lab[p] != lab[p+w] {
-				Hz[p] = 1
-			}
-		}
-	}
-	return V, Hz
-}
+// crackPlanes lives in crossplane.go; both files derive the planes identically.
 
-// caePlane prices one crack plane with an arbitrary ordered tap list, using the same adaptive binary model as caeBytes.
+// caePlane prices one crack plane with an arbitrary ordered wtap list, using the same adaptive binary model as caeBytes.
 // plane 0 scans x in [0,w-1) as caeBytes does; plane 1 scans y in [0,h-1).
 // It also returns the ideal static conditional entropy of the same context, which is what the coder would pay if the model tables were free — the gap between the two is the learning cost that widening has to earn back.
-func caePlane(V, Hz []byte, w, h, plane int, ts []tap) (adaptive, static float64) {
+func caePlane(V, Hz []byte, w, h, plane int, ts []wtap) (adaptive, static float64) {
 	pl := [2][]byte{V, Hz}
 	get := func(p, x, y int) int {
 		if x < 0 || y < 0 || x >= w || y >= h {
@@ -118,7 +102,7 @@ func caePlane(V, Hz []byte, w, h, plane int, ts []tap) (adaptive, static float64
 }
 
 // caeTapsBytes is caeBytes with the template swapped out. With baseVTaps/baseHTaps it must agree with caeBytes to the bit.
-func caeTapsBytes(V, Hz []byte, w, h int, vt, ht []tap) (vB, hB, vS, hS float64) {
+func caeTapsBytes(V, Hz []byte, w, h int, vt, ht []wtap) (vB, hB, vS, hS float64) {
 	vB, vS = caePlane(V, Hz, w, h, 0, vt)
 	hB, hS = caePlane(V, Hz, w, h, 1, ht)
 	return
@@ -126,49 +110,49 @@ func caeTapsBytes(V, Hz []byte, w, h int, vt, ht []tap) (vB, hB, vS, hS float64)
 
 // Candidate pools for widening. V is coded first and so may only condition on V; Hz is coded second and may condition on the whole of V.
 // The pools are the causal neighbourhood out to radius 3-4, plus (for Hz) the V samples that straddle the crack.
-func vPool() []tap {
-	var o []tap
+func vPool() []wtap {
+	var o []wtap
 	for _, dx := range []int{-1, -2, -3, -4, -5} {
-		o = append(o, tap{0, dx, 0})
+		o = append(o, wtap{0, dx, 0})
 	}
 	for _, dx := range []int{-4, -3, -2, -1, 0, 1, 2, 3, 4} {
-		o = append(o, tap{0, dx, -1})
+		o = append(o, wtap{0, dx, -1})
 	}
 	for _, dx := range []int{-3, -2, -1, 0, 1, 2, 3} {
-		o = append(o, tap{0, dx, -2})
+		o = append(o, wtap{0, dx, -2})
 	}
 	for _, dx := range []int{-2, -1, 0, 1, 2} {
-		o = append(o, tap{0, dx, -3})
+		o = append(o, wtap{0, dx, -3})
 	}
 	for _, dx := range []int{-1, 0, 1} {
-		o = append(o, tap{0, dx, -4})
+		o = append(o, wtap{0, dx, -4})
 	}
 	return o
 }
 
-func hPool() []tap {
-	var o []tap
+func hPool() []wtap {
+	var o []wtap
 	for _, dx := range []int{-1, -2, -3, -4, 1, 2} { // +1,+2 on the current row are the baseline's non-causal reach
-		o = append(o, tap{1, dx, 0})
+		o = append(o, wtap{1, dx, 0})
 	}
 	for _, dx := range []int{-3, -2, -1, 0, 1, 2, 3} {
-		o = append(o, tap{1, dx, -1})
+		o = append(o, wtap{1, dx, -1})
 	}
 	for _, dx := range []int{-2, -1, 0, 1, 2} {
-		o = append(o, tap{1, dx, -2})
+		o = append(o, wtap{1, dx, -2})
 	}
 	for _, dx := range []int{-1, 0, 1} {
-		o = append(o, tap{1, dx, -3})
+		o = append(o, wtap{1, dx, -3})
 	}
 	for dy := -2; dy <= 2; dy++ { // the V plane is fully available to Hz
 		for dx := -2; dx <= 2; dx++ {
-			o = append(o, tap{0, dx, dy})
+			o = append(o, wtap{0, dx, dy})
 		}
 	}
 	return o
 }
 
-func hasTap(ts []tap, t tap) bool {
+func hasTap(ts []wtap, t wtap) bool {
 	for _, u := range ts {
 		if u == t {
 			return true
@@ -179,13 +163,13 @@ func hasTap(ts []tap, t tap) bool {
 
 // greedyTaps grows a template one bit at a time, each step keeping the candidate that lowers the adaptive code length most.
 // Selection is done on the image being measured, which flatters the result; the transfer of a frozen order to the other operating points is reported separately for exactly that reason.
-func greedyTaps(V, Hz []byte, w, h, plane int, base []tap, pool []tap, want int) []tap {
-	ts := append([]tap{}, base...)
+func greedyTaps(V, Hz []byte, w, h, plane int, base []wtap, pool []wtap, want int) []wtap {
+	ts := append([]wtap{}, base...)
 	cur, _ := caePlane(V, Hz, w, h, plane, ts)
 	fmt.Printf("  plane %d start %d bits: %.0f B\n", plane, len(ts), cur)
 	for len(ts) < want {
 		bestB := math.Inf(1)
-		var bestT tap
+		var bestT wtap
 		for _, c := range pool {
 			if hasTap(ts, c) {
 				continue
@@ -206,10 +190,10 @@ func greedyTaps(V, Hz []byte, w, h, plane int, base []tap, pool []tap, want int)
 	return ts
 }
 
-// distanceOrder is the non-cherry-picked control: extend the baseline by whichever causal tap is nearest, ties broken by scan order.
-func distanceOrder(base, pool []tap, want int) []tap {
-	ts := append([]tap{}, base...)
-	rest := []tap{}
+// distanceOrder is the non-cherry-picked control: extend the baseline by whichever causal wtap is nearest, ties broken by scan order.
+func distanceOrder(base, pool []wtap, want int) []wtap {
+	ts := append([]wtap{}, base...)
+	rest := []wtap{}
 	for _, c := range pool {
 		if !hasTap(ts, c) {
 			rest = append(rest, c)
@@ -345,7 +329,7 @@ func wallctxCmd(args []string) {
 		bestVk, bestHk, bestV+bestH, base, 100*(bestV+bestH-base)/base)
 }
 
-// wallselCmd derives a tap order by greedy forward selection on this image, then prints it so it can be frozen and applied elsewhere.
+// wallselCmd derives a wtap order by greedy forward selection on this image, then prints it so it can be frozen and applied elsewhere.
 func wallselCmd(args []string) {
 	if len(args) < 2 {
 		fmt.Fprintln(os.Stderr, "usage: lab wallsel <render.png> <maxbits>")
@@ -364,18 +348,18 @@ func wallselCmd(args []string) {
 	}
 	fmt.Printf("\nV taps: %s\n", tapsStr(vt))
 	fmt.Printf("H taps: %s\n", tapsStr(ht))
-	fmt.Printf("\nGO:\nvar selVTaps = []tap{")
+	fmt.Printf("\nGO:\nvar selVTaps = []wtap{")
 	for _, t := range vt {
 		fmt.Printf("{%d,%d,%d},", t.p, t.dx, t.dy)
 	}
-	fmt.Printf("}\nvar selHTaps = []tap{")
+	fmt.Printf("}\nvar selHTaps = []wtap{")
 	for _, t := range ht {
 		fmt.Printf("{%d,%d,%d},", t.p, t.dx, t.dy)
 	}
 	fmt.Println("}")
 }
 
-// wallevalCmd prices a partition at every width using a frozen tap order supplied on the command line, so a template selected at one operating point can be tested at the others.
+// wallevalCmd prices a partition at every width using a frozen wtap order supplied on the command line, so a template selected at one operating point can be tested at the others.
 func wallevalCmd(args []string) {
 	if len(args) < 1 {
 		fmt.Fprintln(os.Stderr, "usage: lab walleval <render.png> [expectRegions]")
@@ -407,7 +391,7 @@ func wallevalCmd(args []string) {
 		fmt.Printf(" %10.0f", a+hB)
 	}
 	a16, _ := caePlane(V, Hz, w, h, 0, selVTaps[:16])
-	// dist16 is the control: the same 16 bits, but chosen by nothing more than "take the nearest unused causal tap".
+	// dist16 is the control: the same 16 bits, but chosen by nothing more than "take the nearest unused causal wtap".
 	// It carries no fitting to this image at all, so it is the honest floor of the effect; sel16 is what greedy selection adds on top.
 	d16, _ := caePlane(V, Hz, w, h, 0, distanceOrder(baseVTaps, vPool(), 16))
 	newWall := math.Min(a16+hB, ct)
@@ -416,14 +400,14 @@ func wallevalCmd(args []string) {
 		100*(a16+hB-cae)/cae, 100*(d16+hB-cae)/cae, 100*(newWall-pubWall)/pubWall)
 }
 
-// caeCausalDelta reports what the baseline's one non-causal tap, H(+1,0), is actually worth, so the reader knows the size of the concession.
+// caeCausalDelta reports what the baseline's one non-causal wtap, H(+1,0), is actually worth, so the reader knows the size of the concession.
 func caeCausalCmd(args []string) {
 	im, lab, n := partFromRender(args[0])
 	w, h := im.W, im.H
 	V, Hz := crackPlanes(lab, w, h)
 	_, hB, _, _ := caeTapsBytes(V, Hz, w, h, baseVTaps, baseHTaps)
-	fix := append([]tap{}, baseHTaps...)
-	fix[4] = tap{1, 0, -2} // replace the non-causal H(+1,0) with a causal tap of the same count
+	fix := append([]wtap{}, baseHTaps...)
+	fix[4] = wtap{1, 0, -2} // replace the non-causal H(+1,0) with a causal wtap of the same count
 	_, hC, _, _ := caeTapsBytes(V, Hz, w, h, baseVTaps, fix)
 	fmt.Printf("%s regions %d: Hz with non-causal H(+1,0) %.0f B, causal substitute H(0,-2) %.0f B (%+.2f%%)\n",
 		args[0], n, hB, hC, 100*(hC-hB)/hB)

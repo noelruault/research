@@ -1,0 +1,301 @@
+# Contour coder, bottleneck B2: the JUNCTION MAP (contourBytes, code/lab/contour.go:64).
+#
+# The contour coder is the wall coder actually chosen below ~6,400 regions at 3840x2160, where walls
+# are 92-96% of the file. Every wall result in report 09 improves CAE and is worth zero in that band.
+# This file measures the junction map -- the context-coded sparse bitmap at contour.go:97-105 that
+# tells the decoder where the wall junctions are, and which uses the same 10-bit / 1024-model context
+# width that report 09 proved under-conditioned at 4K for the CAE V-plane.
+#
+# command : labx csplit / cwidth / csel / ccausal   (code/lab/contourctx.go, frozen taps in code/lab/selectedj.go)
+# build   : the report-09 build set, i.e. code/lab minus crossplane.go (crossplane.go and wallctx.go
+#           both define `tap` and `crackPlanes`, as they did when report 09 was produced)
+# eval    : the published flat renders under $SCRATCH/hd/{renders4k,ladder_1920,ladder_960,ladder_512}
+# runs    : every table below was produced twice; the two runs are byte-identical.
+#
+# REPRODUCTION GATE. csplit re-derives contourBytes' own total and refuses to print unless
+#   (a) the region count recovered from the render matches the published one to within 0.1%,
+#   (b) juncB+dirB+loopB+turnB equals contourBytes to 1e-6 and steps matches exactly,
+#   (c) the contour total equals the published one to within 1 B.
+# All eleven published 4K contour totals reproduce exactly:
+#   19,079 / 24,106 / 29,674 / 37,518 / 45,797 / 56,576 / 72,041 / 93,577 / 126,291 / 167,356 / 224,496 B.
+# cwidth adds a second gate: the generalised pricer on the baseline template must equal contourSplit's
+# juncB to 1e-6, so a variant cannot be compared against a mis-built baseline.
+# Both gates are runnable and both fire: asking csplit for 45,000 B at the 1,383 rung prints
+# "CONTOUR MISMATCH: got 45797.48 B, published 45000 B -- stopping" and exits nonzero.
+
+### 1. THE SPLIT -- what vertBits actually contains, 3840x2160
+#
+# contourBytes reports vertBits and turnBits. vertBits is three separate channels added together and
+# nothing had ever separated them:
+#   juncB  the sparse junction bitmap over the interior lattice (contour.go:97-105)   <- the target
+#   dirB   four presence bits at every special vertex (contour.go:177)
+#   loopB  log2(nv)+2 per closed loop that touches no special vertex (contour.go:192)
+# "pubWall" is min(CAE, contour) as hd.go:187 prices it; b/turn is turnB*8/turns.
+#
+  regions       crack   contourB       caeB      juncB     junc%      turnB     turn%     dirB     dir%    loopB    loop%    steps    turns    njunc   nloops  b/turn    pubWall
+  227          124884      19079      25803        510     2.67%      17989    94.29%    314.5    1.65%    265.5    1.39%   124884   124416      244       85   1.157      19079
+  344          155284      24106      31842        782     3.24%      22497    93.32%    464.9    1.93%    362.3    1.50%   155284   154549      395      116   1.165      24106
+  536          187411      29674      38318       1185     3.99%      27270    91.90%    666.4    2.25%    552.8    1.86%   187411   186252      630      177   1.171      29674
+  849          232086      37518      47181       1749     4.66%      33892    90.33%    943.4    2.51%    933.8    2.49%   232086   230266      979      299   1.177      37518
+  1383         274890      45797      55565       2611     5.70%      40199    87.78%   1329.5    2.90%   1658.4    3.62%   274890   271969     1548      531   1.182      45797
+  2274         326360      56576      65840       3944     6.97%      47878    84.63%   1901.5    3.36%   2851.4    5.04%   326360   321599     2504      913   1.191      56576
+  3794         393410      72041      79177       6231     8.65%      58333    80.97%   2807.0    3.90%   4669.0    6.48%   393410   385425     4234     1495   1.211      72041
+  6417         476863      93577      96087      10452    11.17%      71819    76.75%   4379.0    4.68%   6927.0    7.40%   476863   462856     7687     2218   1.241      93577
+  11121        603086     126291     121047      18188    14.40%      91681    72.60%   7208.0    5.71%   9213.1    7.30%   603086   577279    14866     2950   1.271     121047
+  19338        746605     167356     148233      31178    18.63%     113370    67.74%  11973.3    7.15%  10834.0    6.47%   746605   699138    28494     3469   1.297     148233
+  33964        944544     224496     184194      51651    23.01%     141418    62.99%  20146.7    8.97%  11280.6    5.02%   944544   857518    53652     3612   1.319     184194
+  note: recovered 58503 regions vs published 58506 (0.0051%)
+  58503       1194849     298595     227270      80162    26.85%     174455    58.43%  33091.1   11.08%  10887.1    3.65%  1194849  1042068    95058     3486   1.339     227270
+  note: recovered 96356 regions vs published 96359 (0.0031%)
+  96356       1491269     385922     276165     114200    29.59%     210045    54.43%  52034.8   13.48%   9641.0    2.50%  1491269  1238551   157250     3087   1.357     276165
+
+# Read-off: at every operating point where the contour coder is the one actually chosen, the junction
+# bitmap is 2.7% to 11.2% of the contour bill and the turns are 77% to 94% of it.
+# As a share of the whole file (walls + colour, published 4K totals from 08-native-resolution-data.txt):
+#
+   regions   chosen  contourB    juncB  %contour    %file   gainB  %contour    %file   ceilB    %file  loopfixB
+       227  contour     19079      510     2.67%   2.573%    -0.0    -0.00%  -0.000%      19   0.096%     10.8
+       344  contour     24106      782     3.24%   3.101%     1.3     0.17%   0.005%      24   0.095%     14.6
+       536  contour     29674     1185     3.99%   3.776%     4.7     0.40%   0.015%      38   0.121%     22.2
+       849  contour     37518     1749     4.66%   4.354%     5.8     0.33%   0.014%      55   0.137%     37.5
+      1383  contour     45797     2611     5.70%   5.220%     9.4     0.36%   0.019%      85   0.170%     66.5
+      2274  contour     56576     3944     6.97%   6.223%    10.3     0.26%   0.016%     124   0.196%    114.2
+      3794  contour     72041     6231     8.65%   7.487%    33.0     0.53%   0.040%     201   0.242%    187.0
+      6417  contour     93577    10452    11.17%   9.310%    85.7     0.82%   0.076%     369   0.329%    277.4
+     11121      CAE    126291    18188    14.40%   0.000%   178.2     0.98%   0.000%     728   0.000%    368.9
+     19338      CAE    167356    31178    18.63%   0.000%   389.7     1.25%   0.000%    1454   0.000%    433.8
+     33964      CAE    224496    51651    23.01%   0.000%   831.6     1.61%   0.000%    3016   0.000%    451.6
+#
+#   gainB / %contour / %file  = the measured widening result of section 3, carried through.
+#   ceilB / %file             = juncB minus its own static conditional entropy at 20 bits, i.e. what the
+#                               junction map would be worth if the model tables were free. Unreachable.
+#   loopfixB                  = the missing loop terminator of section 2, priced at 1 flag bit per loop.
+#   Rows where CAE is chosen contribute 0% of the file because the contour coder is not shipped there.
+#
+# The junction map is 2.6-9.3% of the delivered file across the contour coder's whole band, and its
+# absolute ceiling -- deleting it entirely, cost zero -- is 2.67-11.17% of the contour bill.
+#
+# Note on the crossover, which "chosen" above takes from the published CAE numbers. Report 09 result 3
+# showed those CAE numbers are not decodable and that legality costs +4.6% of the wall bill at 11,121
+# regions. Against a legal CAE the 11,121 rung reads 126,615 B for CAE against 126,291 B for contour, so
+# the contour coder would be the chosen one there too, and its band extends to ~11,000 regions rather
+# than ~6,400. That widens the contour coder's importance; it does not change the verdict below, since
+# 11,121 is where the junction map is largest and widening still buys only -0.14% of the contour bill.
+
+### 2. CAUSALITY -- the falsification-#12 check, and it comes back clean
+#
+# Three independent checks, at four resolutions:
+#  (a) static predicate: every tap of the junction-map template is supplied by its own raster scan;
+#  (b) decoder-side replay: the context is rebuilt from a lattice filled in only as the scan reaches
+#      each bit, and compared with the encoder's context at all 8.29M positions;
+#  (c) the rest of the coder is walked in decoder order -- chains must terminate only at vertices the
+#      decoder already holds, every mid-chain vertex must have exactly one continuation, and no
+#      degree-1 (dangling) vertex may sit off the frame.
+#
+  # /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/23e7d4b1-17da-4b78-8110-6154f88a8011/scratchpad/hd/renders4k/hd_00000227.png  3840x2160  regions 227
+  static predicate  base10   10 taps, 0 non-causal []
+  static predicate  sel      20 taps, 0 non-causal []
+  replay junction   base10   0 mismatching contexts (must be 0)
+  replay junction   sel      0 mismatching contexts (must be 0)
+  replay chains     traces terminate at a non-special vertex: 0 (must be 0)
+  replay chains     ambiguous continuations: 0 (must be 0); degree!=2 mid-chain: 0 (must be 0)
+  replay chains     degree-1 vertices: 29, of which interior: 0 (must be 0; frame ones are free to the decoder)
+  loop channel      85 closed loops, 6516 edges; encoder pays log2(nv)+2 each and sends no terminator
+  
+  # /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/23e7d4b1-17da-4b78-8110-6154f88a8011/scratchpad/hd/renders4k/hd_00001383.png  3840x2160  regions 1383
+  static predicate  base10   10 taps, 0 non-causal []
+  static predicate  sel      20 taps, 0 non-causal []
+  replay junction   base10   0 mismatching contexts (must be 0)
+  replay junction   sel      0 mismatching contexts (must be 0)
+  replay chains     traces terminate at a non-special vertex: 0 (must be 0)
+  replay chains     ambiguous continuations: 0 (must be 0); degree!=2 mid-chain: 0 (must be 0)
+  replay chains     degree-1 vertices: 109, of which interior: 0 (must be 0; frame ones are free to the decoder)
+  loop channel      531 closed loops, 95072 edges; encoder pays log2(nv)+2 each and sends no terminator
+  
+  # /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/23e7d4b1-17da-4b78-8110-6154f88a8011/scratchpad/hd/renders4k/hd_00006417.png  3840x2160  regions 6417
+  static predicate  base10   10 taps, 0 non-causal []
+  static predicate  sel      20 taps, 0 non-causal []
+  replay junction   base10   0 mismatching contexts (must be 0)
+  replay junction   sel      0 mismatching contexts (must be 0)
+  replay chains     traces terminate at a non-special vertex: 0 (must be 0)
+  replay chains     ambiguous continuations: 0 (must be 0); degree!=2 mid-chain: 0 (must be 0)
+  replay chains     degree-1 vertices: 208, of which interior: 0 (must be 0; frame ones are free to the decoder)
+  loop channel      2218 closed loops, 180452 edges; encoder pays log2(nv)+2 each and sends no terminator
+  
+  # /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/23e7d4b1-17da-4b78-8110-6154f88a8011/scratchpad/hd/renders4k/hd_00011121.png  3840x2160  regions 11121
+  static predicate  base10   10 taps, 0 non-causal []
+  static predicate  sel      20 taps, 0 non-causal []
+  replay junction   base10   0 mismatching contexts (must be 0)
+  replay junction   sel      0 mismatching contexts (must be 0)
+  replay chains     traces terminate at a non-special vertex: 0 (must be 0)
+  replay chains     ambiguous continuations: 0 (must be 0); degree!=2 mid-chain: 0 (must be 0)
+  replay chains     degree-1 vertices: 279, of which interior: 0 (must be 0; frame ones are free to the decoder)
+  loop channel      2950 closed loops, 177976 edges; encoder pays log2(nv)+2 each and sends no terminator
+  
+  # /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/23e7d4b1-17da-4b78-8110-6154f88a8011/scratchpad/hd/ladder_1920/hd_00000217.png  1920x1080  regions 217
+  static predicate  base10   10 taps, 0 non-causal []
+  static predicate  sel      20 taps, 0 non-causal []
+  replay junction   base10   0 mismatching contexts (must be 0)
+  replay junction   sel      0 mismatching contexts (must be 0)
+  replay chains     traces terminate at a non-special vertex: 0 (must be 0)
+  replay chains     ambiguous continuations: 0 (must be 0); degree!=2 mid-chain: 0 (must be 0)
+  replay chains     degree-1 vertices: 34, of which interior: 0 (must be 0; frame ones are free to the decoder)
+  loop channel      52 closed loops, 6388 edges; encoder pays log2(nv)+2 each and sends no terminator
+  
+  # /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/23e7d4b1-17da-4b78-8110-6154f88a8011/scratchpad/hd/ladder_512/hd_00000199.png  512x288  regions 199
+  static predicate  base10   10 taps, 0 non-causal []
+  static predicate  sel      20 taps, 0 non-causal []
+  replay junction   base10   0 mismatching contexts (must be 0)
+  replay junction   sel      0 mismatching contexts (must be 0)
+  replay chains     traces terminate at a non-special vertex: 0 (must be 0)
+  replay chains     ambiguous continuations: 0 (must be 0); degree!=2 mid-chain: 0 (must be 0)
+  replay chains     degree-1 vertices: 45, of which interior: 0 (must be 0; frame ones are free to the decoder)
+  loop channel      22 closed loops, 1272 edges; encoder pays log2(nv)+2 each and sends no terminator
+  
+
+# Verdict: the contour coder does NOT have potts.go:311's disease.
+# All ten baseline taps read left-on-the-same-row or a row above; the replay reports 0 mismatching
+# contexts at every resolution, against 21,554 at 512x288 for the CAE coder. Chains terminate only at
+# special vertices, every continuation is unique, and every degree-1 vertex is on the frame, which the
+# decoder knows for free.
+#
+# One real but negligible bookkeeping gap was found: the loop channel pays log2(nv)+2 per closed loop
+# but sends no count and no end-of-loops flag, so a decoder cannot tell when the loop list stops.
+# Repairing it costs one flag bit per loop plus one terminator: 10.8 B of 19,079 B at 227 regions
+# (0.06%), 66.5 B of 45,797 B at 1,383 (0.15%), 277 B of 93,577 B at 6,417 (0.30%). Recorded, not fixed.
+
+### 3. WIDENING THE JUNCTION MAP -- greedy tap selection, frozen, priced at four resolutions
+#
+# Selection ran at 3840x2160 and 6,417 regions: the DENSEST partition at which the contour coder is
+# still the chosen wall coder (contour 93,577 B against CAE 96,087 B), hence the most junctions and the
+# best case for widening. Selecting there and finding nothing is worth more than selecting at a rung
+# where the map is starved by construction.
+#
+  # /private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/23e7d4b1-17da-4b78-8110-6154f88a8011/scratchpad/hd/renders4k/hd_00006417.png  3840x2160  regions 6417  junctions 7687  lattice 3841x2161
+    start 10 bits: 10452.3 B
+    +J(+0,-3)   -> 11 bits:    10408.3 B  (-0.42%)
+    +J(+0,-4)   -> 12 bits:    10389.2 B  (-0.18%)
+    +J(-4,+0)   -> 13 bits:    10375.5 B  (-0.13%)
+    +J(-2,-1)   -> 14 bits:    10369.4 B  (-0.06%)
+    +J(+1,-3)   -> 15 bits:    10367.0 B  (-0.02%)
+    +J(-6,+0)   -> 16 bits:    10366.4 B  (-0.01%)
+    +J(+2,-3)   -> 17 bits:    10369.6 B  (+0.03%)
+    +J(+3,-1)   -> 18 bits:    10374.7 B  (+0.05%)
+    +J(-3,-2)   -> 19 bits:    10381.7 B  (+0.07%)
+    +J(+2,-2)   -> 20 bits:    10392.8 B  (+0.11%)
+  
+  J taps: J(-1,+0) J(-2,+0) J(+0,-1) J(-1,-1) J(+1,-1) J(+2,-1) J(+0,-2) J(-1,-2) J(+1,-2) J(-3,+0) J(+0,-3) J(+0,-4) J(-4,+0) J(-2,-1) J(+1,-3) J(-6,+0) J(+2,-3) J(+3,-1) J(-3,-2) J(+2,-2)
+  
+  GO:
+  var selJTaps = []jtap{{-1,0},{-2,0},{0,-1},{-1,-1},{1,-1},{2,-1},{0,-2},{-1,-2},{1,-2},{-3,0},{0,-3},{0,-4},{-4,0},{-2,-1},{1,-3},{-6,0},{2,-3},{3,-1},{-3,-2},{2,-2},}
+
+# Greedy selection, fitted on the very image and partition it is measured on, saturates at 16 bits
+# having taken 0.82% off the junction map, and turns over immediately: 17 bits is already worse.
+# Compare report 09, where the same procedure on the CAE V-plane took 6.22% and was still improving.
+#
+# That 16-bit template was then frozen (code/lab/selectedj.go) and priced unchanged everywhere.
+# Columns: junc10 is the published coder; staticH10/staticH20 are the ideal conditional entropies of
+# the same contexts (free model tables); order0 is the map with no context at all; combLB is
+# log2 C(N,k), the exact bill of an enumerative coder that names k junction positions among N interior
+# lattice sites assuming no structure whatever; dist16 is the zero-fitting control (extend the baseline
+# by whichever causal tap is merely nearest); dWall is the effect on min(CAE, contour); dCt_pp and
+# ceil_pp are the measured gain and the free-tables ceiling as percentage points of the contour bill.
+#
+  ### renders4k
+  regions    contourB    junc10 staticH10    order0    combLB     sel12     sel14     sel16     sel18     sel20    dist16      best  k     dJunc   dDist16  dContour     dWall staticH20    dCt_pp   ceil_pp
+  227           19079       510       497       503       502       510       512       512       516       520       519       510 10     0.00%     1.73%     0.00%     0.00%       491    0.000%    0.101%
+  344           24106       782       765       780       779       781       786       790       795       801       798       781 12    -0.17%     1.99%    -0.01%    -0.01%       758   -0.005%    0.099%
+  536           29674      1185      1164      1191      1190      1180      1183      1186      1193      1202      1200      1180 12    -0.40%     1.25%    -0.02%    -0.02%      1147   -0.016%    0.127%
+  849           37518      1749      1723      1773      1772      1743      1747      1752      1761      1771      1764      1743 12    -0.33%     0.88%    -0.02%    -0.02%      1694   -0.015%    0.148%
+  1383          45797      2611      2579      2676      2675      2603      2602      2601      2614      2624      2625      2601 16    -0.36%     0.54%    -0.02%    -0.02%      2526   -0.021%    0.185%
+  2274          56576      3944      3906      4111      4110      3938      3934      3934      3944      3953      3953      3934 16    -0.26%     0.21%    -0.02%    -0.02%      3820   -0.018%    0.220%
+  3794          72041      6231      6182      6551      6550      6202      6199      6204      6214      6226      6221      6199 14    -0.53%    -0.17%    -0.05%    -0.05%      6030   -0.046%    0.280%
+  6417          93577     10452     10387     11066     11065     10389     10369     10366     10375     10393     10402     10366 16    -0.82%    -0.48%    -0.09%    -0.09%     10083   -0.092%    0.395%
+  11121        126291     18188     18092     19631     19630     18057     18014     18011     18018     18048     18046     18011 16    -0.98%    -0.78%    -0.14%     0.00%     17460   -0.141%    0.577%
+  19338        167356     31178     31040     34280     34279     30932     30830     30798     30789     30836     30778     30789 18    -1.25%    -1.28%    -0.23%     0.00%     29724   -0.233%    0.869%
+  33964        224496     51651     51446     58409     58408     51181     50933     50840     50818     50924     50775     50818 18    -1.61%    -1.70%    -0.37%     0.00%     48635   -0.371%    1.343%
+  ### ladder_1920
+  regions    contourB    junc10 staticH10    order0    combLB     sel12     sel14     sel16     sel18     sel20    dist16      best  k     dJunc   dDist16  dContour     dWall staticH20    dCt_pp   ceil_pp
+  217            9608       523       506       521       520       522       527       532       538       543       537       522 12    -0.20%     2.62%    -0.01%    -0.01%       501   -0.011%    0.237%
+  346           12121       792       771       800       800       792       798       803       811       820       812       792 12    -0.03%     2.49%    -0.00%    -0.00%       761   -0.002%    0.256%
+  572           15400      1192      1166      1205      1205      1187      1194      1201      1210      1222      1212      1187 12    -0.40%     1.71%    -0.03%    -0.03%      1142   -0.031%    0.323%
+  954           20039      1748      1715      1804      1803      1742      1752      1761      1773      1784      1767      1742 12    -0.35%     1.07%    -0.03%    -0.03%      1673   -0.030%    0.373%
+  1656          27028      2787      2744      2908      2907      2784      2792      2804      2820      2838      2806      2784 12    -0.10%     0.70%    -0.01%    -0.01%      2681   -0.011%    0.391%
+  2811          34668      4459      4400      4756      4755      4447      4455      4476      4493      4528      4479      4447 12    -0.28%     0.45%    -0.04%     0.00%      4259   -0.037%    0.579%
+  4983          47093      7493      7405      8127      8126      7468      7482      7505      7543      7602      7508      7468 12    -0.34%     0.19%    -0.05%     0.00%      7098   -0.053%    0.839%
+  8352          61572     12233     12107     13543     13542     12194     12204     12242     12296     12406     12245     12194 12    -0.32%     0.10%    -0.06%     0.00%     11476   -0.063%    1.228%
+  14231         80805     19237     19060     21993     21992     19148     19122     19186     19288     19504     19179     19122 14    -0.60%    -0.30%    -0.14%     0.00%     17667   -0.143%    1.943%
+  23720        104780     28819     28567     34204     34202     28634     28609     28726     28935     29303     28662     28609 14    -0.73%    -0.54%    -0.20%     0.00%     25667   -0.200%    3.008%
+  ### ladder_960
+  regions    contourB    junc10 staticH10    order0    combLB     sel12     sel14     sel16     sel18     sel20    dist16      best  k     dJunc   dDist16  dContour     dWall staticH20    dCt_pp   ceil_pp
+  239            5277       480       458       479       478       484       488       494       500       507       498       480 10     0.00%     3.72%     0.00%     0.00%       448    0.000%    0.597%
+  410            6925       792       765       802       801       797       802       811       821       833       817       792 10     0.00%     3.06%     0.00%     0.00%       749    0.000%    0.622%
+  763            9898      1310      1269      1372      1371      1316      1328      1344      1356      1377      1347      1310 10     0.00%     2.80%     0.00%     0.00%      1230    0.000%    0.815%
+  1222          12553      1965      1917      2078      2078      1973      1987      2005      2027      2058      2010      1965 10     0.00%     2.26%     0.00%     0.00%      1846    0.000%    0.954%
+  2075          16694      3112      3043      3327      3326      3115      3136      3159      3198      3247      3176      3112 10     0.00%     2.05%     0.00%     0.00%      2884    0.000%    1.364%
+  3546          21865      4922      4816      5443      5442      4923      4956      5002      5072      5156      5016      4922 10     0.00%     1.92%     0.00%     0.00%      4449    0.000%    2.163%
+  5985          29096      7432      7280      8449      8448      7444      7490      7565      7674      7830      7568      7432 10     0.00%     1.82%     0.00%     0.00%      6486    0.000%    3.253%
+  16313         47052     14496     14208     18508     18507     14492     14634     14866     15144     15496     14789     14492 12    -0.03%     2.02%    -0.01%     0.00%     10464   -0.009%    8.570%
+  43830         71945     22963     22568     35548     35547     23188     23568     23887     24120     24442     23806     22963 10     0.00%     3.67%     0.00%     0.00%     11230    0.000%   16.308%
+  ### ladder_512
+  regions    contourB    junc10 staticH10    order0    combLB     sel12     sel14     sel16     sel18     sel20    dist16      best  k     dJunc   dDist16  dContour     dWall staticH20    dCt_pp   ceil_pp
+  199            2731       381       358       386       385       384       391       398       406       418       402       381 10     0.00%     5.52%     0.00%     0.00%       348    0.000%    1.205%
+  337            3656       607       576       616       615       614       622       630       644       658       637       607 10     0.00%     4.89%     0.00%     0.00%       555    0.000%    1.425%
+  594            5011       960       916      1000      1000       971       984      1000      1021      1047      1011       960 10     0.00%     5.32%     0.00%     0.00%       865    0.000%    1.899%
+  1044           6805      1510      1445      1596      1595      1527      1550      1571      1603      1641      1583      1510 10     0.00%     4.84%     0.00%     0.00%      1330    0.000%    2.640%
+  1711           8908      2215      2124      2417      2417      2236      2269      2309      2363      2438      2330      2215 10     0.00%     5.16%     0.00%     0.00%      1879    0.000%    3.773%
+  2801          11433      3167      3034      3596      3595      3199      3247      3307      3392      3497      3330      3167 10     0.00%     5.16%     0.00%     0.00%      2471    0.000%    6.088%
+  4617          14606      4392      4200      5253      5252      4436      4505      4602      4721      4868      4600      4392 10     0.00%     4.74%     0.00%     0.00%      2987    0.000%    9.616%
+  7595          18234      5734      5487      7405      7404      5794      5876      5998      6151      6296      5994      5734 10     0.00%     4.54%     0.00%     0.00%      3133    0.000%   14.268%
+
+# Read-off.
+#
+# (a) The direction of report 09's result transfers and the magnitude does not.
+#     At 512x288 and 960x540 the best width is 10 bits at every single mark -- the published context is
+#     already right and every wider template is worse, by up to +5.5%. At 1920 and 4K wider templates
+#     start to pay. Same sign as report 09's frozen 16-tap CAE template, two orders of magnitude smaller:
+#     -10.32% on the CAE V-plane at 4K against -0.82% here at the best case.
+#
+# (b) Sparsity, not sample count, is the binding constraint. The V crack plane has 8.29M samples of
+#     which ~600k are ones at 11,121 regions; the junction lattice has 8.29M samples of which 7,687 are
+#     ones at 6,417 regions. Widening from 1,024 to 65,536 models divides an already tiny positive
+#     population across 64x the bins, and the learning cost eats the conditioning gain almost exactly.
+#
+# (c) At the coarsest marks the 10-bit context is already costing more than no context at all.
+#     4K, 227 regions: junc10 = 510 B, order0 = 503 B, combLB = 502 B, staticH10 = 497 B. The context
+#     coder pays 1.4% MORE than a memoryless coder would, because 1,024 models are being learned to
+#     describe 244 junctions. An enumerative coder naming the positions outright would cost 502 B, so
+#     the entire prize on this channel at this operating point is 8 B of a 19,819 B file: 0.04%.
+#
+# (d) The junction map's share SHRINKS with resolution, which is why report 09's lever cannot repeat here.
+#     Junction count is fixed by the region count; turn count scales with boundary length, i.e. with the
+#     linear dimension. At the coarsest mark of each ladder the junction map is
+#       512x288    199 regions   381 B of  2,731 B  = 13.95% of the contour bill
+#       960x540    239 regions   480 B of  5,277 B  =  9.10%
+#       1920x1080  217 regions   523 B of  9,608 B  =  5.44%
+#       3840x2160  227 regions   510 B of 19,079 B  =  2.67%
+#     4K is where the junction map matters LEAST. Report 09's finding was that 4K is where the CAE
+#     context matters MOST. The two are not the same lever pointed at a different component.
+#
+# (e) Paid for in full: nothing. The frozen template needs no side information (it is a compile-time
+#     constant, as caeBytes' own template is), no second pass, no mode flag. It costs 64x the model
+#     tables -- 65,536 binary models against 1,024 -- which is an encoder/decoder memory cost, not bytes.
+#     There is no accounting trick hiding a larger win; the win is simply not there.
+
+### 4. VERDICT -- clean negative, and a redirect
+#
+# The junction map is not bottleneck B2. It is 2.6-9.3% of the delivered file across the band where the
+# contour coder is chosen, it is already within 1-2% of its own memoryless and enumerative floors at the
+# coarse end, it is causally sound, and widening its context by greedy selection at the most favourable
+# operating point available buys 0.02% to 0.09% of the contour bill at 4K and is strictly negative at
+# 512x288 and 960x540.
+#
+# The contour coder's bill is TURNS: 77-94% of it in the band where it is chosen, at 1.16-1.24 bits per
+# turn against a ternary alphabet whose order-3 model has only 27 contexts. That is the component with
+# the untouched-to-share ratio, and it is the other half of this task, held by a separate agent.
+#
+# A better second target than the junction map is the loop channel. At 1,383 regions it is 1,658 B --
+# 3.6% of the contour bill, and nineteen times the 85 B that the junction map's own free-tables ceiling
+# is worth at the same point. It is paid as a flat log2(nv)+2 = 25.0 bits for each of 531 loop starts,
+# with no context, no ordering, and no attempt to predict where a loop begins, and it is the one channel
+# here with a known correctness gap (section 2). It has never been examined either.

@@ -19,6 +19,8 @@ The compression *verdict* is settled and is not what this programme is trying to
 - **Run it twice.** Go map iteration has produced three separate nondeterminism bugs here (#6, #7).
 - **The killed list is binding**: sixteen mechanisms in report 04, twelve claims in report 06. Re-deriving a dead idea is this study's most common failure.
 - Shell loops under `bash`, not zsh.
+- **Build the package before committing agent code.** Independent agents write independent files that collide; `code/lab` shipped broken in `a6d1c73` because nobody compiled it.
+- **Check the exit status you think you are checking.** `cmd 2>&1 | head && echo OK` reports `head`'s status, not the compiler's. This has produced two false green results today.
 
 ## Where the bill sits at 3840×2160 — this drives priority
 
@@ -45,7 +47,9 @@ The compression *verdict* is settled and is not what this programme is trying to
 | # | bottleneck | why it is worth doing | status |
 |---|---|---|---|
 | B1 | **Colour coder** — mean predictor, order-0 residual, **no cross-channel transform** | 48–71% of the bill at high rate, 93% at lossless. The most primitive component in the pipeline against WebP's 14 predictors + cross-colour transform | **OPEN — next up**, awaiting fan-out results |
-| B2 | **Contour coder, never examined** | It is the *chosen* coder below ~1,400 regions, where walls are 92–96% of the bill. Every wall result so far (report 09) improves CAE and is therefore worth **exactly zero** at the low-rate arm | **IN PROGRESS** — two agents: junction map (its context is the same 10-bit width report 09 proved under-conditioned at 4K) and turn coding. First deliverable is the `vertBits`/`turnBits` split, which nobody has measured |
+| B2a | Contour coder — **junction map** | — | **CLOSED, NEGATIVE.** It is 2.7–11.2% of the contour bill and already at its floor; widening buys −0.076% of the file at best. See log |
+| B2b | Contour coder — **turn stream** | **Turns are 77–94% of the contour bill**, and the contour coder is chosen wherever walls are 92–96% of the file. This is the single largest unexamined component in the pipeline | **IN PROGRESS** — agent running |
+| B8 | Contour coder — **loop channel** | A flat `log2(nv)+2` per closed loop, no context, no ordering, never examined. **1,658 B at 1,383 regions (3.6%), 6,927 B at 6,417 (7.4%)** — nineteen times the junction map's entire ceiling at the same point | OPEN — surfaced by the B2a agent |
 | B3 | **`bitsPerEdge = 1.73`, `bitsPerReg = 25.0`** (`potts2.go:15`) measured at 512×288, drive the RD merge key and Ising λ at every resolution | Actual cost is 1.22–1.61 bits/edge at 4K rungs and 0.4534 at lossless. The 4K scale-space is therefore not the coder's own RD frontier — the shape coder is undersold at the resolution where the verdict was sharpened | OPEN — must re-run baseline on re-tuned partitions or reproduces #3 |
 | B4 | **Re-price report 08 against a legal wall coder** | #12: published CAE numbers are optimistic by 3.4–12.7%. Report 08's tables are flagged but not corrected | OPEN — bookkeeping, no research risk |
 | B5 | **Rung 2 of the rate ladder** | No mark within ±5% of 50,016 B; needs a merge run at ~7,800 regions to settle whether WebP's lead there is real | OPEN — one run |
@@ -53,6 +57,28 @@ The compression *verdict* is settled and is not what this programme is trying to
 | B7 | Generalisation: every result is one photograph | The frozen 16-tap template and any colour win may not transfer. Cheapest real test: Kodak-24 at one small size through the existing frontier | OPEN — blocks any "ship it" claim |
 
 ## Log — newest first
+
+### 2026-07-29 — B2a: contour junction map is at its floor (clean negative)
+
+**The measurement that matters is the split, which had never been taken.** `vertBits` was three channels, not one: the junction bitmap, four presence bits per special vertex, and a flat per-loop cost. At 3840×2160:
+
+| regions | contourB | juncB | junc% | turnB | **turn%** | loopB | loop% |
+|---|---|---|---|---|---|---|---|
+| 227 | 19,079 | 510 | 2.67% | 17,989 | **94.3%** | 266 | 1.4% |
+| 1,383 | 45,797 | 2,611 | 5.70% | 40,199 | **87.8%** | 1,658 | 3.6% |
+| 6,417 | 93,577 | 10,452 | 11.17% | 71,819 | **76.8%** | 6,927 | 7.4% |
+
+Verified independently: the four channels reconcile to `contourB` on every row, and the totals match the published ones.
+
+- **Junction map: negative, and structurally so.** Greedy widening saturates at 16 bits for **−0.82%** of the map = **−0.076% of the file**. It is already at its floor: at 227 regions the adaptive 10-bit coder costs 510 B against a memoryless 503 B and an enumerative `log2 C(N,k)` floor of 502 B — **the context model costs 1.4% *more* than having no context at all**, because 1,024 models are learning to describe 244 junctions.
+- **It cannot repeat report 09's win, for a reason worth keeping.** Junction count is set by region count; turn count scales with the linear dimension. So the junction map's share *shrinks* with resolution — 13.95% of the contour bill at 512×288 down to 2.67% at 4K. Sparsity binds, not sample count: 7,687 positive samples over 65,536 models. 4K is where this component matters **least**, exactly inverting report 09's finding for CAE.
+- **Causality: clean.** Decoder replay over all 8.29M positions reports **0 mismatching contexts** at four resolutions, against CAE's 21,554 at 512×288. `contour.go` does not have `potts.go:311`'s disease.
+- **New decodability gap (small).** The loop channel sends no count and no end-of-loops flag, so a decoder cannot tell when the loop list stops. Repair costs 10.8 B at 227 regions to 277 B at 6,417 (0.06–0.30%). Recorded, not fixed.
+- **The contour coder's band is wider than published.** Against a *legal* CAE (#12: +4.6% at 11,121) the 11,121 rung reads CAE 126,615 B vs contour 126,291 B — contour is chosen up to ~11,000 regions, not ~6,400. More of the ladder depends on this coder than report 09 assumed.
+
+Data: `10-contour-junction-map-data.txt`. Code: `code/lab/contourctx.go`, `code/lab/selectedj.go`.
+
+**Also fixed here: `code/lab` did not compile.** Report 09 committed `crossplane.go` and `wallctx.go` from two independent agents into one package; both declare `tap` and `crackPlanes`. The repo's promise that every number can be re-derived was broken from `a6d1c73` until now. Pure rename, no behaviour change. **Build the package before committing agent code** — added to the invariants.
 
 ### 2026-07-29 — report 09: wall coder, two findings (commit `a6d1c73`, pushed)
 

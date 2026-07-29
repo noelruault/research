@@ -7,6 +7,17 @@ import (
 )
 
 func main() {
+	// The two header-only modes take no image, so they are handled before the arity check.
+	if len(os.Args) == 2 {
+		switch os.Args[1] {
+		case "csplithdr":
+			csplitHeader()
+			return
+		case "cwidthhdr":
+			cwidthHeader()
+			return
+		}
+	}
 	if len(os.Args) < 3 {
 		fmt.Fprintln(os.Stderr, "usage: lab <sweep|potts|voronoi|lattice> <image.png> [args]")
 		os.Exit(2)
@@ -44,6 +55,24 @@ func main() {
 		hd(os.Args[2], os.Args[3])
 	case "affine":
 		affine(os.Args[2])
+	// Report 09, the CAE context-width arm (wallctx.go). Build without crossplane.go: the two files both define `tap` and `crackPlanes`, which is how they were run when report 09 was produced.
+	case "wallctx":
+		wallctxCmd(os.Args[2:])
+	case "wallsel":
+		wallselCmd(os.Args[2:])
+	case "walleval":
+		wallevalCmd(os.Args[2:])
+	case "caecausal":
+		caeCausalCmd(os.Args[2:])
+	// Report 10, the contour junction-map arm (contourctx.go). Same build set.
+	case "csplit":
+		csplitCmd(os.Args[2:])
+	case "cwidth":
+		cwidthCmd(os.Args[2:])
+	case "csel":
+		cselCmd(os.Args[2:])
+	case "ccausal":
+		ccausalCmd(os.Args[2:])
 	default:
 		fmt.Fprintln(os.Stderr, "unknown mode")
 		os.Exit(2)

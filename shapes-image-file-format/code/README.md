@@ -17,6 +17,7 @@ The fixed eval is the macOS Sierra wallpaper at 512×288. That is an Apple asset
 | `bakeoff/` | the original encoder bake-off harness — SVG, binary varint, quadtree, indexed PNG |
 | `corpus/dict.sh` | shared-dictionary leave-one-out test over a best-case corpus |
 | `compare.py` | matched-fidelity comparison; reads both data files and interpolates, so no number in report 05 is hand-derived |
+| `dashboard/` | builds the visual results page — `build.sh` encodes every operating point with each codec and keeps a decoded copy, `gen.py` embeds them as data URIs and draws the rate-distortion chart |
 
 ## Running
 

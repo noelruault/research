@@ -1,0 +1,12 @@
+source	source	original 512x288	264087	99
+a_webp	webp	WebP q34	12350	28.63
+a_avif	avif	AVIF q30	8911	28.71
+a_shapes	shapes	shape coder, 1,685 regions	12202	28.66
+a_jpeg	jpeg	JPEG q36	19503	28.77
+a_png	png	indexed PNG, n=16 grid	27802	28.61
+a_shipped	shipped	SVG rect cover (shipped), 32,924 rects	113562	28.61
+b_webp	webp	WebP q14	7344	26.65
+b_avif	avif	AVIF q18	5112	26.20
+b_shapes	shapes	shape coder, 615 regions	6488	26.44
+c_shapes	shapes	shape coder, 153 regions	2986	24.03
+c_webp	webp	WebP q0 (its floor)	2508	23.53

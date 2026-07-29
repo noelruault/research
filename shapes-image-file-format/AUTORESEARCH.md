@@ -86,6 +86,23 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — P4: the format is a file, and parity is measured (report 21)
+
+| mark | estimate | **real file** | overhead | round trip |
+|---|---|---|---|---|
+| 11,121 / 4K | 132,280 B | **132,301 B** | +21 B (+0.016%) | 0 wrong of 24,883,200 |
+| 3,546 / 960 | 25,399 B | **25,418 B** | +19 B (+0.079%) | 0 wrong of 1,555,200 |
+
+**Both headlines survive as real files: +0.930% at 28.5 dB, −1.097% at the capability point.** Report 16 budgeted "roughly the remaining 1%" for the container; it costs **0.016%**.
+
+**Verified independently of the agent that built it**: encoded both marks myself, and the decoded PNGs are byte-identical to the published renders by `md5` — not merely pixel-equal — with the 4K decode measuring 28.51 dB against the true source.
+
+Overhead splits as ~4 B of range-coder terminator (**constant**, same on a 16 KB and a 105 KB stream, because it splits from raw `binModel` counts rather than a quantised table) plus 16–17 B of header and framing. **Causality is now structural** — the decoder builds context from the planes it is filling, so a non-causal tap fails the round trip rather than needing a separate assert.
+
+**A regression of mine, caught here:** `wallxexact`/`wallx` were exiting 1 before printing, because both assert a `crossplane.go` variant reprices `caeBytes` exactly — and that variant was `base` until report 20 made `caeBytes` legal. Invisible to me because I ran `wallxexact` *before* the P3 fix and never re-ran it after. Now pinned by a test. No published number changes.
+
+**Every remaining caveat in this study is now about generality, not about the numbers.** B7 (one photograph) is the largest open item by a distance.
+
 ### 2026-07-30 — P3: the wall coder is legal, and the headlines never depended on it (report 20)
 
 `potts.go` read `Hz(x+1,y)` into the Hz context — a bit no decoder has, unsupplyable alongside `Hz(x-1,y)` and `Hz(x-2,y)`. Now reads `V(x+1,y)`, which a V-first schedule genuinely holds.

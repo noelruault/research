@@ -63,6 +63,13 @@ func main() {
 		turnload(os.Args[2])
 	case "affine":
 		affine(os.Args[2])
+	// Report 11, the colour entropy floor (floor.go).
+	case "floor": // floor <image.png> [labels.bin ...]; FLOORDUMP=<dir> writes the residual byte streams
+		floorCmd(os.Args[2:])
+	case "floordec": // floordec <labels.bin> <stream.bin> <wmean|rct|medrct> <ref.png> [planar] — the decodability check
+		floorDec(os.Args[2], os.Args[3], os.Args[4], os.Args[5])
+	case "floordump": // floordump <image.png> <dir> — write the exact lossless partition for floordec
+		floorDump(os.Args[2], os.Args[3])
 	// Report 09, the CAE context-width arm (wallctx.go). Build without crossplane.go: the two files both define `tap` and `crackPlanes`, which is how they were run when report 09 was produced.
 	case "wallctx":
 		wallctxCmd(os.Args[2:])

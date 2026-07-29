@@ -1,0 +1,118 @@
+# Colour entropy floor at 3840x2160, macOS Sierra wallpaper. Code: code/lab/floor.go.
+#   labx floor <img.png> [labels.bin ...]        FLOORDUMP=<dir> also writes the residual byte streams
+#   labx floordec <labels.bin> <stream.bin> <wmean|rct|medrct> <ref.png> [planar]
+#   labx floordump <img.png> <dir>               writes the exact lossless partition for floordec
+# Every run below was executed twice and the outputs are identical apart from the elapsed-time line.
+# adaptive = one pass, model paid, ACHIEVABLE.  static = the same counts read back with the table free, an ORACLE.
+
+===== 1. exact lossless partition, 6,356,392 regions =====
+# hd/src4k.png 3840x2160
+# exact lossless partition, 529557 distinct pixel colours
+
+## lossless — 6356392 regions, 8294400 px, 1.305 px/region
+colorBytes2 (published coder, unmodified)      10832608.78 B
+model                                              adaptive B       static B   ctx used   smp/ctx kind
+H(C) order-0, per channel (raw values)               17788187              -          3         - static, needs no table
+H(C) order-0, joint RGB symbol                              -       13135022     529557      12.0 static + a 1588671 B codebook
+H(C | best decoded neighbour), exact                        -        3486939     525851      12.1 ORACLE* — see note
+H(C | best decoded neighbour), residual              11337015       11334732          3   6356392 achievable
+H(C | weighted mean) == the current coder            10832609       10830226          3   6356392 achievable — anchor
+H(residual triple), joint, weighted mean                    -        7354568     110360      57.6 ORACLE* — codebook unpaid
++ residual RCT (G, R-G, B-G)                          7800674        7795589          3   6356392 achievable
++ ctx spread x n_decoded_nb                           7295931        7246558         54    353133 achievable
++ ctx cross-channel (G residual)                      7353035        7129241        424     44974 achievable
++ ctx region area                                     7485669        7103611       1567     12169 achievable
++ ctx prev residual / local gradient                  7684760        6994200       5231      3645 achievable
++ decoder-side colour exclusion                       7656614        6994200       5231      3645 achievable
+MED/LOCO-I on decoded pixels, per channel            10766697       10764295          3   6356392 achievable
+MED + residual RCT                                    7634306        7629215          3   6356392 achievable
+mean(wmean, MED) + residual RCT                       7600041        7594942          3   6356392 achievable
+MED + RCT + JPEG-LS gradient + cross-ch               7621735        6905042       1600     11918 achievable
++ prev residual / NE gradient                         8966423        6819837      12798      1490 achievable
++ decoder-side colour exclusion                       8914422        6819837      12798      1490 achievable
+token alphabet: MED + RCT                             7714865        7714763          3   6356392 achievable
+token: wmean + RCT + full ctx                         7148803        7109812       5231      3645 achievable
+token: MED + RCT + gradctx + cross-ch                 7046309        7019933       1600     11918 achievable
+token: + prev residual / NE gradient                  7088036        6960632      12798      1490 achievable
+token: + neighbour spread                             7193031        6867065      60446       315 achievable
+JUNK CONTROL: mC3's capacity, no info                10598240        7734628       8064      2365 control
+JUNK CONTROL: tP3's capacity, no info                 7967785        7689950      23328       817 control
+  overfit in a static number at tP3's size                  -          24813          -         - subtract this from any static row of that width
+
+anchor colorBytes2 10832609 B
+best ACHIEVABLE (one pass, model paid): 7046309 B via token MED+RCT+gradctx  -> -34.95% of the colour bill
+best STATIC oracle (table free):        6819837 B via MED+RCT+gradctx+prev  -> -37.04% of the colour bill
+gap between them (model-learning cost): 226471 B = 2.1% of the colour bill
+replay mismatches 0 (0 == every context and predictor is causal)
+exclusion violations 0 (0 == the exclusion row is legal on this partition)
+# lossless took 10s
+
+===== 2. lossy operating point, 11,121 regions, from the published hd() scale-space =====
+# hd/src4k.png 3840x2160
+
+## lossy_11121 — 11121 regions, 8294400 px, 745.832 px/region
+colorBytes2 (published coder, unmodified)         32142.63 B
+model                                              adaptive B       static B   ctx used   smp/ctx kind
+H(C) order-0, per channel (raw values)                  30962              -          3         - static, needs no table
+H(C) order-0, joint RGB symbol                              -          18585      10731       1.0 static + a 32193 B codebook
+H(C | best decoded neighbour), exact                        -           4934       2531       4.4 ORACLE* — see note
+H(C | best decoded neighbour), residual                 32221          31464          3     11121 achievable
+H(C | weighted mean) == the current coder               32143          31360          3     11121 achievable — anchor
+H(residual triple), joint, weighted mean                    -          18509      10447       1.1 ORACLE* — codebook unpaid
++ residual RCT (G, R-G, B-G)                            28580          26924          3     11121 achievable
++ ctx spread x n_decoded_nb                             32202          25643         54       618 achievable
++ ctx cross-channel (G residual)                        33953          24308        320       104 achievable
++ ctx region area                                       36816          21956        997        33 achievable
++ ctx prev residual / local gradient                    37705          19784       1994        17 achievable
++ decoder-side colour exclusion                         37705          19784       1994        17 achievable
+MED/LOCO-I on decoded pixels, per channel               32427          31677          3     11121 achievable
+MED + residual RCT                                      29520          27897          3     11121 achievable
+mean(wmean, MED) + residual RCT                         28905          27253          3     11121 achievable
+MED + RCT + JPEG-LS gradient + cross-ch                 31891          26221        293       114 achievable
++ prev residual / NE gradient                           33053          25273        546        61 achievable
++ decoder-side colour exclusion                         33053          25273        546        61 achievable
+token alphabet: MED + RCT                               28697          28649          3     11121 achievable
+token: wmean + RCT + full ctx                           28256          24759       1994        17 achievable
+token: MED + RCT + gradctx + cross-ch                   28527          27900        293       114 achievable
+token: + prev residual / NE gradient                    28598          27577        546        61 achievable
+token: + neighbour spread                               28874          26573       1513        22 achievable
+JUNK CONTROL: mC3's capacity, no info                   41572           9051       7920         4 control
+JUNK CONTROL: tP3's capacity, no info                   33125          18873      17631         2 control
+  overfit in a static number at tP3's size                  -           9776          -         - subtract this from any static row of that width
+
+anchor colorBytes2 32143 B
+best ACHIEVABLE (one pass, model paid): 28256 B via token wmean+RCT+ctx  -> -12.09% of the colour bill
+best STATIC oracle (table free):        19784 B via +ctx prev/grad  -> -38.45% of the colour bill
+gap between them (model-learning cost): 8472 B = 26.4% of the colour bill
+replay mismatches 0 (0 == every context and predictor is causal)
+exclusion violations 0 (0 == the exclusion row is legal on this partition)
+# lossy_11121 took 0s
+
+===== 3. general-purpose compressors on the residual byte streams =====
+# xz -9e -T0 | zstd --ultra -22 --long=27 | brotli -q 11.  A general compressor is an UPPER bound on what is
+# achievable, never a lower bound on the true entropy. No CM/PAQ-class coder is installed here (zpaq, paq8,
+# lpaq, cmix, bsc all absent), so brotli -q 11 is the strongest general modeller these numbers reach.
+lossless_wmean_interleaved           raw=19069176   xz=8159112    zstd=8475137    br=8139399
+lossless_wmean_planar                raw=19069176   xz=8731532    zstd=9480387    br=8549175
+lossless_rct_interleaved             raw=19069176   xz=7716432    zstd=7821010    br=7451790
+lossless_rct_planar                  raw=19069176   xz=7172248    zstd=7379408    br=6904345
+lossy_11121_wmean_interleaved        raw=33363      xz=29452      zstd=31726      br=29542
+lossy_11121_wmean_planar             raw=33363      xz=31828      zstd=31828      br=31601
+lossy_11121_rct_interleaved          raw=33363      xz=28480      zstd=29207      br=27805
+lossy_11121_rct_planar               raw=33363      xz=27500      zstd=29210      br=27201
+lossless_medrct_interleaved          raw=19069176   xz=7642648    zstd=7828999    br=7367744
+lossless_medrct_planar               raw=19069176   xz=7276796    zstd=7462070    br=6911537
+# brotli with a 1 GB window, to show the 16 MB default was not the binding constraint:
+brotli lw30 rct_planar    6904663
+brotli lw30 medrct_planar 6911168
+xz pb0 rct_planar         7232883
+
+===== 4. decodability — what makes section 3 a real colour bill and not bookkeeping =====
+decode floorout/lossless_rct_planar.bin (rct, planar): 6356392 regions, 0 wrong samples of 24883200, max |delta| 0
+EXACT: the partition plus this byte stream reconstruct the source bit for bit
+decode floorout/lossless_medrct_planar.bin (medrct, planar): 6356392 regions, 0 wrong samples of 24883200, max |delta| 0
+EXACT: the partition plus this byte stream reconstruct the source bit for bit
+decode floorout/lossless_wmean_interleaved.bin (wmean, interleaved): 6356392 regions, 0 wrong samples of 24883200, max |delta| 0
+EXACT: the partition plus this byte stream reconstruct the source bit for bit
+decode floorout/lossy_11121_rct_planar.bin (rct, planar): 11121 regions, 0 wrong samples of 24883200, max |delta| 0
+EXACT: the partition plus this byte stream reconstruct the source bit for bit

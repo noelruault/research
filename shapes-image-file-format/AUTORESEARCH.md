@@ -55,10 +55,23 @@ The compression *verdict* is settled and is not what this programme is trying to
 | B5 | **Rung 2 of the rate ladder** | No mark within ±5% of 50,016 B; needs a merge run at ~7,800 regions to settle whether WebP's lead there is real | OPEN — one run |
 | B6 | Inconsistent pricing at the lossless row | — | **CLOSED, APPLIED.** Real, verified twice, and it moved a published headline: lossless total 12,159,385 → **11,654,978 B**, 1.58× → **1.51×** WebP. Shapes now sit *under* AVIF and 5% under PNG |
 | B6b | The 512/960/1920 lossless rows are still `colorBytesLean`-priced | Same bug, other three resolutions; each is ~4% too high, and report 08's "ratio is stable across sizes" line rests on them | OPEN — one run each |
-| B9 | **Apply the residual-context colour model** | Measured −10.33% of the colour bill at lossless (−9.60% of total), the largest single win found so far. Needs integrating and re-pricing | OPEN — pending the cross-channel agent, which may overlap with it |
+| B10 | **Adopt the cross-channel transform in `colorBytes2` and re-price the record** | **−28.0% of the colour bill alone**, ~3× B9, and every colour figure in reports 04–09 was measured without it. This is now the top colour item | **OPEN — top of the colour queue** |
+| B9 | Residual-context colour model | Was queued as the largest colour win at −10.33%. On top of RCT it is worth **+4.7 pp**, not 10.3 | OPEN — do after B10, and quote the stacked figure |
 | B7 | Generalisation: every result is one photograph | The frozen 16-tap template and any colour win may not transfer. Cheapest real test: Kodak-24 at one small size through the existing frontier | OPEN — blocks any "ship it" claim |
 
 ## Log — newest first
+
+### 2026-07-29 — the floor is not the problem; a missing transform is (report 11)
+
+**Verdict: −36% of the colour bill is reachable and has already been reached.** A decode-verified stream of **6,904,345 B (−36.26%)** exists, produced by handing the residuals to off-the-shelf `brotli -q11`. A WebP tie on colour alone needs 6,896,137 B — the gap is **8,208 B, 0.076% of the colour bill**.
+
+**Independently verified before recording**: re-ran `brotli -q 11` on the agent's dumped residual stream outside its harness and got **6,904,345 B** to the byte; their decoder replay rebuilds all 24,883,200 samples with max |Δ| = 0.
+
+**The finding that reorders this queue:** the coder sits **0.02% above the static ideal of its own model** and **36% above the floor of its own data**. It is a competent implementation of the wrong model. The entire deficit is one missing **cross-channel transform (G, R−G, B−G)** — worth **−28.0% alone**, roughly three times B9, which was queued as the largest colour lever. And they do not add: residual context on top of RCT is worth **+4.7 pp**, not 10.3. Every colour lever measured so far was competing for slack a single missing transform already accounted for.
+
+**The regimes have swapped owners.** At the lossy point (11,121 regions) the raster predictor goes *positive* (+0.9%) and the context ladder starves; RCT still gives −15.4% of colour, but colour is 21% of the bill there, so that is **−3.2% of total against the 8.3% still needed at 28.7 dB**. Colour owns the lossless end and can nearly close it. Walls own the middle and colour cannot help there.
+
+**Not claimed, deliberately:** not a WebP tie — 822,369 + 6,904,345 = 7,726,714 vs 7,718,506 is 1.001×, but that wall figure is the coster #12 showed is not decodable and its legality cost at lossless was never tabulated. brotli is an upper bound on achievable, not a lower bound on entropy; no CM/PAQ-class coder was installed, so the true floor is *below* 6,904,345. Oracle rows are not floors — a junk control of 7,920 meaningless contexts reaches 9,051 B at the lossy point, so no wide-context static number there is quotable.
 
 ### 2026-07-29 — spend limit raised; the six colour lenses run SEQUENTIALLY, floor first
 

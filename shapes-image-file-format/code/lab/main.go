@@ -53,6 +53,14 @@ func main() {
 		hdcheck(os.Args[2])
 	case "hd":
 		hd(os.Args[2], os.Args[3])
+	case "contourx": // contour turn-stream characterisation at every mark at or below the region cap
+		mx, _ := strconv.Atoi(os.Args[3])
+		contourx(os.Args[2], mx)
+	case "turnprice": // contour turn-coder variants priced side by side; LABDUMP=<dir> keeps the partitions
+		mx, _ := strconv.Atoi(os.Args[3])
+		turnprice(os.Args[2], mx)
+	case "turnload": // re-price partitions kept by turnprice, without re-walking the merge
+		turnload(os.Args[2])
 	case "affine":
 		affine(os.Args[2])
 	// Report 09, the CAE context-width arm (wallctx.go). Build without crossplane.go: the two files both define `tap` and `crackPlanes`, which is how they were run when report 09 was produced.

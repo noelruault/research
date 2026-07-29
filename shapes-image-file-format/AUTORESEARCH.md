@@ -48,8 +48,8 @@ The compression *verdict* is settled and is not what this programme is trying to
 |---|---|---|---|
 | B1 | **Colour coder** — mean predictor, order-0 residual, **no cross-channel transform** | 48–71% of the bill at high rate, 93% at lossless. The most primitive component in the pipeline against WebP's 14 predictors + cross-colour transform | **OPEN — next up**, awaiting fan-out results |
 | B2a | Contour coder — **junction map** | — | **CLOSED, NEGATIVE.** It is 2.7–11.2% of the contour bill and already at its floor; widening buys −0.076% of the file at best. See log |
-| B2b | Contour coder — **turn stream** | **Turns are 77–94% of the contour bill**, and the contour coder is chosen wherever walls are 92–96% of the file. This is the single largest unexamined component in the pipeline | **IN PROGRESS** — agent running |
-| B8 | Contour coder — **loop channel** | A flat `log2(nv)+2` per closed loop, no context, no ordering, never examined. **1,658 B at 1,383 regions (3.6%), 6,927 B at 6,417 (7.4%)** — nineteen times the junction map's entire ceiling at the same point | OPEN — surfaced by the B2a agent |
+| B2b | Contour coder — **turn stream** | — | **CLOSED, NEGATIVE IN PRACTICE.** −6.40% of turns is real and free, but report 09's interleave collapsed the contour coder's band from ~6,400 regions to ~849, so it now pays only below 24.25 dB. ~2% of learnable slack remains against an oracle |
+| B8 | Contour coder — **loop channel** | — | **CLOSED WITHOUT WORK.** Same collapse: its 3.6–7.4% shares sat at 1,383–6,417 regions, which the interleave has since handed to CAE. Worth <0.1% of any file the coder would actually emit |
 | B3 | **`bitsPerEdge = 1.73`, `bitsPerReg = 25.0`** (`potts2.go:15`) measured at 512×288, drive the RD merge key and Ising λ at every resolution | Actual cost is 1.22–1.61 bits/edge at 4K rungs and 0.4534 at lossless. The 4K scale-space is therefore not the coder's own RD frontier — the shape coder is undersold at the resolution where the verdict was sharpened | OPEN — must re-run baseline on re-tuned partitions or reproduces #3 |
 | B4 | **Re-price report 08 against a legal wall coder** | #12: published CAE numbers are optimistic by 3.4–12.7%. Report 08's tables are flagged but not corrected | OPEN — bookkeeping, no research risk |
 | B5 | **Rung 2 of the rate ladder** | No mark within ±5% of 50,016 B; needs a merge run at ~7,800 regions to settle whether WebP's lead there is real | OPEN — one run |
@@ -59,6 +59,34 @@ The compression *verdict* is settled and is not what this programme is trying to
 | B7 | Generalisation: every result is one photograph | The frozen 16-tap template and any colour win may not transfer. Cheapest real test: Kodak-24 at one small size through the existing frontier | OPEN — blocks any "ship it" claim |
 
 ## Log — newest first
+
+### 2026-07-29 — B2b/B8 closed: report 09 ate the contour coder's territory
+
+The turn stream is 77–94% of the contour bill, so it looked like the largest unexamined component in the pipeline. Three free context taps — the junction map of the three candidate targets, hard exclusions from decoder-known structure, and absolute direction of travel — take **−6.40% of turns at 11,121 regions**. A junk control of 864 equal-sized contexts *costs* +0.49%, so it is information, not capacity.
+
+**It is worth almost nothing, because of our own previous result.** Report 09's interleave cut CAE enough to move the CAE/contour crossover from ~6,400 regions down to between 849 and 1,383 — verified directly against report 09's table:
+
+| regions | base CAE | interAsym | contour | chosen before → after |
+|---|---|---|---|---|
+| 849 | 47,181 | 37,728 | 37,518 | contour → contour |
+| 1,383 | 55,565 | **44,726** | 45,797 | contour → **CAE** |
+| 6,417 | 96,087 | **81,522** | 93,577 | contour → **CAE** |
+
+So contour is now chosen only below ~849 regions at 4K — **21.99 to 24.25 dB, below any usable fidelity**. The turn lever is worth 1.0–1.2% of the file in a band nobody operates in, and exactly 0.00% everywhere else. Had it been measured before report 09 it would have been worth −2.76% at 6,417 regions.
+
+**This is the programme's first case of one result devaluing another.** Improving CAE did not just help CAE — it shrank the region of the ladder where the contour coder is used at all, and retroactively made an entire queue item worthless. Bottleneck priority computed from a static bill table is wrong the moment any component improves; B2 was ranked #2 on numbers that report 09 had already invalidated.
+
+Other findings, recorded because they cost nothing to keep:
+- **My brief's premise was false.** I told the agent the turn stream should be dominated by long straight runs after the Ising relaxation. It is not: p(straight) = 0.536 and the mean straight run is **1.157** — relaxed walls are 45° staircases at pixel level, not axis-aligned. Explicit run-length contexts are **+23% worse**. Do not brief a hypothesis as a fact.
+- **Causality clean.** A decoder state machine rebuilds the crack graph from (junction bitmap, direction bits, turn symbols) alone and asserts equality — `reconstruct=true` at all 10 operating points. No #12 here. One unpaid hole: the loop count is never transmitted.
+- **Near its floor anyway.** Static conditional entropy at 227 regions: published order-3 = 17,956 B, a 132,192-context oracle = 17,232 B. **~4% of slack against an oracle, ~2% against anything learnable online.**
+- **The small eval mis-ranks context depth, again.** `ord5` is −1.07% at 4K/227 but +0.12% at 960/239. Third instance of falsification #2's shape.
+
+### 2026-07-29 — the fan-out died on the account's monthly spend limit
+
+7 of 14 workflow agents failed with `You've hit your monthly spend limit`: **all six multi-disciplinary colour lenses** (vision, light, spectra, biology, matter, information) **and the synthesis**. The multi-disciplinary colour research was never run. What survived is the three wall levers and the four compression-native colour levers, already logged.
+
+**Consequence for whoever picks this up: spawning subagents will fail until the limit is raised.** The remaining queue items are all doable solo, and B9 is the one with a measured number behind it.
 
 ### 2026-07-29 — B6 applied: the lossless row was priced with a weaker coder than its own table
 

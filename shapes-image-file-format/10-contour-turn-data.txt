@@ -1,0 +1,121 @@
+# Contour coder, TURN CODING (contourBytes -> turnBits, code/lab/contour.go:64) at 3840x2160.
+#
+# Method: the whole measurement runs through one decoder-state machine (contourReplay) that rebuilds the
+# crack graph from nothing but (junction bitmap, per-vertex direction bits, turn symbols) and asserts the
+# reconstruction equals the original graph. Every context feature is read out of that decoder state, so an
+# illegal tap cannot be recorded in the first place. reconstruct=true at every operating point below.
+#
+# Reproduction: the published contour totals are matched exactly, on two independent walks of the hd()
+# scale-space (runRD + relax6 + hdMarks), before anything was changed.
+#   227 -> 19079   344 -> 24106   536 -> 29674   849 -> 37518   1383 -> 45797   11121 -> 126291
+#
+# Commands: labx contourx <img> <maxReg>   (characterisation)
+#           labx turnprice <img> <maxReg>  (side-by-side pricing, identical labels)
+#           labx turnload <dir>            (re-price dumped partitions)
+
+## 1. Where the contour bill sits: turns are almost the whole of it at low rate
+regions   psnr    crack   contourB    vertB    turnB  turn%   loops  loopStartsB
+227      21.99   124884      19079     1090    17989  94.3%      85          265
+344      22.72   155284      24106     1609    22497  93.3%     116          362
+536      23.38   187411      29674     2404    27270  91.9%     177          553
+849      24.25   232086      37518     3626    33892  90.3%     299          934
+1383     24.99   274890      45797     5598    40199  87.8%     531         1658
+2274     25.76   326360      56576     8697    47878  84.6%     913         2851
+3794     26.63   393410      72041    13707    58333  81.0%    1495         4669
+6417     27.50   476863      93577    21758    71819  76.7%    2218         6927
+11121    28.51   603086     126291    34610    91681  72.6%    2950         9213
+19338    29.44   746605     167356    53986   113370  67.7%    3469        10834
+# loopStartsB is inside vertB: explicit starts for closed loops with no junction. It is 24-32% of vertBits.
+# The loop *count* is never transmitted; that is a small unpaid side channel in the published coder.
+
+## 2. Turn-stream statistics -- the "long straight runs" premise is false
+regions   turns   p(straight) p(right) p(left)  meanStraightRun maxRun  bits/turn  H0(b/turn)
+227       124416      0.5364    0.2328   0.2308        1.157      153     1.1567     1.4598
+344       154549      0.5348    0.2337   0.2315        1.150      161     1.1645     1.4617
+536       186252      0.5340    0.2344   0.2316        1.146      161     1.1713     1.4626
+849       230266      0.5339    0.2349   0.2312        1.146      135     1.1775     1.4627
+1383      271969      0.5331    0.2363   0.2305        1.142      110     1.1825     1.4636
+2274      321599      0.5333    0.2377   0.2290        1.142       89     1.1910     1.4634
+3794      385425      0.5321    0.2397   0.2282        1.137       86     1.2108     1.4647
+6417      462856      0.5225    0.2460   0.2315        1.094       73     1.2413     1.4757
+11121     577279      0.5150    0.2504   0.2346        1.062       61     1.2705     1.4839
+19338     699138      0.5105    0.2524   0.2371        1.043       97     1.2973     1.4889
+# Straight-run length histogram at 227 regions (share of runs):
+#   0:0.540  1:0.221  2:0.102  3:0.053  4:0.031  5:0.018  6:0.011  7:0.006  8:0.004  9:0.003 >12:0.005
+# 76% of straight runs are 0 or 1 long. The relaxed walls are 45-degree staircases at the pixel level, not
+# axis-aligned straights, so the published order-3 history already spans the entire run distribution.
+
+## 3. Alphabet: how often the crack lattice permits fewer than 3 continuations, as the decoder sees it
+regions   3 allowed   2 allowed   1 allowed (forced)
+227         0.9947      0.0047      0.0006
+344         0.9945      0.0049      0.0006
+536         0.9935      0.0058      0.0007
+849         0.9923      0.0069      0.0008
+1383        0.9906      0.0084      0.0010
+2274        0.9865      0.0122      0.0013
+3794        0.9772      0.0207      0.0021
+6417        0.9587      0.0375      0.0038
+11121       0.9352      0.0584      0.0064
+19338       0.9046      0.0851      0.0103
+# Exclusion rule: a candidate target that is a junction whose four direction bits are already decoded and
+# do not contain the edge back; or a non-junction that already has its two edges. It never once ruled out
+# the symbol that actually occurred, at any operating point or resolution -- the pricing function returns
+# +Inf if it does, and no +Inf was produced.
+
+## 4. Turn bits vs the published order-3 coder, at 3840x2160, identical partitions (%)
+regions    ord5   ord3.dir  ord3.spec  base+excl  ord3.spec.dir+excl  Hfrozen  H(+ord4,5)  H(+slope8)  ctrl:864junk
+227       -1.07     -0.50      -0.14      -0.33          -0.87         -1.10      -2.00      -1.80        +2.65
+344       -1.04     -0.37      -0.23      -0.34          -0.81         -1.01      -1.83      -1.72        +2.20
+536       -1.04     -0.38      -0.33      -0.40          -0.98         -1.17      -1.96      -1.93        +1.89
+849       -1.01     -0.45      -0.45      -0.45          -1.22         -1.38      -2.04      -2.23        +1.58
+1383      -1.01     -0.50      -0.65      -0.53          -1.52         -1.66      -2.18      -2.53        +1.32
+2274      -0.94     -0.55      -0.88      -0.71          -1.97         -2.08      -2.46      -2.79        +1.08
+3794      -0.87     -0.70      -1.29      -1.02          -2.80         -2.89      -3.08      -3.59        +0.90
+6417      -0.83     -0.91      -1.95      -1.66          -4.24         -4.32      -4.39      -4.98        +0.73
+11121     -0.87     -1.26      -2.97      -2.54          -6.35         -6.40      -6.49      -7.14        +0.49
+19338     -0.81     -1.86      -4.59      -3.79          -9.45         -9.50      -9.56     -10.41        +0.21
+# Hfrozen   = interpolate ord2 -> ord3 -> ord3xspec -> ord3xspecxdir, weight 16, with hard exclusions.
+#             Selected at 960x540 and applied unchanged at 4K.
+# H(+ord4,5)= same chain with ord4 and ord5 levels, weight 32. Best at 4K, worse at 960 -- in-sample here.
+# H(+slope8)= Hfrozen plus a local-slope level (straights and right-minus-left over the last 8 symbols).
+# ctrl:864junk = ord3 x (symbols-so-far mod 32): 864 contexts, same count as ord3.spec.dir, causal, no
+#             information. It COSTS 0.2-2.7%. Capacity alone is not the lever.
+# Explicit run-length contexts are far worse than the published order-3 (run32: +23% at 227 regions);
+# run-length x last-non-straight is a wash (-0.30%). Slope-only and runpair contexts are worse too.
+
+## 5. Absolute totals from the pricing walk (walk 2 of 2; every number reproduced walk 1)
+regions   psnr      caeB    vertB   base(ord3)   ord3.spec.dir+excl   Hfrozen   H(+slope8)   H(+ord4,5)
+19338    29.44    148233    53986      167356               156639    156584       155554       156521
+11121    28.51    121047    34610      126291               120473    120422       119741       120345
+6417     27.50     96087    21758       93577                90532     90477        90003        90425
+3794     26.63     79177    13707       72041                70405     70352        69947        70246
+2274     25.76     65840     8697       56576                55632     55579        55238        55400
+1383     24.99     55565     5598       45797                45187     45131        44779        44921
+849      24.25     47181     3626       37518                37106     37050        36764        36827
+536      23.38     38318     2404       29674                29407     29354        29146        29140
+344      22.72     31842     1609       24106                23923     23878        23720        23695
+227      21.99     25803     1090       19079                18923     18880        18755        18719
+
+## 6. What it is worth as a share of the whole file
+# Published record: wall = min(caeBytes, contourBytes); colour = colorBytes2, from hd/ladder_3840.txt.
+# Post-report-09: wall = min(interAsym CAE, contourBytes) -- interAsym from 09-crossplane-wall-data.txt.
+regions  psnr  colB   pubTotal  Hfrozen%file  H(+slope8)%file | 09wallCoder   09total  Hfrozen%file09
+227     21.99    740     19819      -1.00%        -1.63%      | contour         19819      -1.00%
+344     22.72   1108     25214      -0.90%        -1.53%      | contour         25214      -0.90%
+536     23.38   1708     31382      -1.02%        -1.68%      | contour         31382      -1.02%
+849     24.25   2654     40172      -1.16%        -1.88%      | contour         40172      -1.16%
+1383    24.99   4219     50016      -1.33%        -2.03%      | CAE interAsym   48945       0.00%
+2274    25.76   6804     63379      -1.57%        -2.11%      | CAE interAsym   60282       0.00%
+3794    26.63  11188     83228      -2.03%        -2.52%      | CAE interAsym   76689       0.00%
+6417    27.50  18694    112271      -2.76%        -3.19%      | CAE interAsym  100216       0.00%
+11121   28.51  32143    153190      -0.41%        -0.85%      | CAE interAsym  137895       0.00%
+19338   29.44  55277    203510       0.00%         0.00%      | CAE interAsym  189557       0.00%
+# Report 09's interleave moved the CAE/contour crossover from ~6,400 regions down to ~1,000, so against the
+# current state of the coder every turn-coding gain above 849 regions is worth exactly zero.
+
+## 7. Ceiling
+# Static conditional entropy of the turn stream at 227 regions (124,416 symbols), bytes:
+#   order-0 1.4598 b/turn | published order-3 17,956 | ord5 17,645 | ord6 17,522 (-2.4%)
+#   ord3.spec.dir 17,744 | ord3.spec.dir.slope8 (132,192 contexts, overfit oracle) 17,232 (-4.0%)
+# The adaptive coder reaches -2.0%. The whole turn stream holds about 4% of slack against an oracle model
+# and about 2% against a model that can be learned online. This bottleneck is close to its floor.

@@ -28,6 +28,21 @@ binary; it is documentation and data.
   initializer at large N) *and* the many measured discards (PNN, multi-restart,
   HyAB, deterministic annealing, MST/Friends-of-Friends, …).
 
+- **[shapes-image-file-format/](shapes-image-file-format/)** — can an image
+  format made of *shapes* rather than pixels beat WebP, PNG, JPEG or AVIF on
+  size? Five rounds of measurement for
+  [images](https://github.com/noelruault/images). **Result: no, with one narrow
+  exception.** A Potts/Mumford-Shah region coder beats WebP by 1–6% below
+  ~29.2 dB and loses above it; it never beats AVIF, trailing 8–52% across the
+  whole range. Sixteen mechanisms — spanning physics, collective systems, vision
+  science and spacecraft downlink — tested and killed with numbers, including
+  the proof that "don't serialize, let the decoder regrow the regions" is a
+  rename rather than a loophole. The one actionable win is an engineering one:
+  **32,924 primitives where 1,685 suffice** at identical fidelity. Unusually,
+  the record also carries its own casualty list — six claims the investigation
+  produced, believed, published, and then falsified against its own
+  measurements — and the practices that caught them.
+
 - **[compression-agent/](compression-agent/)** — a measurement-driven subagent
   that picks the right HTTP compression for a stack by benchmarking, not opinion.
 

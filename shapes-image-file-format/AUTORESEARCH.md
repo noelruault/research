@@ -54,12 +54,27 @@ The compression *verdict* is settled and is not what this programme is trying to
 | B4 | **Re-price report 08 against a legal wall coder** | #12: published CAE numbers are optimistic by 3.4–12.7%. Report 08's tables are flagged but not corrected | OPEN — bookkeeping, no research risk |
 | B5 | **Rung 2 of the rate ladder** | No mark within ±5% of 50,016 B; needs a merge run at ~7,800 regions to settle whether WebP's lead there is real | OPEN — one run |
 | B6 | Inconsistent pricing at the lossless row | — | **CLOSED, APPLIED.** Real, verified twice, and it moved a published headline: lossless total 12,159,385 → **11,654,978 B**, 1.58× → **1.51×** WebP. Shapes now sit *under* AVIF and 5% under PNG |
-| B6b | The 512/960/1920 lossless rows are still `colorBytesLean`-priced | Same bug, other three resolutions; each is ~4% too high, and report 08's "ratio is stable across sizes" line rests on them | OPEN — one run each |
+| B6b | The 512/960/1920 lossless rows | — | **CLOSED, APPLIED.** All four re-priced with `colorBytes2`: 1.400× / 1.352× / 1.352× / 1.510× against WebP-lossless, where the record said 1.48 / 1.41 / 1.40 / 1.58. Curve shape unchanged |
 | B10 | **Adopt the cross-channel transform in `colorBytes2` and re-price the record** | **−28.0% of the colour bill alone**, ~3× B9, and every colour figure in reports 04–09 was measured without it. This is now the top colour item | **OPEN — top of the colour queue** |
 | B9 | Residual-context colour model | Was queued as the largest colour win at −10.33%. On top of RCT it is worth **+4.7 pp**, not 10.3 | OPEN — do after B10, and quote the stacked figure |
 | B7 | Generalisation: every result is one photograph | The frozen 16-tap template and any colour win may not transfer. Cheapest real test: Kodak-24 at one small size through the existing frontier | OPEN — blocks any "ship it" claim |
 
 ## Log — newest first
+
+### 2026-07-29 — B6b closed: all four lossless rows re-priced
+
+Re-ran the lossless stage at every resolution with the corrected `hd.go` (`colorBytes2`, not `colorBytesLean`), and measured `cwebp -lossless -z 9` at each size directly rather than reusing a remembered figure.
+
+| size | shapes (corrected) | WebP-lossless | ratio | published | delta |
+|---|---|---|---|---|---|
+| 512×288 | 243,481 B | 173,906 B | **1.400×** | 1.48× | −0.080 |
+| 960×540 | 815,037 B | 603,038 B | **1.352×** | 1.41× | −0.058 |
+| 1920×1080 | 3,143,329 B | 2,325,106 B | **1.352×** | 1.40× | −0.048 |
+| 3840×2160 | 11,654,978 B | 7,718,506 B | **1.510×** | 1.58× | −0.070 |
+
+Every row was 0.05–0.08 too high. The qualitative claim survives intact: the ratio is roughly flat across sizes and clearly worst at native resolution, which is what report 08's argument rests on. Report 08's line now carries the corrected figures.
+
+Note the internal consistency check: 1.48 × 173,906 = 257,381 B, which is 5.4% above the corrected 243,481 — the same order as the colour-coder correction that caused it. The old numbers were wrong in exactly the way the fix predicts.
 
 ### 2026-07-29 — the floor is not the problem; a missing transform is (report 11)
 

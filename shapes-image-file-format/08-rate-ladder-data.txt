@@ -1,0 +1,15 @@
+# Byte-matched rate ladder at 3840x2160: the same two coders at six file sizes across three decades.
+#
+# cwebp's quality is bisected until its file lands near the shape coder's, so at each step the only thing left to compare is the picture.
+# Two steps are NOT matchable and that is a result, not a gap: cwebp bottoms out at q0 = 85,102 B on this image, so it cannot produce a file as small as the shape coder's 19,819 B at all. Those rows are pinned to the floor and flagged.
+# The top step pairs against cwebp -lossless, because past ~8 MB WebP stops being lossy on this image.
+#
+# command : bash code/hd/rate-build.sh
+# columns : step  regions  shapes_bytes  shapes_psnr  webp_setting  webp_bytes  webp_psnr  webp_at_floor
+#
+1	227	19819	21.99	q0 floor	85102	26.75	1
+2	1383	50016	24.99	q0 floor	85102	26.75	1
+3	11121	153190	28.51	q6	152834	29.18	0
+4	96359	533107	32.74	q69	536848	35.13	0
+5	710144	2413389	40.42	q97	2452742	43.62	0
+6	3380956	8055367	53.37	lossless	7718506	99.00	0

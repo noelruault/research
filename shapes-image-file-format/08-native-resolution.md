@@ -87,6 +87,23 @@ The matched-quality column is the sharper statement of the same fact: **spending
 
 That failure is nameable and therefore looks fixable, which is why report 04 already priced the fix: per-region **affine** colour closes most of the gradient gap and costs more in coefficients than it saves. The bands are the symptom. The explicit boundary is the disease.
 
+## Result 4 — the whole rate axis, byte-matched, and the one place WebP cannot follow
+
+Six operating points spanning three decades of file size, each byte-matched by bisecting `cwebp -q` against the shape coder's output ([`08-rate-ladder-data.txt`](08-rate-ladder-data.txt)):
+
+| step | shapes | | WebP | | shapes vs WebP |
+|---|---|---|---|---|---|
+| 1 | 19,819 B | 21.99 dB | 85,102 B | 26.75 dB | **WebP cannot go this small** |
+| 2 | 50,016 B | 24.99 dB | 85,102 B | 26.75 dB | **WebP cannot go this small** |
+| 3 | 153,190 B | 28.51 dB | 152,834 B | 29.18 dB | −0.67 dB |
+| 4 | 533,107 B | 32.74 dB | 536,848 B | 35.13 dB | −2.39 dB |
+| 5 | 2,413,389 B | 40.42 dB | 2,452,742 B | 43.62 dB | −3.20 dB |
+| 6 | 8,055,367 B | 53.37 dB | 7,718,506 B | **exact** | WebP is lossless for fewer bytes |
+
+Steps 3–5 match to within 1.6% on bytes. **The deficit widens monotonically with rate** — 0.67, 2.39, 3.20 dB — which is the resolution ladder's finding restated along the other axis: the more bits there are to spend, the worse an explicit boundary is as a way to spend them.
+
+**And there is exactly one thing the region coder can do that WebP cannot.** At 3840×2160 `cwebp` bottoms out at `q0` = **85,102 B**. It has no operating point below that; the format simply does not go there. The shape coder reaches 19,819 B — **4.3× smaller than anything WebP can emit** — at 21.99 dB. That is a real capability, not a rounding win, and it sits at the very bottom of the rate axis, which is where report 05 said the only genuine argument was. It is also the regime nobody serves a 4K photograph in.
+
 ## Caveats, load-bearing
 
 - **The source is a q95 JPEG.** At native resolution it carries JPEG artefacts and film grain that a downscale averages away, and noise favours a transform codec (which buries it in high-frequency residual) over a region codec (which must spend a region on every blob). This confounds "resolution" with "noise". The ladder controls it partially — all four rungs come from that same 4K file, so the effect is monotone across rungs that share content and share the noise's origin — but a genuinely grain-free 4K master could behave differently. **Not verified.**

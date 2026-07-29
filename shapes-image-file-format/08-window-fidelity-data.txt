@@ -1,5 +1,6 @@
-iso-byte  WebP q14: 200024 B
-iso-look  WebP q8 : 165042 B
+# Per-window fidelity, 3840x2160. A crop of a photograph is not representative of it, so these are reported separately from the whole-image numbers everywhere they appear.
+#
+# Part 1 -- 448x448 windows at the matched-size and matched-quality operating points (bash code/hd/mirror-build.sh)
 sky    shapes-hi psnr 53.07  mae 0.3102  max 3  pct>1 0.51  pct>2 0.00  pct>4 0.00  pct>8 0.00
 sky    shapes-lo psnr 36.90  mae 2.8280  max 21  pct>1 66.91  pct>2 47.65  pct>4 19.28  pct>8 2.63
 sky    webp-lo   psnr 42.29  mae 1.4955  max 12  pct>1 41.68  pct>2 18.53  pct>4 2.53  pct>8 0.02
@@ -12,5 +13,29 @@ snow   shapes-hi psnr 54.10  mae 0.2344  max 3  pct>1 0.92  pct>2 0.00  pct>4 0.
 snow   shapes-lo psnr 26.82  mae 8.4725  max 96  pct>1 86.82  pct>2 78.27  pct>4 62.36  pct>8 37.21
 snow   webp-lo   psnr 27.39  mae 7.7682  max 84  pct>1 84.34  pct>2 74.68  pct>4 57.43  pct>8 32.78
 snow   webp-iso  psnr 26.61  mae 8.4527  max 86  pct>1 85.35  pct>2 76.18  pct>4 59.76  pct>8 35.74
---- asset weight ---
-2.8M	/private/tmp/claude-501/-Users-noelruault-go-src-github-com-noelruault/23e7d4b1-17da-4b78-8110-6154f88a8011/scratchpad/hd/mirror
+
+# Part 2 -- 384x384 windows at each of the six rate-ladder steps, in step order (bash code/hd/rate-build.sh)
+  sky    shapes psnr 30.82  mae 5.6695  max 31  pct>1 83.86  pct>2 72.55  pct>4 50.70  pct>8 20.82
+  sky    webp   psnr 37.70  mae 2.5286  max 25  pct>1 62.69  pct>2 41.69  pct>4 14.56  pct>8 1.85
+  ridge  shapes psnr 19.73  mae 18.3266  max 189  pct>1 93.92  pct>2 89.83  pct>4 81.77  pct>8 65.86
+  ridge  webp   psnr 23.45  mae 12.0660  max 153  pct>1 89.19  pct>2 82.24  pct>4 69.22  pct>8 48.36
+  sky    shapes psnr 33.61  mae 4.2291  max 23  pct>1 78.44  pct>2 64.32  pct>4 39.32  pct>8 10.61
+  sky    webp   psnr 37.70  mae 2.5286  max 25  pct>1 62.69  pct>2 41.69  pct>4 14.56  pct>8 1.85
+  ridge  shapes psnr 22.50  mae 12.7263  max 168  pct>1 90.16  pct>2 83.64  pct>4 71.27  pct>8 49.84
+  ridge  webp   psnr 23.45  mae 12.0660  max 153  pct>1 89.19  pct>2 82.24  pct>4 69.22  pct>8 48.36
+  sky    shapes psnr 36.70  mae 2.8942  max 20  pct>1 67.74  pct>2 48.58  pct>4 20.06  pct>8 3.09
+  sky    webp   psnr 41.49  mae 1.6363  max 17  pct>1 45.27  pct>2 21.92  pct>4 3.91  pct>8 0.11
+  ridge  shapes psnr 25.54  mae 9.6204  max 111  pct>1 87.83  pct>2 79.92  pct>4 65.07  pct>8 41.41
+  ridge  webp   psnr 25.74  mae 9.3416  max 106  pct>1 86.60  pct>2 78.15  pct>4 62.74  pct>8 39.54
+  sky    shapes psnr 41.36  mae 1.6930  max 10  pct>1 47.71  pct>2 24.08  pct>4 3.99  pct>8 0.02
+  sky    webp   psnr 43.61  mae 1.2681  max 12  pct>1 34.14  pct>2 12.51  pct>4 1.16  pct>8 0.01
+  ridge  shapes psnr 29.47  mae 6.3736  max 59  pct>1 83.06  pct>2 72.36  pct>4 53.14  pct>8 26.38
+  ridge  webp   psnr 31.75  mae 5.0398  max 51  pct>1 79.69  pct>2 67.01  pct>4 45.22  pct>8 17.67
+  sky    shapes psnr 44.86  mae 1.0927  max 9  pct>1 27.65  pct>2 7.97  pct>4 0.43  pct>8 0.00
+  sky    webp   psnr 46.68  mae 0.8649  max 7  pct>1 18.23  pct>2 3.33  pct>4 0.06  pct>8 0.00
+  ridge  shapes psnr 37.74  mae 2.4727  max 18  pct>1 59.56  pct>2 41.14  pct>4 16.80  pct>8 1.65
+  ridge  webp   psnr 41.96  mae 1.4307  max 24  pct>1 36.86  pct>2 15.60  pct>4 3.32  pct>8 0.46
+  sky    shapes psnr 53.05  mae 0.3123  max 3  pct>1 0.50  pct>2 0.00  pct>4 0.00  pct>8 0.00
+  sky    webp   psnr 99.00  mae 0.0000  max 0  pct>1 0.00  pct>2 0.00  pct>4 0.00  pct>8 0.00
+  ridge  shapes psnr 54.31  mae 0.2229  max 3  pct>1 0.91  pct>2 0.00  pct>4 0.00  pct>8 0.00
+  ridge  webp   psnr 99.00  mae 0.0000  max 0  pct>1 0.00  pct>2 0.00  pct>4 0.00  pct>8 0.00

@@ -70,6 +70,15 @@ func main() {
 		floorDec(os.Args[2], os.Args[3], os.Args[4], os.Args[5])
 	case "floordump": // floordump <image.png> <dir> — write the exact lossless partition for floordec
 		floorDump(os.Args[2], os.Args[3])
+	// Report 13, B10: the cross-channel transform adopted and the colour column re-priced (recolour.go).
+	case "recolour": // recolour <image.png> <tag> [publishedRegions] [src.png]; RCDUMP=<dir> writes the streams
+		rcCmd(os.Args[2:])
+	case "rcdec": // rcdec <labels.bin> <stream.bin> <rct|a> <ref.png> [coef.bin] — the decodability check
+		coef := ""
+		if len(os.Args) > 6 {
+			coef = os.Args[6]
+		}
+		rcDec(os.Args[2], os.Args[3], os.Args[4], os.Args[5], coef)
 	// Report 09, the CAE context-width arm (wallctx.go). Build without crossplane.go: the two files both define `tap` and `crackPlanes`, which is how they were run when report 09 was produced.
 	case "wallctx":
 		wallctxCmd(os.Args[2:])

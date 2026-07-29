@@ -42,6 +42,25 @@ The compression *verdict* is settled and is not what this programme is trying to
 | match WebP lossless | cut 33.8% of total ≈ 36% of the colour bill (was 36.5% before the B6 correction) |
 | beat AVIF anywhere | 30–50% — treat as out of reach, do not aim here |
 
+## Priorities changed on 2026-07-29 — read report 13 first
+
+The programme was optimising bytes against WebP. Report 13 reframes it: the comparison that matches the product is **WebP + a region-map sidecar**, against which the shape coder appears **41% smaller** (153,190 B vs 258,080 B at 28.5 dB) — hypothesis, not result, because that sidecar figure is our own illegal wall coder.
+
+**The top item is no longer a byte lever.** It is **P0: does the segmentation follow objects or illumination?** Twelve reports measured whether regions are cheap; none measured whether they are *right*, and every capability claim depends on it. If regions shatter the sky into bands and merge a person with the wall, the cheapest possible format is worthless.
+
+| P | item | why it outranks bytes |
+|---|---|---|
+| **P0** | **Measure segmentation quality** | Blocks every capability application. Never attempted. Cheapest decisive measurement available |
+| P1 | WebP + sidecar benchmark, properly steelmanned | The comparison that matches the product; would be the study's strongest result |
+| P2 | Adopt RCT (B10) | +8.3% → ~+4.7% at the mid-axis. *In progress* |
+| P3 | Fix wall-coder legality (#12) | The record contains numbers no decoder can produce; P1 inherits the error |
+| P4 | Real container | Without a bitstream there is no format |
+| P5 | Second image, then a corpus (B7) | Blocks every generalisation claim |
+| P6 | Encoder cost | Determines which applications are reachable. Trivial, never measured |
+| P7 | Curve-fitted boundaries | Only worth it if P0 says regions are meaningful |
+
+The byte queue below stays valid but is now subordinate to the above.
+
 ## Bottleneck queue — work the top open item
 
 | # | bottleneck | why it is worth doing | status |

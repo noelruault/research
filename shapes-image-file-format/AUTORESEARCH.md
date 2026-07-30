@@ -88,6 +88,28 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — preprocessing the colours works, and it shrinks our advantage (report 36)
+
+**Owner's idea: push the colour classes apart before encoding, then run report 35's pipeline unchanged.** It works — and the pixel arm benefits most.
+
+| | original dog | pre-processed |
+|---|---|---|
+| arms agree | 94.50% | **98.86%** |
+| region blobs | 77 | **22** |
+| pixel blobs | 451 | **63** |
+| region edge dE | 5.47 | **10.88** |
+| pixel edge dE | 4.04 | **9.82** |
+| **blobs advantage** | 5.9× | **2.9×** |
+| **edge dE advantage** | 1.35× | **1.11×** |
+
+Mechanism, and it generalises: **the region graph's advantage was largely that it regularises an error-prone classifier.** Make the classifier reliable and there is less to regularise. With the majority-filter steelman at radius 7 the **pixel arm is actually ahead on edge fidelity** (9.54 vs 9.38). The preprocessing is the single biggest improvement measured in this line of work and it is **substrate-independent** — most of it is available to anyone, with or without this format.
+
+**It also introduced a collision the original did not have.** The boost clipped the background sky/trees *and* the dog's nose and eyes to exactly `rgb(0,0,0)`. In the original these were separable in principle (ear `rgb(42,44,39)` vs foliage `rgb(10,16,16)`–`rgb(54,60,60)`) — overlapping but not identical. Clipping made it total, and the cut has holes where the dog's face should be. **The boost traded the chromatic axis for the luminance one.**
+
+**Next: a non-clipping transform.** Raise chroma separation, leave the luminance endpoints intact. The two axes are independent so the gain should be available without the loss. Untested. There is also a format-native version worth trying — fit a chroma stretch from the region palette and store it as the colour-space tag SHPC still lacks (H2), making it reversible rather than a destructive edit to the source.
+
+**Also this session: every ad-hoc run is now a script** under [`code/runs/`](code/runs/) — A1/A1b, and reports 32, 33, 34, 35. No number in those reports now rests on a shell line that only existed in a transcript.
+
 ### 2026-07-30 — CORRECTION to report 35: the cleanliness headline was a strawman (falsification #14)
 
 **Caught by a reader asking "are you sure we were on equal conditions?" — and no, we were not.**

@@ -1,0 +1,83 @@
+36 — does boosting colour separation before encoding improve the cut?
+
+Idea supplied by the project owner: the dog photograph from report 33, run through a heavy
+contrast/saturation boost, then put through the report 35 pipeline unchanged.
+
+Source: a 1170x855 JPEG, resampled to 738x539 so the width matches report 33's original.
+Encoded mark: 1,009 regions / 34.25 dB. WebP arm: cwebp -m 6 -q 12 = 5,562 B at 34.63 dB.
+Our file at that mark: 8,908 B (walls 6,754, colour 2,130, header 24).
+
+    runs/35-bgclass.sh with IMG=dogpop738 REGIONS=1009
+
+=== THE CUT IS MUCH BETTER, ON BOTH ARMS ===
+
+                        ORIGINAL dog        PRE-PROCESSED dog
+arms agree                    94.50%                   98.86%
+region blobs                      77                       22
+pixel  blobs                     451                       63
+region dE on edge               5.47                    10.88
+pixel  dE on edge               4.04                     9.82
+
+Every number improves, and the two arms nearly stop disagreeing (98.86%).
+
+=== BUT THE FORMAT'S ADVANTAGE SHRINKS ===
+
+                        ORIGINAL        PRE-PROCESSED
+blobs, region vs pixel     5.9x                 2.9x
+dE,    region vs pixel     1.35x                1.11x
+
+With the majority-filter steelman applied to both arms it narrows further:
+
+arm                  radius   removed px     bg blobs     fg blobs   dE on edge
+R  per region       (none)        340468           10           12        10.88
+P  per pixel        (none)        338804           20           43         9.82
+R  per region             3       340481           10           12        10.60
+P  per pixel              3       338867           13           22        10.09
+R  per region             5       340504            7           12        10.05
+P  per pixel              5       338971           10           14         9.98
+R  per region             7       340589            6           12         9.38
+P  per pixel              7       339035            8           14         9.54
+
+At radius 7 the pixel arm is AHEAD on edge fidelity (9.54 vs 9.38).
+
+MECHANISM: the region graph's advantage was largely that it regularises an error-prone
+classifier. Make the classifier reliable and there is less left to regularise. Cleanly separated
+colour classes are exactly what makes a per-pixel decision reliable.
+
+=== AND IT INTRODUCES A COLLISION THE ORIGINAL DID NOT HAVE ===
+
+Probed colours from the pre-processed frame:
+
+  background sky/trees   (330,100) (480,100) (189,63) (568,63)  ->  rgb(0,0,0)
+  dog's nose/eyes        (460,214)                              ->  rgb(0,0,0)
+
+EXACTLY equal. The boost clipped both to pure black.
+
+In the ORIGINAL the same pair was separable in principle: the dog's ear was rgb(42,44,39) and the
+foliage rgb(10,16,16) to rgb(54,60,60) — close, overlapping, but not identical. Clipping made the
+collision total and unrecoverable. It is visible in 36-preprocess/dogpop-cut.png as holes in the
+dog's face where the eyes, nose and mouth were.
+
+So the boost TRADED one collision for another:
+  gained   grass separates cleanly. Grass blue channel falls to 8-58 while the dog's blue tracks
+           its green at 100-142, so the blue channel alone now discriminates.
+  lost     every dark dog feature and the whole dark background became the same pure black.
+
+=== WHAT TO DO INSTEAD ===
+
+A NON-CLIPPING transform. Boost chroma separation while preserving luminance detail — rotate or
+stretch hue, raise saturation, but do not crush the endpoints. The gain here came from the
+chromatic axis (blue channel); the loss came from clipping the luminance axis. They are
+independent, so the gain is available without the loss. UNTESTED — stated as the next experiment,
+not as a result.
+
+=== CAVEATS ===
+
+  - One image, one preprocessing setting, applied by hand outside this pipeline. The exact
+    transform is unknown to the code: an already-processed JPEG was supplied.
+  - Different crop and size from report 33's original (738x539 vs 738x414), so the two are not
+    pixel-comparable; the comparison is between summary statistics, not between matched runs.
+  - Sample coordinates were re-picked for this frame. The FIRST attempt put two "keep" points on
+    grass — caught by reading the printed rgb values, which is why the probe step exists.
+  - Bytes: 8,908 B against WebP's 5,562 B at matched fidelity, i.e. +60.2%. Unchanged story, and
+    not what this report is about.

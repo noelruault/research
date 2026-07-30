@@ -1,0 +1,92 @@
+37 — segment one image, colour from another. And what removing the black point does.
+
+Owner's idea: "flatten the colours a bit so the difference is more obvious, then get the shape and
+apply it to the original."
+
+This format can do that natively, because geometry and colour are SEPARATE CHUNKS in the file.
+A raster codec cannot: its segmentation is the block grid and its colours are the same
+coefficients. New verb:
+
+    lab crosseg <seg-source.png> <colour-source.png> <regions> <out.png>
+
+It merges on the segmentation source (capturing the final merge key as the relaxation lambda, as
+hd does), then prices and paints the resulting partition from the COLOUR source. It also runs the
+baseline — the same target segmented on the colour source directly — so the two are compared at
+matched region count against the same reference.
+
+=== 1. FOR THE FILE: NEGATIVE, and not close ===
+
+seg source = dogpop738.png    (Highlights -100, Contrast -100, Brightness -20, Black point +100)
+colour source = dognobp738.png (same, Black point 0)
+Both 738x539, same crop. PSNR measured against dognobp738.png in BOTH rows.
+
+partition from                       regions     PSNR      wallB       colB     totalB
+dogpop738.png (cross)                   1296    28.44       9220       3188      12409
+dognobp738.png (baseline)               1141    39.27      11181       2731      13911
+
+cross vs baseline: -10.82 dB for -10.80% bytes.
+
+A catastrophic trade. MECHANISM: the flattened source has crushed blacks, so its partition puts
+background trees AND the dog's dark features in the same regions. Filling those regions from the
+original averages over colours the original keeps distinct, and the error is enormous.
+
+THE RULE THIS ESTABLISHES: the partition must match the colours it is going to carry. Segmenting
+on a different image is only free when you are throwing the fill away — i.e. when you want a MASK,
+not a picture.
+
+=== 2. FOR THE MASK: free, and it is the good version of the idea ===
+
+Geometry is shared, so a mask is a set of region ids. Classify using the FLATTENED image's region
+colours (easy separation), then apply the resulting id set to the ORIGINAL pixels. Costs nothing
+extra and keeps the real colours. That is exactly what the owner proposed and it works — subject
+to the collision below.
+
+=== 3. REMOVING THE BLACK POINT MOVES THE ERROR, IT DOES NOT REMOVE IT ===
+
+Probed, same coordinates, both versions:
+
+                        WITH black point +100      WITHOUT (black point 0)
+dog nose (460,214)          rgb(  0,  0,  0)          rgb( 38, 37, 36)
+background (330,100)        rgb(  0,  0,  0)          rgb( 64, 68, 62)
+background (480,100)        rgb(  0,  0,  0)          rgb( 57, 55, 51)
+grass    (189,441)          rgb(123,134, 25)          rgb(131,140, 72)
+
+Clipping is gone: the nose is no longer identical to the sky. But 38,37,36 against 57,55,51 is
+still a ~20-unit gap, and the dark trees sit inside the dog's dark range.
+
+RESULT, with the dog's dark features added to the KEEP set (dognobp, 1,569 regions, 40.13 dB):
+
+arm                 decisions   removed px     bg blobs     fg blobs
+R  per region            1569       322931           25           22
+P  per pixel           397782       323871           39           63
+decisions ratio 254x; masks agree on 98.29% of pixels
+
+  WITH black point:     trees removed, DOG'S FACE HOLED (nose/eyes were rgb(0,0,0) = background)
+  WITHOUT black point:  dog's face intact, LARGE BLOCK OF DARK TREES KEPT
+
+Same collision, relocated. The dark-dog/dark-tree overlap is a property of the SCENE, not of the
+preprocessing; the black point made it total, and removing it makes it merely severe. No colour
+rule resolves it in either direction.
+
+=== 4. A METHODOLOGICAL CORRECTION TO REPORT 36 ===
+
+Report 36 tabulated edge dE across two different images (original 5.47 -> pre-processed 10.88) and
+read the rise as better mask quality. THAT COMPARISON IS CONFOUNDED. Edge dE is a mean CIELAB step
+across the mask edge, so it scales with the image's own contrast. Black point +100 raises contrast
+at the dark end, which inflates dE regardless of whether the mask improved.
+
+Confirmed here: the no-black-point version, which is FLATTER, scores dE 2.59 / 2.13 against the
+black-point version's 10.88 / 9.82 — a 4x difference driven by the tone curve, not by mask quality.
+
+Edge dE is valid BETWEEN ARMS ON ONE IMAGE, which is how the region-vs-pixel claim uses it. It is
+NOT valid across images. Report 36's cross-image row is withdrawn; its region-vs-pixel ratios
+(1.35x original, 1.11x pre-processed) stand, because both are within-image.
+
+=== CAVEATS ===
+
+  - One scene, two tone curves, one region count each.
+  - The crosseg baseline lands at 1,141 regions against the cross arm's 1,296: runRD stops at the
+    first mark at or below the target and the two sources coarsen differently. The cross arm has
+    MORE regions and still scores 10.82 dB worse, so the direction of the finding is safe.
+  - Both tone curves were applied in an external editor; the transfer curves are not reproducible
+    from this repo.

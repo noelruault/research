@@ -32,8 +32,10 @@ That makes the fix specific rather than speculative: **keep the first three, dro
 | arms agree | 94.50% | **98.86%** |
 | region blobs | 77 | **22** |
 | pixel blobs | 451 | **63** |
-| region edge dE | 5.47 | **10.88** |
-| pixel edge dE | 4.04 | **9.82** |
+| region edge dE | 5.47 | 10.88 |
+| pixel edge dE | 4.04 | 9.82 |
+
+> **The two edge-dE rows are withdrawn — see report 37.** Edge dE scales with the image's own contrast, and Black point +100 raises contrast at the dark end, so the rise is inflated by the tone curve rather than by mask quality. The *within-image* ratios below (1.35× and 1.11×) are unaffected, because both arms there see the same image. Comparing dE across images was the error.
 
 The mechanism is visible in the probed colours: the boost drove grass's **blue channel down to 8–58** while the dog's blue still tracks its green at **100–142**. The blue channel alone now discriminates. That is a real gain and it is what the proposal predicted.
 
@@ -69,7 +71,7 @@ In the original these were separable *in principle* — the ear was `rgb(42,44,3
 
 **A non-clipping transform.** The gain came from chroma — stretching the classes apart in hue and saturation. The loss came from crushing the luminance endpoints. Those are independent axes, so the gain should be available without the loss: raise chroma separation, leave the endpoints intact, keep dark-dog and dark-background distinguishable.
 
-**Untested.** Stated as the next experiment, not as a result. With the settings now known it is concrete: re-run at **Black point 0**, everything else unchanged, and check whether the dog's face survives while the grass separation holds.
+**Now tested — report 37.** Re-run at Black point 0: the dog's face survives, and **a large block of dark trees is kept instead**. The collision moved rather than resolved; the dark-dog/dark-tree overlap is a property of the scene. Report 37 also tests the stronger version of the idea — segment the flattened image, colour from the original — which is **free for a mask and catastrophic for the file** (−10.82 dB for −10.80% bytes).
 
 ### The bigger hypothesis hiding in "I tried to reduce noise"
 

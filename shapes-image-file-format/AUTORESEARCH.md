@@ -88,6 +88,18 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — segment one image, colour from another (report 37); and report 36's dE row withdrawn
+
+**Owner's idea: flatten the colours, take the shape, apply it to the original.** This format can do it natively — geometry and colour are separate chunks — so it was worth a verb (`lab crosseg`) rather than an argument.
+
+**For the file: negative, and not close.** Partition from the flattened image, colours from the original, matched region count, PSNR against the colour source in both rows: **28.44 dB / 12,409 B (cross)** against **39.27 dB / 13,911 B (baseline)**. **−10.82 dB to save 10.80% of the bytes.** The flattened source has crushed blacks, so its partition puts background trees and the dog's dark features in the same regions, and filling those from the original averages over colours the original keeps distinct. **The rule: a partition must match the colours it will carry.** Segmenting elsewhere is only free when the fill is thrown away — i.e. when you want a mask.
+
+**For the mask: free, and it is the good version of the idea.** Geometry is shared, so a mask is a set of region ids: classify on the flattened colours, apply the ids to the original pixels. No second encode.
+
+**Removing the black point moves the error rather than removing it.** Probed: the dog's nose goes from `rgb(0,0,0)` to `rgb(38,37,36)` and the background trees from `rgb(0,0,0)` to `rgb(57,55,51)`. Clipping gone, but a ~20-unit gap remains. With the black point the trees went and the dog's face was holed; without it the face is intact and **a large block of dark trees is kept**. Same collision, relocated — it is a property of the scene, and report 35's hard limit is unchanged.
+
+**A correction to report 36, found while doing this.** It tabulated edge dE *across two images* (5.47 → 10.88) and read the rise as better masks. **Confounded and withdrawn**: dE scales with the image's own contrast, and Black point +100 inflates it at the dark end. The flatter no-black-point version scores 2.59 / 2.13 — a 4× swing driven by the tone curve. **dE is valid between arms on one image**, which is how the region-vs-pixel claim uses it, and invalid across images. Report 36's within-image ratios stand.
+
 ### 2026-07-30 — preprocessing the colours works, and it shrinks our advantage (report 36)
 
 **Owner's idea: push the colour classes apart before encoding, then run report 35's pipeline unchanged.** It works — and the pixel arm benefits most.

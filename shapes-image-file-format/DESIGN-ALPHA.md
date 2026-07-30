@@ -61,7 +61,15 @@ They are not exclusive. A mode field in the header:
 
 ## A1 is done, and it retracts the fix this document proposed
 
-**Run it and look: [`A1-silhouette/`](A1-silhouette/), numbers in [`DESIGN-ALPHA-A1-data.txt`](DESIGN-ALPHA-A1-data.txt), verb `lab silhouette`.**
+**Numbers in [`DESIGN-ALPHA-A1-data.txt`](DESIGN-ALPHA-A1-data.txt), verb `lab silhouette`, panel key in [`A1-silhouette/README.md`](A1-silhouette/README.md).**
+
+![ak74 at 328 regions, before: authored, what the merge received, render, dissolved crossings in red](A1-silhouette/ak74-328regions.png)
+
+*ak74 at 328 regions, **before**. Panels: authored (checkerboard = transparent) · what `load()` handed the merge · render · dissolved crossings in red. **50.43% dissolved.** This single image is the whole mechanism: the orange wooden stock keeps its silhouette, every edge of the black gun body loses it — same image, same merge, decided purely by whether the edge colour differs from black.*
+
+![bow at 476 regions, before](A1-silhouette/bow-476regions.png)
+
+*bow at 476 regions, **before**. **37.32% dissolved**, and the bowstring is gone along its entire length. Panel 2 shows why — on black the bow nearly vanishes.*
 
 The merge dissolves the silhouette on all three sprites, at every mark — 16% to 62% of silhouette crossings. So the hazard is real. **But the cause is not the merge, and the fix proposed below is aimed at the wrong stage.**
 
@@ -99,7 +107,20 @@ Two separate things, and the phrasing ran them together.
 
 ## A1b — built, and the constraint turned out to be unnecessary
 
-**Before and after, same sprites, same protocol** (`A1-silhouette/*-AFTER.png`):
+**Before and after, same sprites, same protocol.** Pairs are matched by nearest region count; marks shift by a unit or two because the partitions genuinely differ once alpha is carried.
+
+![ak74 at 330 regions, after: no dissolved crossings](A1-silhouette/ak74-330regions-AFTER.png)
+
+*ak74 at 330 regions, **after**. **0.00% dissolved** — no red at all, against 50.43% at 328 regions above. Panel 2 is deliberately still the old premultiplied view, so the failure and the fix sit side by side in one image.*
+
+![bow at 473 regions, after](A1-silhouette/bow-473regions-AFTER.png)
+
+*bow at 473 regions, **after**. **0.14%**, against 37.32% at 476 regions. At the finest mark ([1,368 regions](A1-silhouette/bow-1368regions-AFTER.png)) it reaches 0.00%.*
+
+![pickaxe at 160 regions, before and after](A1-silhouette/pickaxe-160regions-AFTER.png)
+
+*pickaxe at 160 regions, **after**: **0.00%**, against [16.30% before](A1-silhouette/pickaxe-160regions.png) at the identical mark. This is the exact-matched pair — same region count on both arms.*
+
 
 | sprite | before (A1) | after (A1b) |
 |---|---|---|

@@ -88,6 +88,22 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — first bytes on the target niche: 1 win, 2 losses vs WebP lossless (report 32)
+
+**[`32-sprites-vs-codecs.md`](32-sprites-vs-codecs.md).** Every byte number in this study came from photographs. The niche is game sprites and nobody had measured one.
+
+| sprite | OURS | WebP-ll | PNG | AVIF-ll |
+|---|---|---|---|---|
+| ak74 | **1,831** | 1,938 (**−5.5%**) | 2,617 (−30.0%) | 3,605 (−49.2%) |
+| bow | 1,310 | 1,054 (+24.3%) | 2,397 (−45.4%) | 3,114 (−57.9%) |
+| pickaxe | 345 | 218 (+58.3%) | 466 (−26.0%) | 1,242 (−72.2%) |
+
+**It is a lossless comparison, which was not the plan.** At the finest mark `hdMarks`' stop (940) is above the exact partition (813 regions), so `runRD` never merges and the render is the source. Checked rather than assumed: `p4dec` was pointed at the **original sprite** as reference instead of the render, and reports EXACT on all three, alpha included. So no fidelity matching was needed or done.
+
+**The losses have causes, and one of them is actionable.** pickaxe is 400 px — our ~21 B header plus a 61 B wall chunk is most of the file against WebP's ~44 B floor, which is small-image overhead rather than a coding failure. **bow loses on alpha specifically: its alpha chunk is 540 B against a 519 B colour chunk**, the largest single component of that file, because approach A stores one flat value per region and a soft gradient must be bought with extra regions and extra boundary. That is the first *measured* argument for `DESIGN-ALPHA.md`'s deferred per-region alpha ramp (idea D) or the per-pixel plane (approach B). One sprite, so a pointer, not a mandate.
+
+**Not a general win, and report 23 is unchanged.** n=3, one project, 400–3,420 px, lossless only. The format's actual pitch lives at the coarse marks and this says nothing about them. Timing was measured and is deliberately **not** reported: at this size both sides are process-startup bound and our decoder shells out to `brotli`, so it measures fork/exec, not decoding.
+
 ### 2026-07-30 — alpha now runs the whole pipeline; SHPC v2 ships, and A1's fix was not needed
 
 **Look at it: `A1-silhouette/*-AFTER.png`. Numbers: `DESIGN-ALPHA-A1b-data.txt`.**

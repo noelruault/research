@@ -1,0 +1,80 @@
+32 — SHPC v2 against shipping codecs, on game sprites, LOSSLESS.
+
+Commands (from code/lab, under bash — zsh mis-splits the loop pairs):
+
+    SP=/Users/noelruault/go/src/github.com/noelruault/sprites/assets/props/extra
+    for pair in "ak74 940" "bow 1368" "pickaxe 160"; do
+      s=${pair% *}; n=${pair#* }; m=$(printf %08d $n)
+      R=$OUT/$s/hd_$m.png                        # finest mark of the scale-space
+      lab p4enc $R $OUT/$s.shpc
+      lab p4dec $OUT/$s.shpc /dev/null $SP/$s.png   # <-- verifies against the SOURCE
+      cwebp -quiet -lossless -z 9 -exact $R -o $OUT/$s-render.webp
+      avifenc -s 0 --lossless $R $OUT/$s-render.avif
+    done
+
+WHY THIS IS A LOSSLESS COMPARISON, WHICH WAS NOT THE INTENT WHEN THE RUN STARTED.
+At the finest mark the scale-space has nothing to merge: hdMarks' finest stop (940 for ak74)
+exceeds the exact partition's region count (813), so runRD never merges and the render is the
+source. Confirmed the strong way rather than assumed -- p4dec was pointed at the ORIGINAL sprite
+as its reference, not at the render, and reports EXACT on all three:
+
+    ak74:    EXACT: the file alone rebuilds the partition and every region colour, bit for bit
+    bow:     EXACT: ...
+    pickaxe: EXACT: ...
+
+So every arm below stores pixel-identical content, alpha included. No fidelity matching is
+needed and none was done. (The PNG byte streams differ between source and render because the
+encoders pick different filters; the decoded pixels are identical, which is what p4dec asserts.)
+
+=== BYTES, all arms lossless, all storing the same pixels + alpha ===
+
+sprite     px    OURS .shpc   WebP -z9   PNG (Go)   AVIF -s0    as-authored PNG
+ak74     2352          1831       1938       2617       3605               5217
+bow      3420          1310       1054       2397       3114               4915
+pickaxe   400           345        218        466       1242                506
+
+Relative to OURS (negative = we are smaller):
+
+sprite     vs WebP-ll   vs PNG(Go)   vs AVIF-ll   vs as-authored PNG
+ak74           -5.52%      -30.04%      -49.21%             -64.90%
+bow           +24.29%      -45.35%      -57.93%             -73.35%
+pickaxe       +58.26%      -25.97%      -72.22%             -31.82%
+
+HEADLINE: 1 win, 2 losses against WebP lossless. 3 wins of 3 against PNG and against AVIF
+lossless.
+
+The as-authored column is NOT a codec comparison and must not be quoted as one -- those are the
+PNGs sitting in the sprites repo, and nobody ran an optimiser over them. It is included because
+it is what that project actually ships today, which is a different and also useful number.
+
+Reading the split:
+  - ak74 (the win) is the largest and most colour-varied of the three -- a wood stock, a metal
+    body, several parts. More regions, each flat.
+  - pickaxe (the worst loss, +58%) is 400 px. At that size our ~21 B header plus a 61 B wall
+    chunk is most of the file, and WebP's ~44 B floor is simply smaller. Small-image overhead,
+    not a coding failure.
+  - bow (+24%) is the softest-alpha sprite of the three (18.25% soft, A3 pilot) and pays 540 B
+    for its alpha chunk against a 519 B colour chunk -- alpha is the single largest component of
+    that file.
+
+=== TIMING: measured, and NOT reportable at this size ===
+
+    decode, best of 3:  ours 25-28 ms   dwebp 19-22 ms
+    encode:             ours 24-97 ms (full scale-space)   cwebp -z 9  24-79 ms
+
+DO NOT QUOTE THESE AS A SPEED RESULT. At 400-3,420 px both figures are dominated by process
+startup, and our decoder additionally shells out to an external `brotli` process. This measures
+fork/exec, not decoding. A real decode benchmark needs in-process timing over a corpus large
+enough for the work to exceed the noise, and has not been done.
+
+Caveats.
+  - n=3. Three sprites from one project, 400 to 3,420 px. Not a corpus, and every one of them is
+    small enough that container overhead is a visible share of the file.
+  - Lossless only. The format's actual pitch -- addressable regions at a few hundred primitives
+    -- lives at the COARSE marks, where these numbers say nothing. A matched-fidelity lossy
+    comparison against WebP with alpha has not been run.
+  - Bytes were never this format's claim (PRINCIPLES.md #5). Report 23 settled that it loses to
+    WebP on all 24 Kodak photographs, mean +27.8%. That it wins one of three sprites is
+    consistent with flat art being the friendlier content, and is not evidence of a general win.
+  - AVIF lossless is a weak arm at these sizes and its losses here should not be read as a
+    general statement about AVIF, which beats this format by 30-50% on photographs (report 05).

@@ -2,7 +2,7 @@
 
 **Question.** Report 24 is the study's one surviving claim: pay ~30% more than WebP and get pixels *plus* a segmentation, cheaper than assembling the same thing from a raster codec and a sidecar. The obvious objection was never tested — **a client can segment the decoded pixels itself, for free**, so the mask costs nothing and report 24's baseline is wrong. Report 13 answers that a *transmitted* partition is deterministic and identical on every client, but that is an argument, not a measurement.
 
-**Answer.** The free mask is genuinely free and genuinely different. Across two deliveries of the *same image*, only **24–40% of its boundaries survive**, and it agrees with the transmitted partition on **22–41%**. Report 24's baseline holds for any use needing stable region identity, and does not apply to one-shot local selection.
+**Answer.** The free mask is genuinely free and genuinely different. Across two deliveries of the *same image* only **24–40% of its boundaries survive** — measured on **ten images**, mean Jaccard 0.330, and on none of them does it keep even half. It agrees with the transmitted partition on **22–41%**. Report 24's baseline holds for any use needing stable region identity, and does not apply to one-shot local selection.
 
 Knobs, and they are deliberately generous to the free-mask side: the client is given **this study's own merge** — the strongest segmenter available here, and one whose nondeterminism was fixed in falsification #6 — run on the WebP-decoded pixels at matched fidelity. A real client using a different library, version or threshold would agree *less*, not more.
 
@@ -67,7 +67,7 @@ A perfect score is evidence of a broken test far more often than of a perfect re
 
 ## Caveats
 
-- **Two images.** The effect is large and consistent in direction, but this is not the corpus report 24 rests on.
+- **Ten images for Test 1, two for Test 2.** The stability finding is now on a corpus and lands in a narrow band on every image; the *agreement with the transmitted partition* is still only two images and should be read as indicative.
 - **One segmenter on both sides.** Using our own merge for the client is the generous case; it bounds free-mask agreement from *above*. The realistic case — SLIC, Felzenszwalb, SAM, or a different build of any of them — is untested and would be worse.
 - **Boundary Jaccard is unforgiving by construction**: a one-pixel shift in an otherwise identical contour scores as a full miss on both sides. It measures identity, which is the thing under test, but it is not a perceptual similarity measure and should not be read as one.
 - The regions were matched by nearest region count, not at matched fidelity, since the client has no fidelity target — it segments what it receives.

@@ -1,0 +1,19 @@
+# Is a client-side re-segmentation a substitute for a transmitted partition?
+#
+# The free-mask client is given this study's OWN merge -- the strongest segmenter here, and a
+# deterministic one -- run on WebP-decoded pixels. That bounds free-mask agreement from ABOVE.
+# Code: 28-freemask/pcmp.go. Metric: over every 4-neighbour pixel pair, do both partitions agree
+# on same-region-or-not; boundary Jaccard is shared boundaries over union.
+#
+# TEST 1 -- same source, two WebP deliveries, client segments each:
+#   kodim01  4604 vs 5135 regions   pair 86.90%   boundary Jaccard 0.4015
+#   kodim23  4374 vs 4313 regions   pair 84.92%   boundary Jaccard 0.2383
+#
+# TEST 2 -- client mask vs the transmitted partition:
+#   kodim01  4603 vs 4604 regions   pair 87.38%   boundary Jaccard 0.4069
+#   kodim23  4387 vs 4374 regions   pair 84.15%   boundary Jaccard 0.2213
+#
+# NOTE the first run of TEST 1 reported 100.0000% for kodim23. Report 23's matched-fidelity
+# search had picked q45, and the 'other quality' arm was also q45, so it compared a file with
+# itself (md5 identical, both 14,986 B). Redone at q70 (20,702 B) the figures above are the real
+# ones. A perfect score is evidence of a broken test more often than of a perfect result.

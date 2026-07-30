@@ -86,6 +86,20 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — the free-mask baseline, tested at last (report 28)
+
+Report 24's margin rests on the assumption that a transmitted partition is worth paying for when a client could segment the decoded pixels for free. Measured, with the client given **our own merge** on WebP-decoded pixels — the generous case, since a different library would agree less:
+
+| | kodim01 | kodim23 |
+|---|---|---|
+| same image, two WebP deliveries — **boundary Jaccard** | **0.4015** | **0.2383** |
+| region-count drift | 4,604 → 5,135 | 4,374 → 4,313 |
+| client mask vs transmitted — **boundary Jaccard** | **0.4069** | **0.2213** |
+
+**The free mask keeps a quarter to two-fifths of its boundaries when the delivery changes.** Region identity cannot survive that, so report 24's baseline holds for anything needing stable ids — animation keyframes, editing round-trips, cross-client selection — and **does not apply** to one-shot local selection where any plausible segmentation will do. That is narrower than report 13 claimed and it is the first time the capability argument carries a number.
+
+**Caught a broken test before publishing it:** the first run reported 100.0000% agreement for kodim23, because report 23's matched-fidelity search had picked q45 and the "other quality" arm was also q45 — the script compared a file with itself. Redone at q70 the figure is 84.92%. A perfect score is evidence of a broken test more often than of a perfect result.
+
 ### 2026-07-30 — P-06b closed: the RD constants have no win in either direction (report 27)
 
 **Raising `bitsPerEdge` with the ratio held is provably inert.** The merge key is `dSSE/(bitsPerEdge·(l+ratio))`, so uniform scaling cannot change candidate ordering, and the relaxation's `λ·bitsPerEdge` cancels. Measured: **1.73 → 3.0, a 73% increase, byte-identical render** (`md5` match), ladder differing by 1 byte at two marks.

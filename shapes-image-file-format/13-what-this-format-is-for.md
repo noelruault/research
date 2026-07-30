@@ -32,7 +32,9 @@ The comparison that matches this product is not WebP. It is **WebP plus a region
 
 **5. The level-of-detail hierarchy is already built.** The merge produces nested partitions — 227 → 1,383 → 11,121 → 96,359 → … Truncate anywhere and the result is a valid coarser image. Report 04 killed this as a *bytes* argument (6.37 dB behind JPEG-2000); as a *capability* it is untouched and already implemented in `hdMarks`.
 
-**6. Deterministic, shared segmentation — and this one survives the killed list.** Report 04 #2 killed "let the decoder regrow the regions" as an *information* argument: anything derivable from decoded pixels is a context model bounded by `H(X | causal past)`. Airtight for bytes, and **silent on capability**. If every client re-segments, every client gets a different segmentation — different library, version, thresholds, seeds. Shipping the partition means region #4,211 is the same object on every device forever. That is authored intent, and nothing in twelve reports touches it.
+**6. Deterministic, shared segmentation — now measured, report 28.** Across two WebP deliveries of the same image a client-side mask keeps only **24–40% of its boundaries**, and agrees with the transmitted partition on **22–41%** — using our own deterministic merge on both sides, which is the *generous* case. The capability argument below now has a number.
+
+**6a. The original argument, which report 28 tested:** Report 04 #2 killed "let the decoder regrow the regions" as an *information* argument: anything derivable from decoded pixels is a context model bounded by `H(X | causal past)`. Airtight for bytes, and **silent on capability**. If every client re-segments, every client gets a different segmentation — different library, version, thresholds, seeds. Shipping the partition means region #4,211 is the same object on every device forever. That is authored intent, and nothing in twelve reports touches it.
 
 **7. It degrades gracefully across scale.** Encoded at 960×540 and upscaled to 3840×2160, the shape coder scores **24.59 dB at 20,618 B against WebP's 24.54 dB at 20,066 B** (report 06 #11) — a tie at the bottom of the rate axis.
 

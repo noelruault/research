@@ -86,6 +86,16 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — P-06b closed: the RD constants have no win in either direction (report 27)
+
+**Raising `bitsPerEdge` with the ratio held is provably inert.** The merge key is `dSSE/(bitsPerEdge·(l+ratio))`, so uniform scaling cannot change candidate ordering, and the relaxation's `λ·bitsPerEdge` cancels. Measured: **1.73 → 3.0, a 73% increase, byte-identical render** (`md5` match), ladder differing by 1 byte at two marks.
+
+**That retracts part of report 26.** Its "straightening pressure" mechanism does not survive the algebra; the measured outcome stands but the cause was the incidental **1.2% ratio change**, not the 12% scale change.
+
+**The ratio — the real parameter — has no win either.** Swept 8 / 11 / 14.45 / 20 / 30 on two images, each arm building its own partitions. Fidelity drifts with the ratio, so bytes are unmatched and were **not** compared directly (falsification #1). Tested for **dominance** instead: **no arm is both smaller and higher-fidelity than the base, on either image.** Every setting sits on the same RD curve — the ratio chooses where on the curve, not which curve.
+
+**The whole P-06 family is closed and its "largest single win left" premise is retracted.** Repo unchanged and verified before commit.
+
 ### 2026-07-30 — P8: 43% of the encode was unnecessary, and my prescription was wrong (report 25)
 
 `HDONLY=<n>` prices one mark instead of twenty: **3 m 44 s → 2 m 7 s (−43%)**, render `md5`-identical to the published one and the priced row identical to the ladder's. **Free** — no approximation, just not computing nineteen things nobody wanted. The four finest marks alone were 2 m 0 s of the original 3 m 44 s.

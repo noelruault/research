@@ -106,7 +106,11 @@ Live state and the active queue are in [`AUTORESEARCH.md`](AUTORESEARCH.md). Thi
 
 **This entry's reasoning was wrong in an instructive way:** it argued from the gap between a constant and a measurement without asking what the constant was *doing*. The gap was real and irrelevant.
 
-**Successor: P-06b.** If over-weighting walls helps, values *above* 1.73 may help more. Untested, and the opposite of what this entry proposed.
+**Successor P-06b also closed — report 27, and it retracts part of report 26.** Raising `bitsPerEdge` with the ratio held is **provably inert**: the merge key is `dSSE/(bitsPerEdge·(l+ratio))`, so uniform scaling cannot change candidate *ordering*, and λ·bitsPerEdge cancels. Measured: 1.73 → 3.0, a 73% increase, gives a **byte-identical render** and a ladder differing by 1 byte at two marks.
+
+So report 26's "straightening pressure" explanation does not survive the algebra — its *measured* outcome stands, but the cause was the incidental 1.2% ratio change, not the 12% scale change.
+
+Sweeping the ratio itself (8, 11, 14.45, 20, 30) on two images: **no setting dominates the base** — none is both smaller and higher-fidelity. Every ratio lands on the same RD curve. **The whole P-06 family has no win in it, in either direction**, and the entry's "largest single win left" premise is retracted.
 
 **Cost to revive.** High — a full scale-space re-run plus re-pricing every published mark, baseline included.
 

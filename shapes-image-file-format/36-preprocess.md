@@ -6,6 +6,21 @@
 
 Data: [`36-preprocess-data.txt`](36-preprocess-data.txt). Images: [`36-preprocess/`](36-preprocess/). Script: [`code/runs/35-bgclass.sh`](code/runs/35-bgclass.sh).
 
+## The transform, and which knob did what
+
+Supplied by the owner after the run, intent stated as **noise reduction**:
+
+| adjustment | effect here |
+|---|---|
+| Highlights −100 | flattens the bright end — helps |
+| Contrast −100 | compresses the tonal range, reduces texture variance — **helps most** |
+| Brightness −20 | darkens overall — neutral |
+| **Black point +100** | **crushes the dark end to pure black — this is the clipping** |
+
+**Three of the four are doing the good work and one is doing all the damage.** Highlights, contrast and brightness flatten the image, which reduces texture variance — and texture variance is exactly what shatters grass into many drifting-colour regions (report 33). Black point +100 is what mapped both the background *and* the dog's nose to `rgb(0,0,0)`.
+
+That makes the fix specific rather than speculative: **keep the first three, drop or reduce the fourth.**
+
 ## The cut is much better
 
 ![the pre-processed dog, cut](36-preprocess/dogpop-cut.png)
@@ -54,13 +69,21 @@ In the original these were separable *in principle* — the ear was `rgb(42,44,3
 
 **A non-clipping transform.** The gain came from chroma — stretching the classes apart in hue and saturation. The loss came from crushing the luminance endpoints. Those are independent axes, so the gain should be available without the loss: raise chroma separation, leave the endpoints intact, keep dark-dog and dark-background distinguishable.
 
-**Untested.** Stated as the next experiment, not as a result.
+**Untested.** Stated as the next experiment, not as a result. With the settings now known it is concrete: re-run at **Black point 0**, everything else unchanged, and check whether the dog's face survives while the grass separation holds.
+
+### The bigger hypothesis hiding in "I tried to reduce noise"
+
+Noise reduction may help *this format specifically*, on bytes, for a structural reason. **79.3% of our file is boundary** (report 34), boundary count is driven by texture, and texture is largely noise. A transform codec's cost is driven by coefficient energy instead. So denoising might lower our bill more than it lowers WebP's.
+
+**Against that, a precedent on the killed list:** report 04 killed foveation/CSF as "real (−71%) but codec-agnostic preprocessing that lowers the wall for every codec equally". Denoising could be the same class.
+
+The two arguments point opposite ways, which is exactly when to measure rather than assume: denoise one corpus, encode both arms from the denoised source, and see whose bill falls further. **This is the first byte-side idea in a while that is not already closed**, and it is cheap. It is not run here.
 
 There is also a version of this that is *native* to the format rather than a preprocess: the merge already computes region colours, so a per-image chroma stretch could be fitted from the region palette and stored in the header as a colour-space tag — which SHPC still lacks (`HANDOFF.md`, H2). That would make the transform reversible and free rather than a destructive edit to the source. Also untested, and it should be, because a destructive preprocess is a bad thing to require of an asset pipeline.
 
 ## Caveats
 
-- **One image, one preprocessing setting**, applied by hand outside this pipeline. The exact transform is unknown to the code — an already-processed JPEG was supplied.
+- **One image, one preprocessing setting**, applied by hand outside this pipeline. The settings are known (above) but were applied in an external editor, so the exact transfer curves are not reproducible from this repo — an already-processed JPEG was supplied.
 - **Different crop and size** from report 33's original (738×539 vs 738×414), so the two are not pixel-comparable. The comparison is between summary statistics, not matched runs.
 - **The first attempt put two "keep" points on grass.** Caught by reading the printed RGB values before trusting the output, which is why the probe step now exists in the script.
 - **Bytes are unchanged as a story**: 8,908 B against WebP's 5,562 B at matched fidelity, +60.2%. Not what this report is about.

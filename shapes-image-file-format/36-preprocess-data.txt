@@ -1,7 +1,18 @@
 36 — does boosting colour separation before encoding improve the cut?
 
-Idea supplied by the project owner: the dog photograph from report 33, run through a heavy
-contrast/saturation boost, then put through the report 35 pipeline unchanged.
+Idea supplied by the project owner: the dog photograph from report 33, run through an external
+editor, then put through the report 35 pipeline unchanged.
+
+THE EXACT SETTINGS, supplied after the run. Stated intent: noise reduction.
+
+    Highlights   -100     flattens the bright end                       helps
+    Contrast     -100     compresses tonal range, cuts texture variance HELPS MOST
+    Brightness    -20     darkens overall                               neutral
+    Black point  +100     crushes the dark end to pure black            THIS IS THE CLIPPING
+
+Three of the four do the good work; one does all the damage. Black point +100 is what mapped both
+the background AND the dog's nose to rgb(0,0,0). The fix is therefore specific: keep the first
+three, drop or reduce the fourth, and re-run.
 
 Source: a 1170x855 JPEG, resampled to 738x539 so the width matches report 33's original.
 Encoded mark: 1,009 regions / 34.25 dB. WebP arm: cwebp -m 6 -q 12 = 5,562 B at 34.63 dB.
@@ -73,11 +84,25 @@ not as a result.
 
 === CAVEATS ===
 
-  - One image, one preprocessing setting, applied by hand outside this pipeline. The exact
-    transform is unknown to the code: an already-processed JPEG was supplied.
+  - One image, one preprocessing setting. The settings are known (above) but were applied in an
+    external editor, so the exact transfer curves are not reproducible from this repo.
   - Different crop and size from report 33's original (738x539 vs 738x414), so the two are not
     pixel-comparable; the comparison is between summary statistics, not between matched runs.
   - Sample coordinates were re-picked for this frame. The FIRST attempt put two "keep" points on
     grass — caught by reading the printed rgb values, which is why the probe step exists.
   - Bytes: 8,908 B against WebP's 5,562 B at matched fidelity, i.e. +60.2%. Unchanged story, and
     not what this report is about.
+
+=== FOLLOW-UP HYPOTHESIS: does denoising help THIS format more than it helps WebP? ===
+
+The stated intent was noise reduction, and there is a structural reason it might favour us:
+79.3% of our file is boundary (report 34), boundary count is driven by texture, and texture is
+largely noise. A transform codec's cost is driven by coefficient energy instead. So denoising
+might lower our bill more than it lowers WebP's.
+
+AGAINST IT, a precedent already on the killed list: report 04 killed foveation/CSF as "real
+(-71%) but codec-agnostic preprocessing that lowers the wall for every codec equally". Denoising
+may be the same class.
+
+The two arguments point opposite ways, which is when to measure. Protocol: denoise a corpus, encode
+BOTH arms from the denoised source at matched fidelity, compare whose bill falls further. Not run.

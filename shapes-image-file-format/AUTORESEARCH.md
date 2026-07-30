@@ -88,6 +88,16 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — CORRECTION to report 35: the cleanliness headline was a strawman (falsification #14)
+
+**Caught by a reader asking "are you sure we were on equal conditions?" — and no, we were not.**
+
+Report 35 headlined a **3.5–5.9× cleaner mask** for the region graph. Arm R classifies region colours the partition has *already spatially averaged*; arm P classified raw pixels with **no cleanup whatever**, which nobody ships. Given a majority filter on both arms the advantage collapses to **1.0–1.7×**, and on the bobcat at 5×5 it is a dead heat (107 vs 110). **The fragmentation headline is retracted.**
+
+**What survives, on a neutral referee.** Scoring the mask edge against the **source image** (mean CIELAB step across it) rather than against our own partition: the region arm is **28–54% better at every filter setting on both images**, using ~30% fewer edge pixels. The filter degrades edge fidelity on both arms — it buys smoothness by cutting through real edges, a trade a region mask does not have to make. **The 140–249× decisions ratio is untouched**, and the filter sharpens it: the pixel arm needs the cleanup to compete (451 → 89 blobs), the region arm barely moves (77 → 52).
+
+**This is falsification #11 committed again** — steelmanning one side only — in a report whose own predecessor had already flagged the biased-referee version of the same mistake. A claim that flatters the format is the one to attack hardest *before* publishing.
+
 ### 2026-07-30 — supervised colour cut: report 33's pessimism was the algorithm's fault (report 35)
 
 **[`35-background-removal-supervised.md`](35-background-removal-supervised.md).** Report 33 used an unsupervised flood with a drifting RGB tolerance and concluded the format does not help decide what the background is. Swap the rule for a 1-nearest-neighbour classifier in CIELAB over a handful of user-supplied example colours — everything else held identical — and it works.

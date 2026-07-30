@@ -171,6 +171,36 @@ Nor is the win an artefact of a good resampler. Repeated with ffmpeg's nearest-n
 
 **Lesson.** A mechanism that explains the data you have is not a predictor until it is tested on data you did not use to build it. Three points can support almost any story — and this one was mine, written into a report headline within minutes of seeing the third point.
 
+## 14. "The region graph gives a 3.5–5.9× cleaner mask" — the pixel arm was never given a cleanup pass
+
+**Published in report 35, corrected within the hour, on a reader's challenge.**
+
+Report 35 compared supervised background removal on two substrates and headlined a **3.5–5.9× reduction in mask fragmentation** for the region graph. The arms were not equal. Arm R classifies region colours the partition has **already spatially averaged**; arm P classified raw pixels with **no regularisation at all**. Nobody ships a raw per-pixel mask — a median or morphological pass is standard — so the comparison was against a strawman, and it measured "averaged vs not averaged" at least as much as it measured the region graph.
+
+Re-run with a majority filter applied to **both** arms:
+
+| image | no filter | 3×3 | 5×5 | 7×7 |
+|---|---|---|---|---|
+| dog (R vs P blobs) | 77 vs 451 (**5.9×**) | 64 vs 162 (2.5×) | 61 vs 111 (1.8×) | 52 vs 89 (**1.7×**) |
+| bobcat (R vs P blobs) | 144 vs 535 (**3.7×**) | 134 vs 180 (1.3×) | 107 vs 110 (**1.03×**) | 74 vs 88 (1.2×) |
+
+**On the bobcat at 5×5 the advantage is gone.** The headline does not survive and is retracted.
+
+**What survives, and it is measured on a neutral referee.** Report 33's "frayed edge" was scored against our own partition — a biased referee, flagged there but repeated in spirit here. Scoring instead against the **source image** (mean CIELAB step across the mask edge; a mask sitting on genuine image edges scores high, one cutting through flat areas scores low):
+
+| image | arm | no filter | 3×3 | 5×5 | 7×7 |
+|---|---|---|---|---|---|
+| dog | **region** | **5.47** | **4.60** | **4.12** | **3.82** |
+| dog | pixel | 4.04 | 3.27 | 3.05 | 2.99 |
+| bobcat | **region** | **11.51** | **9.86** | **8.35** | **7.23** |
+| bobcat | pixel | 7.47 | 6.67 | 5.79 | 5.37 |
+
+**The region arm's mask edges sit on 28–54% larger colour steps, at every filter setting, on both images** — and it uses ~30% fewer edge pixels to do it, so the boundary is shorter as well as more decisive. The filter degrades edge fidelity on both arms: it buys smoothness by cutting through real edges.
+
+**The decisions ratio (140–249×) is untouched**, and the filter sharpens rather than blunts it: the pixel arm *needs* the cleanup to be competitive on fragmentation (451 → 89), while the region arm barely moves (77 → 52) because there was little to clean.
+
+**The lesson is the one this study keeps re-learning.** Falsification #11 was steelmanning one side only, and the method rules put it first. It was committed again here — in a report whose own caveats section had already flagged the biased-referee problem one report earlier. A claim that flatters the format is the one to attack hardest before publishing, not after.
+
 ## The pattern
 
 | # | Claim | Failure mode |

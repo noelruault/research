@@ -125,6 +125,34 @@ func bgclassCmd(args []string) {
 		maskP[p] = isRemove([3]float64{rival.P[p*3], rival.P[p*3+1], rival.P[p*3+2]})
 	}
 
+	// STEELMAN THE PIXEL ARM.
+	// Arm R classifies region colours that the partition has ALREADY spatially averaged; arm P classifies raw pixels with no regularisation whatever.
+	// Comparing those two directly measures "averaged vs not averaged" as much as it measures the region graph, and no practitioner ships a raw per-pixel mask.
+	// So give arm P the standard cheap fix: a majority (median) filter over the mask.
+	// Applied to BOTH arms, so neither gets a knob the other is denied.
+	majority := func(m []bool, r int) []bool {
+		out := make([]bool, len(m))
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				on, tot := 0, 0
+				for dy := -r; dy <= r; dy++ {
+					for dx := -r; dx <= r; dx++ {
+						nx, ny := x+dx, y+dy
+						if nx < 0 || nx >= w || ny < 0 || ny >= h {
+							continue
+						}
+						tot++
+						if m[ny*w+nx] {
+							on++
+						}
+					}
+				}
+				out[y*w+x] = on*2 > tot
+			}
+		}
+		return out
+	}
+
 	// components counts 4-connected runs of one mask value: the speckle measure.
 	components := func(m []bool, val bool) int {
 		seen := make([]bool, w*h)
@@ -180,6 +208,67 @@ func bgclassCmd(args []string) {
 	fmt.Printf("%-18s %10d %12d %12d %12d\n", "P  per pixel", w*h, pxP, components(maskP, true), components(maskP, false))
 	fmt.Printf("decisions ratio %.0fx; masks agree on %.2f%% of pixels\n",
 		float64(w*h)/float64(n), 100*float64(agree)/float64(w*h))
+
+	// EDGE FIDELITY, judged by a NEUTRAL referee.
+	// Report 33's "frayed edge" was scored against our own partition, which is a biased referee.
+	// This scores against the SOURCE image instead: for every mask-edge pixel pair, how big is the real colour step there, in CIELAB?
+	// A mask whose edges sit on genuine image edges scores high; a mask that cuts through flat areas scores low.
+	// Neither arm owns the referee.
+	edgeFidelity := func(m []bool) (float64, int) {
+		tot, cnt := 0.0, 0
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				p := y*w + x
+				for _, q := range [][2]int{{x + 1, y}, {x, y + 1}} {
+					if q[0] >= w || q[1] >= h {
+						continue
+					}
+					np := q[1]*w + q[0]
+					if m[p] == m[np] {
+						continue
+					}
+					a := rgbToLab([3]float64{src.P[p*3], src.P[p*3+1], src.P[p*3+2]})
+					b := rgbToLab([3]float64{src.P[np*3], src.P[np*3+1], src.P[np*3+2]})
+					d := 0.0
+					for i := 0; i < 3; i++ {
+						e := a[i] - b[i]
+						d += e * e
+					}
+					tot += math.Sqrt(d)
+					cnt++
+				}
+			}
+		}
+		if cnt == 0 {
+			return 0, 0
+		}
+		return tot / float64(cnt), cnt
+	}
+	er, ner := edgeFidelity(maskR)
+	ep, nep := edgeFidelity(maskP)
+	fmt.Printf("\n-- edge fidelity: mean CIELAB step across the mask edge, judged on the SOURCE --\n")
+	fmt.Printf("%-18s %10s %12s\n", "arm", "dE on edge", "edge px")
+	fmt.Printf("%-18s %10.2f %12d\n", "R  per region", er, ner)
+	fmt.Printf("%-18s %10.2f %12d\n", "P  per pixel", ep, nep)
+
+	fmt.Printf("\n-- with a majority filter on the mask, applied to BOTH arms (the steelman) --\n")
+	fmt.Printf("%-18s %8s %12s %12s %12s %10s\n", "arm", "radius", "removed px", "bg blobs", "fg blobs", "dE on edge")
+	for _, r := range []int{1, 2, 3} {
+		mr, mp := majority(maskR, r), majority(maskP, r)
+		cr, cp := 0, 0
+		for i := range mr {
+			if mr[i] {
+				cr++
+			}
+			if mp[i] {
+				cp++
+			}
+		}
+		fr, _ := edgeFidelity(mr)
+		fp, _ := edgeFidelity(mp)
+		fmt.Printf("%-18s %8d %12d %12d %12d %10.2f\n", "R  per region", 2*r+1, cr, components(mr, true), components(mr, false), fr)
+		fmt.Printf("%-18s %8d %12d %12d %12d %10.2f\n", "P  per pixel", 2*r+1, cp, components(mp, true), components(mp, false), fp)
+	}
 
 	// ---- the picture ---------------------------------------------------------------------------
 	const gap = 4

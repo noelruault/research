@@ -87,3 +87,72 @@ against it.
   - No comparison against rembg, SAM or Lift Subject. Those solve the semantic half.
   - The per-region arm classifies OUR partition's region colours; the per-pixel arm classifies
     WebP's decoded pixels at matched fidelity. Both are downstream of a lossy encode.
+
+================================================================================
+CORRECTION — falsification #14. The arms were NOT equal, and a reader caught it.
+================================================================================
+
+Arm R classifies region colours the partition has ALREADY spatially averaged. Arm P classified
+raw pixels with NO regularisation at all. Nobody ships a raw per-pixel mask; a median or
+morphological pass is standard. So the blob comparison above measured "averaged vs not averaged"
+at least as much as it measured the region graph.
+
+Re-run with a majority (median) filter applied to BOTH arms, so neither gets a knob the other is
+denied. Radius column is the window edge (3 = 3x3).
+
+--- dog, 738x414, 18 examples ---
+arm                  radius   removed px     bg blobs     fg blobs   dE on edge
+R  per region       (none)        246489           44           33         5.47
+P  per pixel        (none)        248211          187          264         4.04
+R  per region             3       246461           32           32         4.60
+P  per pixel              3       248517           61          101         3.27
+R  per region             5       246576           27           34         4.12
+P  per pixel              5       248923           39           72         3.05
+R  per region             7       246857           22           30         3.82
+P  per pixel              7       249144           33           56         2.99
+
+--- bobcat, 597x335, 15 examples ---
+arm                  radius   removed px     bg blobs     fg blobs   dE on edge
+R  per region       (none)         99404          133           11        11.51
+P  per pixel        (none)         95462          344          191         7.47
+R  per region             3        98877          124           10         9.86
+P  per pixel              3        94891          134           46         6.67
+R  per region             5        97874          100            7         8.35
+P  per pixel              5        94060           88           22         5.79
+R  per region             7        96736           68            6         7.23
+P  per pixel              7        93205           68           20         5.37
+
+FRAGMENTATION ADVANTAGE, total blobs, region vs pixel:
+  dog     no filter 77 vs 451 (5.9x)  ->  3x3 2.5x  ->  5x5 1.8x  ->  7x7 1.7x
+  bobcat  no filter 144 vs 535 (3.7x) ->  3x3 1.3x  ->  5x5 1.03x ->  7x7 1.2x
+
+On the bobcat at 5x5 the advantage is GONE (107 vs 110). THE 3.5-5.9x HEADLINE IS RETRACTED.
+
+EDGE FIDELITY — the surviving claim, measured on a NEUTRAL referee.
+Report 33's "frayed edge" was scored against our own partition, which is a biased referee. This
+scores against the SOURCE image: for every mask-edge pixel pair, the CIELAB step across it. A mask
+sitting on genuine image edges scores high; one cutting through flat areas scores low.
+
+  region arm is 28-54% better at EVERY filter setting, on BOTH images:
+    dog     5.47/4.04=1.35   4.60/3.27=1.41   4.12/3.05=1.35   3.82/2.99=1.28
+    bobcat 11.51/7.47=1.54   9.86/6.67=1.48   8.35/5.79=1.44   7.23/5.37=1.35
+
+  and it uses ~30% FEWER edge pixels to do it (dog 9,001 vs 13,811; bobcat 9,850 vs 13,610), so
+  the boundary is shorter as well as more decisive.
+
+  The filter DEGRADES edge fidelity on both arms: it buys smoothness by cutting through real
+  edges. That is a trade a region mask does not have to make.
+
+DECISIONS RATIO is untouched (140-249x) and the filter sharpens rather than blunts it: the pixel
+arm NEEDS the cleanup to compete on fragmentation (451 -> 89), the region arm barely moves
+(77 -> 52) because there was little to clean. The pixel path costs 305,532 classifications PLUS a
+7x7 majority pass; the region path costs 1,229 classifications and no pass.
+
+FURTHER CAVEAT ON THE SURVIVING CLAIM: edge fidelity is a proxy too. A mask edge on a large colour
+step is evidence it follows real structure, not proof it follows the RIGHT structure. A
+confidently wrong boundary also scores well.
+
+THE DEEPER TEST STILL NOT RUN: give the pixel arm its own partition — SLIC or Felzenszwalb
+superpixels over WebP's output, classified the same way. That isolates "our segmentation" from
+"having any segmentation at all", and it is the honest apples-to-apples. It needs a segmenter this
+environment does not have installed.

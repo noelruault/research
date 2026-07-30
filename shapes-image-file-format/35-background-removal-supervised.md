@@ -2,7 +2,9 @@
 
 **Question.** Report 33 concluded that the format "does not help you decide what the background is". That was tested with an *unsupervised* flood — seed from the border, absorb neighbours within a drifting RGB tolerance — and it failed on both substrates. The obvious objection: that is a bad algorithm, not a verdict on the representation. If a user supplies colour information — *this is grass, remove it; this is the dog, keep it* — does colour separate them, and does the region graph help?
 
-**Answer. Yes on both counts, with one hard limit.** Chromatic separation works cleanly once examples are supplied. The region graph makes the same rule **140–249× cheaper** and **3.5–5.9× less fragmented**, and the cleanliness gap *widens* as the classifier sharpens. What colour cannot do is separate a black ear from dark foliage, and no substrate fixes that.
+**Answer. Yes on both counts, with one hard limit.** Chromatic separation works cleanly once examples are supplied. The region graph makes the same rule **140–249× cheaper**, and its mask edges sit on **28–54% larger colour steps** judged against the source. What colour cannot do is separate a black ear from dark foliage, and no substrate fixes that.
+
+> **Corrected — falsification #14, and a reader caught it.** This report first headlined a **3.5–5.9× reduction in mask fragmentation**. That comparison was not fair: arm R classifies region colours the partition has *already spatially averaged*, while arm P classified raw pixels with **no cleanup at all**, which nobody ships. Given a majority filter on both arms the advantage falls to **1.0–1.7×** — on the bobcat at 5×5 it is a dead heat — and the fragmentation headline is **retracted**. What survives is the decisions ratio and the edge-fidelity result below, the latter measured on a neutral referee rather than on our own partition. The corrected tables are in the section "The steelman, and what it costs the claim".
 
 Data: [`35-background-removal-supervised-data.txt`](35-background-removal-supervised-data.txt). Verb: `lab bgclass`. Images: [`35-bgclass/`](35-bgclass/).
 
@@ -43,14 +45,33 @@ Mask agreement between the two arms rises from **61.55%** under the flood to **9
 
 **Cost:** 140–249× fewer decisions. A region has one colour, so classifying the image means classifying ~1,200 things instead of ~300,000.
 
-**Cleanliness, and this is the better finding:** "blobs" counts connected components of each mask value — a proxy for how much morphological cleanup the mask needs. Sharpening the dog classifier from 8 to 18 examples removed 45,081 more background pixels and:
+**Fragmentation, as first published and now retracted as a headline:** "blobs" counts connected components of each mask value. Sharpening the dog classifier from 8 to 18 examples removed 45,081 more background pixels and took per-**pixel** blobs **263 → 451** while per-**region** stayed **75 → 77**. That looked like a property of the representation. It is largely a property of *one arm having had a smoothing step and the other not* — see the correction below.
 
-- per-**pixel** blobs went **263 → 451** (+71%)
-- per-**region** blobs went **75 → 77** (flat)
+## The steelman, and what it costs the claim
 
-**A sharper decision boundary fragments a pixel mask and does not fragment a region mask.** The partition regularises the decision spatially for free, so there is nothing to clean up afterwards. On the bobcat the subject itself comes out as **11 connected pieces on the region graph against 191 on the pixel grid**, from the same classifier.
+A majority (median) filter on the mask is what any practitioner applies to a per-pixel classification. Applied to **both** arms, so neither gets a knob the other is denied:
 
-That is a property of the representation, not of the classifier, and it is the first measured capability win in this study that is not about bytes.
+| image | no filter | 3×3 | 5×5 | 7×7 |
+|---|---|---|---|---|
+| dog — region vs pixel blobs | 77 vs 451 (**5.9×**) | 64 vs 162 (2.5×) | 61 vs 111 (1.8×) | 52 vs 89 (**1.7×**) |
+| bobcat — region vs pixel blobs | 144 vs 535 (**3.7×**) | 134 vs 180 (1.3×) | 107 vs 110 (**1.03×**) | 74 vs 88 (1.2×) |
+
+**On the bobcat at 5×5 the advantage is gone.** The fragmentation claim does not survive a steelmanned pixel arm.
+
+### What does survive: edge fidelity, on a neutral referee
+
+Report 33 scored "frayed edge" against *our own partition*, which is a biased referee — flagged there, and repeated in spirit by the blob metric. So this scores against the **source image** instead: the mean CIELAB step across the mask edge. A mask sitting on genuine image edges scores high; one cutting through flat areas scores low. Neither arm owns that referee.
+
+| image | arm | no filter | 3×3 | 5×5 | 7×7 |
+|---|---|---|---|---|---|
+| dog | **region** | **5.47** | **4.60** | **4.12** | **3.82** |
+| dog | pixel | 4.04 | 3.27 | 3.05 | 2.99 |
+| bobcat | **region** | **11.51** | **9.86** | **8.35** | **7.23** |
+| bobcat | pixel | 7.47 | 6.67 | 5.79 | 5.37 |
+
+**The region arm's mask edges sit on 28–54% larger colour steps at every setting, on both images**, using ~30% fewer edge pixels — a shorter and more decisive boundary. And the filter *degrades* edge fidelity on both arms: it buys smoothness by cutting through real edges, which is the trade a region mask does not have to make.
+
+**The decisions ratio is untouched and the filter sharpens it.** The pixel arm *needs* the cleanup to be competitive on fragmentation (451 → 89); the region arm barely moves (77 → 52) because there was little to clean. So the pixel path costs 305,532 classifications **plus** a 7×7 majority pass; the region path costs 1,229 classifications and no pass.
 
 ## The hard limit, stated plainly
 
@@ -63,7 +84,7 @@ Colour cannot separate things that are the same colour. The dog's black ear is `
 The honest division of labour that follows:
 
 - **Deciding *what* to select needs semantics.** Colour gets you the chromatic majority; the achromatic collisions need a model.
-- **Executing the selection is where this format is strong** — 140–249× cheaper, 3.5–5.9× cleaner, and edge-exact because the boundary is stored rather than inferred.
+- **Executing the selection is where this format is strong** — 140–249× cheaper, mask edges on 28–54% larger colour steps, and no cleanup pass needed.
 
 And those compose: a model that outputs *region labels* rather than a pixel mask inherits the cheapness and the exact edges. **The 140–249× is what makes an expensive model affordable to run per-region.**
 
@@ -71,6 +92,7 @@ And those compose: a model that outputs *region labels* rather than a pixel mask
 
 - **Two images**, one subject type: a centred animal on a natural background.
 - **Examples were hand-picked by the author while looking at the picture.** A real gesture supplies one touch point, not seven. How this degrades with fewer or worse examples is untested, and it is the first thing to measure next.
-- **Blobs measure fragmentation, not accuracy.** There is no ground-truth mask for these images, so nothing here is an accuracy claim.
+- **Blobs measure fragmentation, not accuracy**, and the unfiltered blob comparison was unfair — see the correction above. There is no ground-truth mask for these images, so nothing here is an accuracy claim.
+- **Edge fidelity is a proxy too.** A mask edge sitting on a large colour step is evidence it follows real structure, not proof it follows the *right* structure. A confidently wrong boundary also scores well.
 - **No comparison against rembg, SAM or Lift Subject.** Still the honest next comparison, and still not run.
 - Both arms sit downstream of a lossy encode: our partition at the capability mark, WebP at matched fidelity.

@@ -16,7 +16,7 @@ The comparison that matches this product is not WebP. It is **WebP plus a region
 | **WebP + a region map** (137,033 + the 121,047 B wall bill) | **258,080 B** | yes |
 | **shape coder** | **153,190 B** | yes — the structure *is* the image |
 
-**Against the baseline that matches the product, the shape coder is 41% smaller.** Raster-plus-sidecar pays for boundaries *and* every pixel; the shape coder pays for boundaries and derives the pixels from them. The geometry stops being overhead and becomes load-bearing.
+**Against the baseline that matches the product, the shape coder is 41% smaller** — and report 24 has now confirmed this across Kodak-24: **24 wins of 24, mean +30.5%**, while the same corpus shows it losing to WebP *alone* on every image. Raster-plus-sidecar pays for boundaries *and* every pixel; the shape coder pays for boundaries and derives the pixels from them. The geometry stops being overhead and becomes load-bearing.
 
 > **Now measured — report 19.** Re-run at matched fidelity with a legal wall coder and the sidecar steelmanned across five encodings: **44.1% smaller at 28.5 dB and 40.1% at the capability point**. Our boundary coder *is* the strongest sidecar, beating the best off-the-shelf option (raw label plane + `xz -9e`) by **2.46×**, so pricing the sidecar with it is conservative rather than self-serving. Against what a consumer could actually download, the margin is 60–66%. The 41% here was a good guess.
 
@@ -120,7 +120,7 @@ Four stages. **Nothing in stage 4 should start before stage 1 finishes** — eve
 |---|---|---|
 | ~~P5~~ | ~~A second image~~ | **DONE — report 22, and it broke the headline.** Three Kodak images: **+9.4% to +71.5%** over WebP against +0.93% on Sierra. Parity is content-dependent, not a property of the format |
 | ~~P5b~~ | ~~Full Kodak-24~~ | **DONE — report 23, and it is the study's hardest result. Zero wins in 24, mean +27.8%, range +3.6% to +71.5%.** Not resolution (Sierra at 768×512 is +1.3%). Report 22's predictor falsified, correlation +0.005. **The applicable domain is uncharacterised** |
-| **P5c** | **Re-run the sidecar comparison (report 19) on Kodak** | Its 40–44% is a ratio and could hold, narrow or invert on busy content. **Now the single most valuable open item** — it is the one place the positioning could still hold after report 23, since a raster+sidecar consumer pays for the region map too |
+| ~~P5c~~ | ~~Re-run the sidecar comparison on Kodak~~ | **DONE — report 24, and it HOLDS. 24 wins out of 24, mean +30.5%, range +18.7% to +37.8%.** The first claim in this study to survive a corpus rather than rest on one image |
 | — | Boundary recall vs SAM / annotated ground truth | Report 14's residual gap: regions were judged meaningful by eye on three windows |
 | — | Perceptual metrics (SSIMULACRA2, butteraugli) | PSNR only, and report 04 already found the two disagree on flat interiors |
 

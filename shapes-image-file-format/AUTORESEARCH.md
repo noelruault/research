@@ -88,6 +88,41 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — connectivity: the foreground collapses to one piece (report 39)
+
+**Owner's observation — "stuff not connected to the centred object is usually background" — and it is two operations, fixing two different failures.** Hole filling (a background component never touching the border is enclosed by the subject, so flip it) fixes the bobcat's dark markings. Disconnected rejection (keep only the component holding the subject seed) fixes the dog's floating tree blobs.
+
+| | bg blobs | fg blobs |
+|---|---|---|
+| bobcat region, raw → connectivity | 133 → **10** | 11 → **1** |
+| bobcat pixel, raw → connectivity | 344 → **8** | 191 → **1** |
+| dog region, raw → connectivity | 44 → **4** | 33 → **1** |
+| dog pixel, raw → connectivity | 187 → **5** | 264 → **1** |
+
+**The foreground becomes exactly one connected piece in every case.** The dog's removed-pixel count rises by 11,412 — the detached tree blobs being discarded.
+
+**And it is not a format advantage.** After the pass the arms are level (11 vs 9, 5 vs 6). Connectivity is a graph operation any substrate can run, applied here to both arms with identical code. What survives from report 35 as corrected is unchanged: cost and edge fidelity, not fragmentation. One unmeasured asymmetry: on the region arm both operations are O(regions) rather than O(pixels).
+
+**The limit is visible in both pictures:** connectivity cannot reject background that *touches* the subject. The dog's detached tree blobs go; the mass behind its ear stays. The bobcat's branch stays. **What remains is exactly the achromatic collision at the point of contact** — which is what report 38's roadmap targets.
+
+**Rollback:** `CONN=0` restores the raw masks without reverting code.
+
+### 2026-07-30 — consultant report on the colour-science problem (report 38)
+
+**Commissioned expert input on what report 35 left open. The load-bearing claim was independently re-measured before being recorded.**
+
+**Diagnosis:** achromatic collision is information-theoretic, not a missing trick. Any pointwise colour transform is a function of a single pixel value, so overlapping class-conditional distributions stay overlapping — which is why reports 36 and 37 both measured the collision *moving* rather than resolving. Separating information can only come from neighbourhoods (texture, focus), structure (adjacency, hierarchy), or priors (learned).
+
+**The lever, verified.** The exact pair that defeats the colour rule differs 65× in local high-frequency energy: **black ear lap² 777.0 against dark foliage 12.0**, ~10 RGB units apart. Re-measured independently and **every Laplacian figure reproduced to the decimal**. One discrepancy: the consultant reported the ear as `rgb(26,27,25)`; it is `rgb(42,44,39)`. Incidental readout, not the claim.
+
+**A caveat the numbers confirm:** in-focus grass scores 1303.1, *higher* than the dog's body at 547.6. **Focus alone does not separate foreground from background.** It separates the dark pair colour cannot; colour separates the chromatic pair focus cannot. The cues fail on disjoint pairs — that complementarity is the design, and "use defocus instead of colour" is a misreading.
+
+**The machinery:** graph cut on the region adjacency graph (`share[]` already is that graph). Binary labels make it submodular so min-cut is exact; ~1,200 nodes against a pixel grid's 300k. Named failure mode stated in advance — contrast-sensitive smoothing hands the ear to the background unless the unary is informative, which is what the defocus feature buys.
+
+**Roadmap S0–S6 with pre-registered kill rules**, S0+S1 (1.5 days) deciding whether the rest is worth running. S0 is hand-painted ground truth, which is the biggest methodological upgrade available — reports 33–39 all use proxies because no GT exists.
+
+**Dead ends named:** no more colour spaces or tone curves as collision fixes, no illumination-invariant route, no intrinsic images, no texture banks before S1, no self-trained CNN, no learned CRF. And a non-goal to declare now: everything here produces a hard region-id cutout, while Lift Subject ships a **soft matte** — hair is sub-region and per-region flat alpha cannot represent it.
+
 ### 2026-07-30 — the measurement methodology is now one document ([`METHODOLOGY.md`](METHODOLOGY.md))
 
 Every comparison protocol and metric this study uses was scattered across reports 16–37 and their data files. It is now one place, organised by **what each metric is valid for and what confounds it** — because that second column is where the retractions came from.

@@ -1,0 +1,74 @@
+39 — connectivity post-pass: fill enclosed background, drop what is not attached to the subject.
+
+Owner's observation: "stuff not connected to the centered object is usually background and can be
+discarded." It is two distinct operations that fix two different failures.
+
+  1. HOLE FILLING. A background component that never touches the image border is enclosed by the
+     subject, so it is almost certainly a misclassified part of it. Flip it to keep.
+     Fixes: the bobcat's dark markings, the dog's eyes.
+  2. DISCONNECTED REJECTION. Of what remains kept, keep only the component containing the subject
+     seed (centroid of the keep examples). Anything not attached to the subject is background
+     however much it looks like it.
+     Fixes: the dog's floating tree blobs.
+
+APPLIED TO BOTH ARMS with identical code. Falsification #14 was giving one arm a cleanup the other
+did not get. Disable with CONN=0 to recover the raw classifier output.
+
+    lab bgclass <source> <ours> <rival> <out> keep=... remove=...
+    CONN=0 lab bgclass ...        # rollback to raw masks
+
+=== BOBCAT, 597x335, 1,433 regions ===
+
+                         removed px     bg blobs     fg blobs
+R  raw                        99404          133           11
+P  raw                        95462          344          191
+R  connectivity               96955           10            1
+P  connectivity              111035            8            1
+
+=== DOG, 738x414, 1,229 regions ===
+
+                         removed px     bg blobs     fg blobs
+R  raw                       246489           44           33
+P  raw                       248211          187          264
+R  connectivity              257901            4            1
+P  connectivity              266781            5            1
+
+FOREGROUND COLLAPSES TO EXACTLY ONE PIECE on both images and both arms. Background blobs fall from
+133 to 10 (bobcat) and 44 to 4 (dog) on the region arm. The dog's removed-pixel count rises by
+11,412 — that is the detached tree blobs being discarded, which is the operation working.
+
+=== IT WORKS, AND IT DOES NOT CLOSE THE GAP TO THE PIXEL ARM ===
+
+After the pass, region vs pixel blob counts are 11 vs 9 (bobcat) and 5 vs 6 (dog). Essentially
+equal. Connectivity is a graph operation available on ANY substrate; it is not a format advantage.
+The format's advantage here remains what report 35 (corrected) established: cost (140-249x fewer
+decisions) and edge fidelity, not fragmentation.
+
+On the REGION arm both operations are available on the region adjacency graph at O(regions)
+instead of O(pixels). They are computed on the pixel mask here so both arms run exactly the same
+computation and the mask comparison stays fair. The cost claim is separate and is not measured by
+this run.
+
+=== THE LIMIT, VISIBLE IN BOTH IMAGES ===
+
+Connectivity cannot reject background that TOUCHES the subject.
+
+  dog     — the detached tree blobs on the right are gone. The tree mass directly behind the
+            dog's ear SURVIVES, because it is one connected component with the dog.
+  bobcat  — the branch crossing in front of the cat SURVIVES for the same reason.
+
+So the rule is: disconnected background is free to remove; connected background is untouched. On
+these two photographs that removes most but not all of the error, and what remains is exactly the
+achromatic collision at the point of contact.
+
+=== CAVEATS ===
+
+  - Two images. The seed is the centroid of the keep examples; if that centroid lands on a removed
+    pixel the code falls back to the largest kept component, which is a heuristic and untested.
+  - "Background must touch the border" fails for a subject that is cropped at the frame edge, and
+    for a background fully enclosed by the subject (a doughnut). Neither occurs here.
+  - Keeping only the seed component discards legitimately detached subject parts — a thrown ball,
+    a second animal, an arm behind an occluder. It is a strong assumption stated as a heuristic,
+    not a general rule.
+  - No ground-truth masks, so these are still fragmentation counts, not accuracy. Consultant item
+    S0 (report 38) is what fixes that.

@@ -191,6 +191,133 @@ func bgclassCmd(args []string) {
 		}
 		return cnt
 	}
+	// CONNECTIVITY POST-PASS — the owner's observation, and it is two distinct operations.
+	//
+	// 1. Hole filling. A background component that does not touch the image border is enclosed by
+	//    the subject, so it is almost certainly a misclassified part of it (the cat's dark
+	//    markings, the dog's eyes). Flip it to keep.
+	// 2. Disconnected rejection. Of what remains kept, keep only the component containing the
+	//    subject seed, taken as the centroid of the keep examples. Anything not connected to the
+	//    subject is background however much it looks like it (the dog's tree block).
+	//
+	// Applied to BOTH arms with identical code. Falsification #14 was giving one arm a cleanup the
+	// other did not get; this comment exists so nobody does it again.
+	//
+	// On the region arm both operations are available on the region adjacency graph at O(regions)
+	// rather than O(pixels). They are run on the pixel mask here so the two arms are compared on
+	// exactly the same computation; the cost claim is separate and is stated in the report.
+	seedX, seedY := 0, 0
+	for _, q := range keepPts {
+		seedX += q[0]
+		seedY += q[1]
+	}
+	seedX /= len(keepPts)
+	seedY /= len(keepPts)
+
+	label := func(m []bool, val bool) ([]int, int) {
+		id := make([]int, w*h)
+		for i := range id {
+			id[i] = -1
+		}
+		n := 0
+		stack := make([]int, 0, 1024)
+		for s := 0; s < w*h; s++ {
+			if id[s] >= 0 || m[s] != val {
+				continue
+			}
+			stack = append(stack[:0], s)
+			id[s] = n
+			for len(stack) > 0 {
+				p := stack[len(stack)-1]
+				stack = stack[:len(stack)-1]
+				x, y := p%w, p/w
+				try := func(q int) {
+					if id[q] < 0 && m[q] == val {
+						id[q] = n
+						stack = append(stack, q)
+					}
+				}
+				if x > 0 {
+					try(p - 1)
+				}
+				if x < w-1 {
+					try(p + 1)
+				}
+				if y > 0 {
+					try(p - w)
+				}
+				if y < h-1 {
+					try(p + w)
+				}
+			}
+			n++
+		}
+		return id, n
+	}
+
+	connectivity := func(m []bool) []bool {
+		out := make([]bool, len(m))
+		copy(out, m)
+		// 1. fill background components that never touch the border
+		bg, nbg := label(out, true)
+		touches := make([]bool, nbg)
+		for x := 0; x < w; x++ {
+			if c := bg[x]; c >= 0 {
+				touches[c] = true
+			}
+			if c := bg[(h-1)*w+x]; c >= 0 {
+				touches[c] = true
+			}
+		}
+		for y := 0; y < h; y++ {
+			if c := bg[y*w]; c >= 0 {
+				touches[c] = true
+			}
+			if c := bg[y*w+w-1]; c >= 0 {
+				touches[c] = true
+			}
+		}
+		for p := range out {
+			if out[p] && !touches[bg[p]] {
+				out[p] = false // enclosed "background" is really subject
+			}
+		}
+		// 2. of the kept pixels, keep only the component holding the seed
+		fg, nfg := label(out, false)
+		if nfg > 0 {
+			want := fg[seedY*w+seedX]
+			if want < 0 {
+				// The seed centroid landed on a removed pixel; fall back to the largest component.
+				sz := make([]int, nfg)
+				for p := range out {
+					if !out[p] {
+						sz[fg[p]]++
+					}
+				}
+				best := 0
+				for i, v := range sz {
+					if v > sz[best] {
+						best = i
+					}
+				}
+				want = best
+			}
+			for p := range out {
+				if !out[p] && fg[p] != want {
+					out[p] = true // kept, but not attached to the subject
+				}
+			}
+		}
+		return out
+	}
+	// CONN=0 disables the post-pass and restores the raw classifier output, so an idea that turns
+	// out to be wrong can be rolled back without reverting code.
+	connR, connP := maskR, maskP
+	connOn := os.Getenv("CONN") != "0"
+	if connOn {
+		connR, connP = connectivity(maskR), connectivity(maskP)
+	}
+
 	pxR, pxP, agree := 0, 0, 0
 	for p := range maskR {
 		if maskR[p] {
@@ -246,6 +373,26 @@ func bgclassCmd(args []string) {
 	}
 	er, ner := edgeFidelity(maskR)
 	ep, nep := edgeFidelity(maskP)
+	cR, cP := 0, 0
+	for i := range connR {
+		if connR[i] {
+			cR++
+		}
+		if connP[i] {
+			cP++
+		}
+	}
+	ecR, _ := 0.0, 0
+	_ = ecR
+	if !connOn {
+		fmt.Printf("\n-- connectivity post-pass DISABLED (CONN=0); the rows below repeat the raw masks --\n")
+	} else {
+		fmt.Printf("\n-- connectivity post-pass: fill enclosed background, then drop what is not attached to the subject --\n")
+	}
+	fmt.Printf("%-18s %12s %12s %12s\n", "arm", "removed px", "bg blobs", "fg blobs")
+	fmt.Printf("%-18s %12d %12d %12d\n", "R  per region", cR, components(connR, true), components(connR, false))
+	fmt.Printf("%-18s %12d %12d %12d\n", "P  per pixel", cP, components(connP, true), components(connP, false))
+
 	fmt.Printf("\n-- edge fidelity: mean CIELAB step across the mask edge, judged on the SOURCE --\n")
 	fmt.Printf("%-18s %10s %12s\n", "arm", "dE on edge", "edge px")
 	fmt.Printf("%-18s %10.2f %12d\n", "R  per region", er, ner)
@@ -296,8 +443,8 @@ func bgclassCmd(args []string) {
 		}
 	}
 	blit(0, srcAt)
-	blit(w+gap, cut(maskR))
-	blit((w+gap)*2, cut(maskP))
+	blit(w+gap, cut(connR))
+	blit((w+gap)*2, cut(connP))
 	// Disagreement: where the two masks differ, so the speckle is legible rather than asserted.
 	blit((w+gap)*3, func(x, y int) color.NRGBA {
 		p := y*w + x
@@ -313,7 +460,7 @@ func bgclassCmd(args []string) {
 	must(err)
 	must(png.Encode(f, out))
 	must(f.Close())
-	fmt.Printf("wrote %s (source | per-region cut | per-pixel cut | disagreement in red)\n", args[3])
+	fmt.Printf("wrote %s (source | per-region cut | per-pixel cut, both after the connectivity pass | raw-mask disagreement in red)\n", args[3])
 }
 
 // rgbToLab converts sRGB 0..255 to CIELAB (D65). Perceptual distance matters here: a shadowed white hair and a sunlit blade of grass are far apart in hue and close in RGB magnitude, which is exactly the confusion that sank the unsupervised flood in report 33.

@@ -1,0 +1,44 @@
+# P5b: the full Kodak-24 set through the pipeline.
+#
+# Knobs: both coders native 768x512, NO resampling either side. WebP -m 6, quality bisected to the
+# shape render's PSNR. Shape side is a real SHPC v1 container. Operating point = each image's
+# scale-space mark nearest 4,500 regions.
+#
+# columns : image  regions  psnr  shpc_B  webp_B  delta_pct  top100_coverage_pct
+#
+kodim01	4604	27.59	28013	25604	+9.4	39.9
+kodim02	4472	33.86	24493	23632	+3.6	65.5
+kodim03	4738	35.39	25530	19238	+32.7	61.4
+kodim04	4746	32.99	29851	21712	+37.5	45.4
+kodim05	4457	26.65	30950	26652	+16.1	39.1
+kodim06	4998	29.39	30077	22864	+31.5	61.4
+kodim07	4768	33.01	25370	18226	+39.2	54.5
+kodim08	4419	26.15	27172	25674	+5.8	51.4
+kodim09	4368	34.32	23421	16848	+39.0	66.7
+kodim10	4332	34.21	24466	19484	+25.6	45.7
+kodim11	4542	30.75	26407	22182	+19.0	60.3
+kodim12	4351	35.04	25464	20398	+24.8	58.4
+kodim13	4561	24.42	30878	25404	+21.5	58.0
+kodim14	4411	28.73	30062	26134	+15.0	40.5
+kodim15	4606	33.19	27007	19328	+39.7	57.5
+kodim16	4496	32.87	27210	21738	+25.2	50.6
+kodim17	4340	32.93	26915	18412	+46.2	45.6
+kodim18	4469	28.02	29744	23134	+28.6	50.9
+kodim19	4400	31.02	26318	20400	+29.0	53.5
+kodim20	4307	33.79	23949	17090	+40.1	69.5
+kodim21	4519	29.91	26198	20894	+25.4	63.4
+kodim22	4433	30.77	29458	23828	+23.6	44.1
+kodim23	4387	34.76	25702	14986	+71.5	42.6
+kodim24	4373	28.07	27743	23652	+17.3	56.7
+#
+# n=24  mean +27.8%  range +3.6% .. +71.5%  images where shapes win: 0
+#
+# CONTENT, NOT RESOLUTION -- content held, size varied:
+#   sierra @3840x2160  11121 reg  28.51 dB  132301 vs 131082 = +0.93%
+#   sierra @768x512     4497 reg  30.39 dB   27130 vs  26788 = +1.3%
+#   kodak-24 @768x512   ~4500 reg            mean            = +27.8%
+#
+# PREDICTORS TESTED, BOTH FAIL:
+#   top-100 region coverage (report 22's claim) : correlation +0.005
+#   lossless PNG bytes/pixel (complexity proxy) : correlation -0.528, wrong sign;
+#     and 15 of 24 Kodak images are LESS complex than sierra (1.661 bpp) yet all lose.

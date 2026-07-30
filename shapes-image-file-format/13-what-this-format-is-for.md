@@ -119,8 +119,8 @@ Four stages. **Nothing in stage 4 should start before stage 1 finishes** — eve
 | # | item | why |
 |---|---|---|
 | ~~P5~~ | ~~A second image~~ | **DONE — report 22, and it broke the headline.** Three Kodak images: **+9.4% to +71.5%** over WebP against +0.93% on Sierra. Parity is content-dependent, not a property of the format |
-| **P5b** | **Full Kodak-24, and find the regime boundary** | Report 22 gives a *predictor* — top-100 region coverage, 90% on Sierra vs ~40% on Kodak. Establish where the crossover is, so the format's regime can be stated rather than guessed | now the top item |
-| **P5c** | **Re-run the sidecar comparison (report 19) on Kodak** | Its 40–44% is a ratio and could hold, narrow or invert on busy content. **Must not be quoted as general until measured** |
+| ~~P5b~~ | ~~Full Kodak-24~~ | **DONE — report 23, and it is the study's hardest result. Zero wins in 24, mean +27.8%, range +3.6% to +71.5%.** Not resolution (Sierra at 768×512 is +1.3%). Report 22's predictor falsified, correlation +0.005. **The applicable domain is uncharacterised** |
+| **P5c** | **Re-run the sidecar comparison (report 19) on Kodak** | Its 40–44% is a ratio and could hold, narrow or invert on busy content. **Now the single most valuable open item** — it is the one place the positioning could still hold after report 23, since a raster+sidecar consumer pays for the region map too |
 | — | Boundary recall vs SAM / annotated ground truth | Report 14's residual gap: regions were judged meaningful by eye on three windows |
 | — | Perceptual metrics (SSIMULACRA2, butteraugli) | PSNR only, and report 04 already found the two disagree on flat interiors |
 

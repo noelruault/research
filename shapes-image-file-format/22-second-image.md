@@ -53,6 +53,8 @@ This is the report 04 mechanism, unchanged: **geometry is cheap only when region
 - **The sidecar comparison (report 19).** Its margin is a *ratio* — WebP plus a region map versus shapes — and on busy content the region map itself gets much more expensive for both sides. It could hold, narrow or invert. **It has not been run on Kodak** and nobody should quote 40–44% as general until it has.
 - Whether the capability operating point behaves differently on this content, or whether resampling changes the picture as it did on Sierra.
 
+> **The predictor in this section is retracted — report 23, falsification #13.** Across the full Kodak-24 set, top-100 region coverage correlates **+0.005** with the byte delta. It was fitted to three points. The content-dependence conclusion stands; the explanation for it does not.
+
 ## What this changes
 
 The honest headline is no longer "at parity with WebP". It is: **on content with large low-detail areas the shape coder reaches parity; on detailed content it is 9–72% behind, and the gap tracks how much of the image a few regions can explain.**

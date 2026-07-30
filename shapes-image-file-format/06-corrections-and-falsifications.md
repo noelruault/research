@@ -1,6 +1,6 @@
-# 06 — The twelve claims this investigation killed
+# 06 — The thirteen claims this investigation killed
 
-Every claim below was produced *by this investigation*, believed, written down, and in most cases committed to a repo README — then falsified by a later measurement in the same investigation. They are collected here because the failure pattern is more useful than any single number: **eight of the twelve were a measurement compared against the wrong baseline, one was a measurement compared against itself run once, one was a bug class declared closed after fixing a single instance, one was a real result generalised past the one axis the eval had frozen, and one was a coder that turned out not to be decodable at all.** Note that #11 breaks the pattern in an instructive way: it is the first baseline error that flattered *against* the hypothesis, and it was caused by over-correcting #10.
+Every claim below was produced *by this investigation*, believed, written down, and in most cases committed to a repo README — then falsified by a later measurement in the same investigation. They are collected here because the failure pattern is more useful than any single number: **eight of the thirteen were a measurement compared against the wrong baseline, one was a measurement compared against itself run once, one was a bug class declared closed after fixing a single instance, one was a real result generalised past the one axis the eval had frozen, one was a coder that turned out not to be decodable at all, and one was a mechanism fitted to three data points and published as a predictor.** Note that #11 breaks the pattern in an instructive way: it is the first baseline error that flattered *against* the hypothesis, and it was caused by over-correcting #10.
 
 ## 1. "Beats WebP by 31%"
 
@@ -159,6 +159,18 @@ Nor is the win an artefact of a good resampler. Repeated with ffmpeg's nearest-n
 
 **Lesson.** A cross-entropy coster is not a codec, and nothing forces it to be implementable. If a pricing function is going to stand in for a bitstream across eight reports, it needs a decoder-side replay asserting every context is causal — a few dozen lines, written once, at the start.
 
+## 13. "Parity holds where a hundred regions explain most of the picture"
+
+**Claimed.** Report 22, on the strength of three Kodak images plus the Sierra wallpaper: the byte deficit tracks how much of the image a hundred regions cover — 90% on Sierra where the coder reaches parity, ~40% on Kodak where it loses — and that figure is measurable before encoding, making it a usable predictor of the format's regime.
+
+**Why it was wrong.** Three data points. The mechanism was plausible, it matched report 04's isoperimetric argument, and it was asserted as a finding rather than a hypothesis.
+
+**Corrected.** Across the full Kodak-24 set the correlation between top-100 region coverage and the byte delta is **+0.005**. It explains nothing. A second candidate — lossless PNG bytes per pixel as a complexity proxy — correlates −0.528, points the *wrong* way, and is contradicted outright by 15 of 24 Kodak images being *less* complex than the Sierra wallpaper while all of them lose by 19–72%.
+
+**And the honest state is worse than "wrong predictor".** There is now no characterisation at all of when this format is competitive. Sierra is +0.93% at 4K and +1.3% at Kodak's own size, so it is not a resolution effect; it is an outlier for reasons this study has not identified.
+
+**Lesson.** A mechanism that explains the data you have is not a predictor until it is tested on data you did not use to build it. Three points can support almost any story — and this one was mine, written into a report headline within minutes of seeing the third point.
+
 ## The pattern
 
 | # | Claim | Failure mode |
@@ -175,5 +187,6 @@ Nor is the win an artefact of a good resampler. Repeated with ffmpeg's nearest-n
 | 10 | WebP cannot go this small | wrong baseline — WebP was forbidden to resample |
 | 11 | the low-rate band is where it loses hardest | wrong baseline — only WebP was allowed to resample, and this one flattered *against* the hypothesis |
 | 12 | the CAE wall numbers price a bitstream | the coster was not decodable — one context tap reads a bit that has not been coded |
+| 13 | top-100 coverage predicts the byte deficit | a mechanism fitted to three points; correlation +0.005 across twenty-four |
 
 Eight of twelve are baseline errors, and every one of them flattered the hypothesis under test. None was caught by reasoning; each was caught by a later measurement that happened to overlap. The only structural defence found was the rule applied to the four investigating agents in report 04 — **reproduce the shared eval before your findings are believed** — which caught a fifth error in flight, when one agent's contradicting headline turned out to come from it silently substituting a different image.

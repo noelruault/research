@@ -36,6 +36,8 @@ Two changes, neither of which touched the partition, the fidelity, or the region
 
 So the honest reading is: **the shape coder is within 1% of WebP at matched fidelity, and roughly that much of the remaining difference is container overhead it does not yet pay.** Parity is plausible and unproven. Building the container (report 13, P4) is what would settle it, and it can only move the shape number **up**.
 
+> **Content-dependent — report 22.** This +0.930% is one photograph. On three Kodak images the same pipeline is +9.4% to +71.5%. Parity is a property of images with large low-detail areas, not of the format.
+
 > **Settled — report 21.** The container was built. It costs **21 bytes**, not the ~1% budgeted here. The real file is **132,301 B** against WebP's 131,082 B: **+0.930%**, round-tripping bit-exactly. The estimate above was honest to within tens of bytes.
 
 Also unchanged: **one photograph** (B7), and **AVIF remains 30–50% ahead** at every fidelity measured — it is not a target and this does not make it one.

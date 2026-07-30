@@ -49,7 +49,7 @@ In the shape coder the pixels **are** the regions — piecewise constant by cons
 
 - **Our 105,752 B and 16,700 B are idealised cross-entropies** with no container, while every generic number is a real file. The margin is 2.25–2.46×, far wider than any plausible container overhead, so the conclusion survives — but the exact ratio will shrink when report 13's P4 is built.
 - **No dedicated modern region-map codec was benchmarked.** JBIG2 and CM-class coders are not installed here. Our coder is the MPEG-4 CAE lineage, which is the right family, but "nothing off-the-shelf beats it" rests on five encodings, not a survey. **Unverified.**
-- **One photograph.** B7, and it now gates a headline.
+- **One photograph, and report 22 makes this urgent.** Parity with WebP alone collapses on Kodak content (+9.4% to +71.5%). This margin is a *ratio* and could hold, narrow or invert there — the region map gets dearer for both sides. **It has not been re-run on Kodak and 40–44% must not be quoted as general until it has.**
 - **The comparison assumes the consumer wants this exact partition.** If a coarser mask would do, their sidecar gets cheaper — and so does ours, since both scale with region count.
 
 ## What this settles

@@ -1,0 +1,23 @@
+# P5: the whole pipeline on three Kodak photographs, against the one it was tuned on.
+#
+# Knobs: both coders native 768x512, NO resampling either side. WebP -m 6, quality bisected to the
+# shape render's PSNR. Shape files are real SHPC v1 containers, not cross-entropy estimates.
+#
+# columns : image  regions  psnr  shpc_file_B  webp_file_B  delta_pct
+#
+kodim01	7819	28.80	39891	33680	+18.4
+kodim01	4604	27.59	28013	25604	+9.4
+kodim05	7503	27.84	42498	33436	+27.1
+kodim05	4457	26.65	30950	26652	+16.1
+kodim23	7240	36.51	35805	21896	+63.5
+kodim23	4387	34.76	25702	14986	+71.5
+sierra4K	11121	28.51	132301	131082	+0.93
+#
+# region-area distribution, the mechanism (report 14's tool):
+#   sierra  @1383 : top-100 cover 90.0%, largest 9.3%, median 223 px
+#   kodim01 @4603 : top-100 cover 39.9%, largest 5.0%, median  17 px
+#   kodim23 @4387 : top-100 cover 42.6%, largest 2.6%, median  10 px
+#
+# hand check at the worst point: at 34.76 dB shapes need 25,702 B; cwebp -q60 reaches 35.68 dB
+# in 18,158 B -- smaller AND better, so +71.5% is conservative.
+# container on unseen content: round trip EXACT, 0 wrong of 1,179,648, overhead +20.67 B.

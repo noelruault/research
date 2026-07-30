@@ -79,7 +79,7 @@ Marked **[needs P0]** where the claim depends on the regions being *semantically
 
 **W2 — The capability band is narrow, and it is not where fidelity is good.** The shape story holds from ~227 to ~11,000 regions = **21.99 to 28.5 dB**. At 4K lossless the partition degenerates to **1.305 px/region** — 6.36M "regions", no shapes at all, just a raster coder with extra steps. The honest pitch is *structure in exchange for mid fidelity*, never *structure for free*.
 
-**W3 — ~~Still behind on bytes~~ — essentially closed at the mid-axis, report 16.** At **matched fidelity** the shape coder is **132,280 B against WebP's 131,082 B — +0.91%**, with every component decodable. The +19.3% this document was written around described a coder with an illegal wall coster and no cross-channel transform. **What remains:** the wall half is still an idealised cross-entropy while WebP's number is a real file, so roughly that last 1% is container overhead not yet paid — parity is plausible and **unproven** until W6 is fixed. Higher up the axis the gap is larger and has not been re-measured. **AVIF is still 30–50% ahead everywhere** and is not a target.
+**W3 — ~~Still behind on bytes~~ — closed at the mid-axis *on one image*, reports 16/21; reopened by report 22.** On three Kodak photographs the same pipeline is **+9.4% to +71.5%** over WebP. Parity holds where a hundred regions explain most of the picture (90% on Sierra) and fails where they explain ~40% (Kodak). The claim below is true and content-dependent. At **matched fidelity** the shape coder is **132,280 B against WebP's 131,082 B — +0.91%**, with every component decodable. The +19.3% this document was written around described a coder with an illegal wall coster and no cross-channel transform. **What remains:** the wall half is still an idealised cross-entropy while WebP's number is a real file, so roughly that last 1% is container overhead not yet paid — parity is plausible and **unproven** until W6 is fixed. Higher up the axis the gap is larger and has not been re-measured. **AVIF is still 30–50% ahead everywhere** and is not a target.
 
 **W4 — Not resolution-independent.** Boundaries are crack edges on a pixel lattice. Report 06 #4 already killed "renders at 8K for the same bytes" as a baseline error. It upscales *gracefully* (strength 7), which is not the same thing. True resolution independence needs curve-fitted boundaries, and nobody has priced that.
 
@@ -118,7 +118,9 @@ Four stages. **Nothing in stage 4 should start before stage 1 finishes** — eve
 
 | # | item | why |
 |---|---|---|
-| **P5** | A second image, then Kodak-24 | Every number in sixteen reports is one photograph. Blocks every general claim |
+| ~~P5~~ | ~~A second image~~ | **DONE — report 22, and it broke the headline.** Three Kodak images: **+9.4% to +71.5%** over WebP against +0.93% on Sierra. Parity is content-dependent, not a property of the format |
+| **P5b** | **Full Kodak-24, and find the regime boundary** | Report 22 gives a *predictor* — top-100 region coverage, 90% on Sierra vs ~40% on Kodak. Establish where the crossover is, so the format's regime can be stated rather than guessed | now the top item |
+| **P5c** | **Re-run the sidecar comparison (report 19) on Kodak** | Its 40–44% is a ratio and could hold, narrow or invert on busy content. **Must not be quoted as general until measured** |
 | — | Boundary recall vs SAM / annotated ground truth | Report 14's residual gap: regions were judged meaningful by eye on three windows |
 | — | Perceptual metrics (SSIMULACRA2, butteraugli) | PSNR only, and report 04 already found the two disagree on flat interiors |
 

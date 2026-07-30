@@ -86,6 +86,25 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — P5: the parity result does not generalise (report 22)
+
+Three Kodak photographs, both coders native 768×512 with no resampling, WebP `-m 6`, fidelity matched by bisection, shape side as **real SHPC files**:
+
+| image | regions | PSNR | SHPC | WebP | delta |
+|---|---|---|---|---|---|
+| kodim01 | 4,604 | 27.59 | 28,013 | 25,604 | **+9.4%** |
+| kodim05 | 4,457 | 26.65 | 30,950 | 26,652 | **+16.1%** |
+| kodim23 | 4,387 | 34.76 | 25,702 | 14,986 | **+71.5%** |
+| *Sierra 4K* | *11,121* | *28.51* | *132,301* | *131,082* | ***+0.93%*** |
+
+Hand-checked at the worst point: at 34.76 dB shapes need 25,702 B while `cwebp -q60` reaches **35.68 dB in 18,158 B** — smaller *and* better, so +71.5% is conservative.
+
+**The mechanism is measurable before encoding.** Report 14's tool on the new content: a hundred regions cover **90.0%** of the Sierra wallpaper, **39.9%** of kodim01, **42.6%** of kodim23. That wallpaper has an enormous smooth sky which a few regions explain for almost nothing; the Kodak images have no such area, so region count rises and report 04's perimeter tax reasserts itself exactly as predicted.
+
+**The format works — it just is not competitive here.** SHPC round-trips bit-exactly on unseen content (0 wrong of 1,179,648, +20.67 B overhead). Every coder improvement is content-independent and stands. The capability claims stand. **What falls is parity as a general claim** — and twenty-one reports of tuning were conducted on the one image that most favours the idea.
+
+**Not measured, must not be assumed:** report 19's 40–44% sidecar margin is a ratio and could hold, narrow or invert on busy content. Queued as P5c.
+
 ### 2026-07-30 — P4: the format is a file, and parity is measured (report 21)
 
 | mark | estimate | **real file** | overhead | round trip |

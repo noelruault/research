@@ -99,7 +99,10 @@ func exactPartition(im *Img) ([]int32, [][3]float64, int) {
 	raw := make([]int32, npix)
 	seen := make(map[uint32]int32, 1<<20)
 	for p := 0; p < npix; p++ {
-		k := uint32(im.P[p*3])<<16 | uint32(im.P[p*3+1])<<8 | uint32(im.P[p*3+2])
+		// Alpha is part of the key. Without it two pixels identical in RGB but differing in
+		// transparency land in one region, and the exact partition loses the silhouette before
+		// any merging happens at all.
+		k := uint32(im.P[p*3])<<24 | uint32(im.P[p*3+1])<<16 | uint32(im.P[p*3+2])<<8 | uint32(im.alphaAt(p))
 		id, ok := seen[k]
 		if !ok {
 			id = int32(len(seen))
@@ -271,4 +274,27 @@ func hdcheck(path string) {
 		os.Exit(1)
 	}
 	fmt.Println("OK: lean colour coder is identical to the original on both partitions")
+}
+
+// regionAlphas is the per-region mean alpha for an existing partition, rounded, in region order.
+// Separate from the colour path on purpose: every coder signature threading [][3]float64 stays
+// exactly as it was, and alpha travels as its own plane — which is also how it is stored (SHPC v2
+// mode 1, DESIGN-ALPHA.md approach A).
+func regionAlphas(im *Img, lab []int32, n int) []float64 {
+	if im.A == nil {
+		return nil
+	}
+	sum := make([]float64, n)
+	cnt := make([]float64, n)
+	for p, l := range lab {
+		sum[l] += im.A[p]
+		cnt[l]++
+	}
+	out := make([]float64, n)
+	for i := range out {
+		if cnt[i] > 0 {
+			out[i] = math.Round(sum[i] / cnt[i])
+		}
+	}
+	return out
 }

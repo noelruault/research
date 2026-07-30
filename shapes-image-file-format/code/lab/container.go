@@ -335,20 +335,37 @@ func p4Brotli(args []string, in []byte) []byte {
 //
 //	 offset  bytes  field
 //	 0       4      magic "SHPC"
-//	 4       1      version
+//	 4       1      version — 1 has no alpha fields at all, 2 adds the two marked below
 //	 5       v      uvarint width
 //	         v      uvarint height
 //	         v      uvarint region count
 //	         v      uvarint wall chunk length
 //	         v      uvarint colour chunk length
+//	         1      alpha mode           (v2 only)  0 none · 1 per-region flat · 2 per-pixel plane
+//	         v      uvarint alpha length (v2 only, and only when the mode is not 0)
 //	         8      chroma coefficients aR, aB as little-endian float32
 //	         ...    wall chunk   — range-coded crack planes, interleaved V/Hz schedule
 //	         ...    colour chunk — brotli -q11 of the planar RCT residual
+//	         ...    alpha chunk  — brotli -q11 of one byte per region, in region order
+//
+// The mode field is DESIGN-ALPHA.md approach C: one reserved byte now, so adding the per-pixel
+// plane later is a mode value rather than another version bump. Mode 2 is deliberately NOT
+// implemented — research item A3 has not yet shown that real game art needs it.
+//
+// v2 costs one byte more than v1 on an opaque image (the mode field), and report 21's ~20 B
+// overhead figures were measured on v1. Mode 1 additionally pays the alpha chunk, which on a
+// mostly-binary sprite alpha is nearly free after brotli.
 //
 // The region count is derivable from the decoded partition; it is transmitted anyway, as a 2-3 byte consistency check that catches a truncated or mismatched wall chunk before the colour stream is misread. It is paid for.
 
 const p4Magic = "SHPC"
-const p4Version = 1
+const p4Version = 2
+
+const (
+	p4AlphaNone     = 0 // no alpha channel in the source
+	p4AlphaPerRegin = 1 // one flat alpha per region — approach A
+	// 2 is reserved for the per-pixel plane (approach B) and is not implemented.
+)
 
 func p4PutUvarint(b *bytes.Buffer, v uint64) {
 	var tmp [binary.MaxVarintLen64]byte
@@ -365,6 +382,17 @@ func p4EncCmd(args []string) {
 	w, h := im.W, im.H
 	lab, cols, _ := exactPartition(im)
 	n := len(cols)
+	alphas := regionAlphas(im, lab, n)
+	mode := byte(p4AlphaNone)
+	var alphaChunk []byte
+	if alphas != nil {
+		mode = p4AlphaPerRegin
+		raw := make([]byte, n)
+		for i, a := range alphas {
+			raw[i] = clamp8(a)
+		}
+		alphaChunk = p4Brotli([]string{"-q", "11", "-c", "-"}, raw)
+	}
 
 	V, Hz := crackPlanes(lab, w, h)
 	xeV, xeH := priceVariant(p4Variant(), V, Hz, w, h) // the number the reports quote
@@ -381,22 +409,31 @@ func p4EncCmd(args []string) {
 	p4PutUvarint(&hdr, uint64(n))
 	p4PutUvarint(&hdr, uint64(len(wall)))
 	p4PutUvarint(&hdr, uint64(len(colour)))
+	hdr.WriteByte(mode)
+	if mode != p4AlphaNone {
+		p4PutUvarint(&hdr, uint64(len(alphaChunk)))
+	}
 	var coef [8]byte
 	binary.LittleEndian.PutUint32(coef[0:], math.Float32bits(fa[0]))
 	binary.LittleEndian.PutUint32(coef[4:], math.Float32bits(fa[1]))
 	hdr.Write(coef[:])
 
-	file := append(append(hdr.Bytes(), wall...), colour...)
+	file := append(append(append(hdr.Bytes(), wall...), colour...), alphaChunk...)
 	must(os.WriteFile(args[1], file, 0o644))
 
 	xe := xeV + xeH
-	est := xe + float64(len(colour)) + 8
+	est := xe + float64(len(colour)) + float64(len(alphaChunk)) + 8
 	fmt.Printf("p4enc %s %dx%d regions=%d -> %s\n", args[0], w, h, n, args[1])
 	fmt.Printf("  walls   cross-entropy %10.2f B   coded %8d B   coder overhead %+6d B (%+.3f%%)\n",
 		xe, len(wall), len(wall)-int(math.Round(xe)), 100*(float64(len(wall))-xe)/xe)
 	fmt.Printf("  colour  brotli -q11   %10d B   raw %8d B   coefficients 8 B (inside the header)\n",
 		len(colour), len(planar))
-	fmt.Printf("  header  %d B (magic 4, version 1, %d varint, coefficients 8)\n", hdr.Len(), hdr.Len()-13)
+	if mode != p4AlphaNone {
+		fmt.Printf("  alpha   brotli -q11   %10d B   raw %8d B   mode %d (per-region flat)\n",
+			len(alphaChunk), n, mode)
+	}
+	fmt.Printf("  header  %d B (magic 4, version %d, %d varint, mode 1, coefficients 8)\n",
+		hdr.Len(), p4Version, hdr.Len()-14)
 	fmt.Printf("  estimate (walls xentropy + colour brotli + 8) = %.2f B\n", est)
 	fmt.Printf("  FILE                                          = %d B\n", len(file))
 	fmt.Printf("  overhead                                      = %+.2f B (%+.4f%%)\n",
@@ -412,10 +449,11 @@ func p4DecCmd(args []string) {
 	}
 	file, err := os.ReadFile(args[0])
 	must(err)
-	if len(file) < 5 || string(file[:4]) != p4Magic || file[4] != p4Version {
-		fmt.Fprintln(os.Stderr, "fatal: not a SHPC v1 file")
+	if len(file) < 5 || string(file[:4]) != p4Magic || (file[4] != 1 && file[4] != 2) {
+		fmt.Fprintln(os.Stderr, "fatal: not a SHPC v1 or v2 file")
 		os.Exit(1)
 	}
+	version := file[4]
 	r := bytes.NewReader(file[5:])
 	rd := func() int {
 		v, err := binary.ReadUvarint(r)
@@ -423,6 +461,20 @@ func p4DecCmd(args []string) {
 		return int(v)
 	}
 	w, h, nHdr, wallLen, colLen := rd(), rd(), rd(), rd(), rd()
+	// v1 predates alpha entirely, so it has neither field and decodes as mode 0.
+	mode, alphaLen := byte(p4AlphaNone), 0
+	if version >= 2 {
+		b, err := r.ReadByte()
+		must(err)
+		mode = b
+		if mode != p4AlphaNone {
+			alphaLen = rd()
+		}
+	}
+	if mode > p4AlphaPerRegin {
+		fmt.Fprintf(os.Stderr, "fatal: alpha mode %d is not implemented (only 0 and 1)\n", mode)
+		os.Exit(1)
+	}
 	var coef [8]byte
 	if _, err := r.Read(coef[:]); err != nil {
 		must(err)
@@ -432,9 +484,9 @@ func p4DecCmd(args []string) {
 		math.Float32frombits(binary.LittleEndian.Uint32(coef[4:])),
 	}
 	off := len(file) - r.Len()
-	if off+wallLen+colLen != len(file) {
-		fmt.Fprintf(os.Stderr, "fatal: chunk lengths %d+%d do not fill %d B after a %d B header\n",
-			wallLen, colLen, len(file), off)
+	if off+wallLen+colLen+alphaLen != len(file) {
+		fmt.Fprintf(os.Stderr, "fatal: chunk lengths %d+%d+%d do not fill %d B after a %d B header\n",
+			wallLen, colLen, alphaLen, len(file), off)
 		os.Exit(1)
 	}
 
@@ -444,15 +496,27 @@ func p4DecCmd(args []string) {
 		fmt.Fprintf(os.Stderr, "fatal: decoded %d regions, header says %d\n", n, nHdr)
 		os.Exit(1)
 	}
-	planar := p4Brotli([]string{"-d", "-c", "-"}, file[off+wallLen:])
+	planar := p4Brotli([]string{"-d", "-c", "-"}, file[off+wallLen:off+wallLen+colLen])
 	dec := p4ColourDecode(lab, n, planar, fa, w, h)
 
 	im := &Img{W: w, H: h, P: make([]float64, w*h*3)}
 	for p, l := range lab {
 		im.P[p*3], im.P[p*3+1], im.P[p*3+2] = dec[l][0], dec[l][1], dec[l][2]
 	}
+	if mode == p4AlphaPerRegin {
+		raw := p4Brotli([]string{"-d", "-c", "-"}, file[off+wallLen+colLen:])
+		if len(raw) != n {
+			fmt.Fprintf(os.Stderr, "fatal: alpha chunk holds %d values, partition has %d regions\n", len(raw), n)
+			os.Exit(1)
+		}
+		im.A = make([]float64, w*h)
+		for p, l := range lab {
+			im.A[p] = float64(raw[l])
+		}
+	}
 	im.writePNG(args[1])
-	fmt.Printf("p4dec %s -> %s: %dx%d, %d regions, a=(%.5f,%.5f)\n", args[0], args[1], w, h, n, fa[0], fa[1])
+	fmt.Printf("p4dec %s -> %s: v%d, %dx%d, %d regions, alpha mode %d, a=(%.5f,%.5f)\n",
+		args[0], args[1], version, w, h, n, mode, fa[0], fa[1])
 
 	if len(args) < 3 {
 		return
@@ -465,6 +529,16 @@ func p4DecCmd(args []string) {
 	bad, maxd := 0, 0.0
 	for i := range ref.P {
 		if d := math.Abs(im.P[i] - ref.P[i]); d > 0 {
+			bad++
+			if d > maxd {
+				maxd = d
+			}
+		}
+	}
+	// Alpha is checked on the same footing as colour. Without this an alpha plane that decoded to
+	// garbage would still print EXACT, since nothing else in this function reads it.
+	for p := 0; p < w*h; p++ {
+		if d := math.Abs(im.alphaAt(p) - ref.alphaAt(p)); d > 0 {
 			bad++
 			if d > maxd {
 				maxd = d

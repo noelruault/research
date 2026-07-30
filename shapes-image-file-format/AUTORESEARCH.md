@@ -88,6 +88,22 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — alpha now runs the whole pipeline; SHPC v2 ships, and A1's fix was not needed
+
+**Look at it: `A1-silhouette/*-AFTER.png`. Numbers: `DESIGN-ALPHA-A1b-data.txt`.**
+
+Alpha travels load → merge → container → decode. **Silhouette dissolution goes from 16.30–62.39% to 0.00% at every usable mark.** ak74 and pickaxe hold at every rung; bow holds at all but its coarsest.
+
+**What changed.** `load()` reads **NRGBA** instead of RGBA — straight instead of premultiplied — so the authored colour survives and transparency gets its own channel. The merge carries alpha as a **fourth SSE channel** in both `runRD` and `relax`. `exactPartition` keys on alpha, so pixels identical in RGB but differing in transparency can never start in one region. `priceSeg` carries alpha into the render, without which the fix would have been invisible in the output and measured as doing nothing.
+
+**The constraint this study proposed twice is retracted on measurement.** Carrying alpha is sufficient. The residual 10.66% at bow's coarsest rung is the merge *seeing* the alpha difference and trading it away on rate-distortion grounds — a priced decision, not destroyed information. The shape of the numbers is what distinguishes them: before, dissolution hit a **floor** no fineness could clear (bow stuck at 37.32% across three marks including 1,368 regions, where the merge is barely merging). Now it is zero everywhere but one coarse rung.
+
+**Every opaque number in this study is untouched, by construction.** A constant fourth channel contributes exactly zero to every `dSSE` term, and `Img.A` is nil when the source has no alpha. Verified against a pre-change binary built in a git worktree: **13 of 13 renders byte-identical** over a full scale-space, stdout differing only in a wall-clock line. Locked by `TestAlphaOpaqueIsInert`.
+
+**SHPC v2.** Mode field in the header — 0 none, 1 per-region flat, 2 reserved and rejected. Three sprites round-trip bit-exactly with alpha (ak74 1,831 B, bow 1,310 B, pickaxe 345 B). **v1 files still decode**, and v2 on an opaque image costs **exactly the one predicted byte**: 816 B against 815 B. The alpha chunk tracks how binary the alpha is, as approach A predicted — **17 B for pickaxe's 83 regions**, 540 B for bow, the softest of the three.
+
+**One near-miss worth recording.** The first A1b run showed pickaxe unchanged at exactly 15/15 while the others improved. That was not the format — `priceSeg` was writing an opaque render, so the silhouette the merge had just protected was invisible to the measurement. An unchanged number next to two large improvements is what caught it. The round-trip check had the same hole and was fixed the same way: it now compares alpha on the same footing as colour, because without that an alpha plane decoding to garbage would still print EXACT.
+
 ### 2026-07-30 — A1 ran: the merge dissolves silhouettes, and the merge is not the defect
 
 **Look at it: [`A1-silhouette/`](A1-silhouette/). Numbers: `DESIGN-ALPHA-A1-data.txt`. Verb: `lab silhouette`, builds and vets clean.**

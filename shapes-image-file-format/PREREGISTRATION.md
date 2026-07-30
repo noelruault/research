@@ -164,3 +164,17 @@ This file is **append-only below this line**. To change a protocol, a metric or 
 **Nothing in M1, M2 or M3 is affected.** Their protocols, metrics and thresholds are unchanged.
 
 **Also added this session, and it governs the above:** [`PRINCIPLES.md`](PRINCIPLES.md). Principle 7 — *other formats inspire us, they do not set our bar* — is why the alpha question was re-asked from scratch rather than answered by copying PNG. Its stated exception is why M3 still compares against the strongest free segmenter: where a free alternative competes for the same user, that is product competition, and refusing to measure it would be avoiding the result rather than pioneering.
+
+#### Amendment 2 — 2026-07-30 — Phase 1 alpha is built; A1's proposed fix is retracted on measurement
+
+**Still no data seen for M1, M2 or M3.** They have not run and their protocols, metrics and thresholds are untouched. This amendment records Phase 1 work only.
+
+**Built.** Alpha now travels the whole pipeline — load → merge → container → decode — as **SHPC v2 mode 1** (per-region flat, `DESIGN-ALPHA.md` approach A). Mode 2 (per-pixel plane) is reserved in the header and rejected by the decoder, because A3 has not shown that real game art needs it. Round-trips bit-exactly on three sprites, alpha included.
+
+**Phase 1 item 2 is retracted on measurement.** It said the merge would need an explicit "never merge across an alpha edge" constraint. A1 showed the merge was never the defect — `load()` discarded alpha and premultiplication turned transparency into black — and **A1b now shows the constraint is unnecessary**: carrying alpha alone takes silhouette dissolution from 16–62% to **0.00% at every usable mark**. The only residual is 10.66% at one sprite's coarsest rung, where the merge sees the alpha difference and trades it away on rate-distortion grounds. That is a priced decision, not a loss. The constraint stays available as an override for extreme coarsening; it is not needed to make the format correct.
+
+**Phase 1 items 3 and 4 stand and are now measured.** The version bump cost **exactly the one predicted byte** on an opaque image (816 B vs v1's 815 B), and v1 files still decode bit-exactly under the new decoder. The `brotli` dependency noted in item 4 is unchanged and now also carries the alpha chunk.
+
+**The guarantee every published number rests on, verified rather than asserted.** An image with no alpha takes the identical path it took before alpha existed: the merge carries alpha as a fourth SSE channel, and a *constant* fourth channel contributes exactly zero to every `dSSE` term. Checked against a pre-change binary built from a git worktree — **13 of 13 renders byte-identical** across a full scale-space — and locked by `TestAlphaOpaqueIsInert`.
+
+**Still open in Phase 1:** the colour-space tag. Not started.

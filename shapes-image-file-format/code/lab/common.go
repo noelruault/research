@@ -22,6 +22,17 @@ import (
 type Img struct {
 	W, H int
 	P    []float64 // 3*W*H, channel-interleaved
+	// A is W*H straight (un-premultiplied) alpha in 0..255, or nil when the source had no alpha channel at all. Nil is not the same as all-255: it means "this image never had alpha", which keeps every opaque-corpus number in this study on exactly the path it was measured on.
+	// Report A1 (DESIGN-ALPHA.md) is why this field exists — dropping it here turned every transparent pixel into black and dissolved 16-62% of a sprite's silhouette before the merge ever ran.
+	A []float64
+}
+
+// alphaAt reports the region-merge's fourth channel: 255 wherever the image has no alpha data, so a constant alpha field contributes exactly zero to dSSE and cannot perturb an opaque baseline.
+func (im *Img) alphaAt(p int) float64 {
+	if im.A == nil {
+		return 255
+	}
+	return im.A[p]
 }
 
 func (im *Img) at(x, y int) (float64, float64, float64) {
@@ -37,22 +48,41 @@ func load(path string) *Img {
 	must(err)
 	b := src.Bounds()
 	im := &Img{W: b.Dx(), H: b.Dy(), P: make([]float64, b.Dx()*b.Dy()*3)}
+	// NRGBA, not RGBA: Go's decoder returns PREMULTIPLIED values, so reading RGBA darkens every partially transparent pixel toward black and flattens fully transparent ones to exactly black.
+	// That is the loss report A1 measured. Straight alpha keeps the authored colour intact and puts transparency in its own channel where the merge can see it.
+	alpha := make([]float64, im.W*im.H)
+	opaque := true
 	for y := 0; y < im.H; y++ {
 		for x := 0; x < im.W; x++ {
-			r, g, bl, _ := src.At(b.Min.X+x, b.Min.Y+y).RGBA()
-			i := (y*im.W + x) * 3
-			im.P[i], im.P[i+1], im.P[i+2] = float64(r>>8), float64(g>>8), float64(bl>>8)
+			c := color.NRGBAModel.Convert(src.At(b.Min.X+x, b.Min.Y+y)).(color.NRGBA)
+			p := y*im.W + x
+			i := p * 3
+			im.P[i], im.P[i+1], im.P[i+2] = float64(c.R), float64(c.G), float64(c.B)
+			alpha[p] = float64(c.A)
+			if c.A != 255 {
+				opaque = false
+			}
 		}
+	}
+	// A stays nil for a fully opaque source, so every existing measurement runs the identical path.
+	if !opaque {
+		im.A = alpha
 	}
 	return im
 }
 
 func (im *Img) writePNG(path string) {
-	out := image.NewRGBA(image.Rect(0, 0, im.W, im.H))
+	// NRGBA so the stored colour survives the round trip unchanged under a non-opaque alpha.
+	// Writing premultiplied here would re-introduce exactly the loss load() was fixed to avoid.
+	out := image.NewNRGBA(image.Rect(0, 0, im.W, im.H))
 	for y := 0; y < im.H; y++ {
 		for x := 0; x < im.W; x++ {
 			r, g, b := im.at(x, y)
-			out.SetRGBA(x, y, color.RGBA{clamp8(r), clamp8(g), clamp8(b), 255})
+			a := uint8(255)
+			if im.A != nil {
+				a = clamp8(im.A[y*im.W+x])
+			}
+			out.SetNRGBA(x, y, color.NRGBA{clamp8(r), clamp8(g), clamp8(b), a})
 		}
 	}
 	f, err := os.Create(path)

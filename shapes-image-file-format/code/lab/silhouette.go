@@ -69,8 +69,9 @@ func silhouetteCmd(args []string) {
 				if void(x, y) && nearBlack(nx, ny) || void(nx, ny) && nearBlack(x, y) {
 					invisible++
 				}
+				// Compare RGBA, not RGB. Once the pipeline carries alpha a region is identified by all four channels, and two regions differing only in transparency are still two regions. On a render made before alpha existed every pixel is opaque, so this is identical to the RGB comparison the first A1 run used — the old numbers stand.
 				a, b := renderAt(x, y), renderAt(nx, ny)
-				if a.R == b.R && a.G == b.G && a.B == b.B {
+				if a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A {
 					dissolved++
 					if void(x, y) {
 						lost[ny*w+nx] = true
@@ -120,7 +121,9 @@ func silhouetteCmd(args []string) {
 		mix := func(v uint8) uint8 { return uint8((int(v)*int(c.A) + int(bg)*(255-int(c.A))) / 255) }
 		return color.NRGBA{mix(c.R), mix(c.G), mix(c.B), 255}
 	})
-	// Panel 2: what load() hands the merge — alpha gone, transparent premultiplied to black.
+	// Panel 2: what load() USED to hand the merge before A1b — alpha dropped, transparency
+	// premultiplied to black. Kept deliberately: it is the picture of the failure, and holding it
+	// beside the fixed render is what makes the fix legible. It is no longer what load() does.
 	blit(pw+pad, func(x, y int) color.NRGBA {
 		c := nrgbaAt(x, y)
 		if c.A == 0 {

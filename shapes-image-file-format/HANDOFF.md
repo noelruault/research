@@ -1,6 +1,6 @@
 # Handoff — start here
 
-You are picking up a shape-based image format. Everything below is measured and committed; nothing is from memory or conversation. Read this file, then `PRINCIPLES.md` (**what this is for and how it is measured — seven rules, each naming the failure it prevents**), then `PREREGISTRATION.md` (**the active plan — three measurements with their decision thresholds committed before they run**), then `AUTORESEARCH.md` (the running ledger), then `PARKED.md` (set-aside ideas with revive triggers). `DESIGN-ALPHA.md` holds the alpha design study, both approaches, nothing decided. Report 13 holds the capability argument and the older roadmap.
+You are picking up a shape-based image format. Everything below is measured and committed; nothing is from memory or conversation. Read this file, then `PRINCIPLES.md` (**what this is for and how it is measured — seven rules, each naming the failure it prevents**), then `PREREGISTRATION.md` (**the active plan — three measurements with their decision thresholds committed before they run**), then `AUTORESEARCH.md` (the running ledger), then `PARKED.md` (set-aside ideas with revive triggers). `DESIGN-ALPHA.md` holds the alpha design study — approach A built and shipping as SHPC v2, approach B documented and reserved. Report 13 holds the capability argument and the older roadmap.
 
 **The single most useful thing to know: the byte-optimisation phase is finished, and it is mostly negative. Do not restart it.** The value now is in making the format *usable* and *demonstrating* the capability that justifies it.
 
@@ -13,6 +13,7 @@ You are picking up a shape-based image format. Everything below is measured and 
 | It is a real format | **SHPC v1** emits files that round-trip bit-exactly; container overhead ~20 B (report 21) |
 | The capability is real | A free client-side mask keeps only **24–40%** of its boundaries across two deliveries of the same image; 10 images, none above half (report 28) |
 | Encode cost | **2 m 7 s and 2.89 GB at 4K**, ~10 s at 768×512 (reports 18, 25) |
+| **Alpha works** | **SHPC v2** carries per-region alpha end to end; silhouette dissolution 16–62% → **0.00%** at every usable mark. Opaque output byte-identical to v1's (`DESIGN-ALPHA.md`, A1b) |
 
 **The positioning that follows:** if you want pixels, use WebP. If you want pixels **and** a segmentation with stable region identity, this is the cheapest measured way to get both, by roughly 30%. Price it against **raster + sidecar**, never against a raster codec alone.
 
@@ -46,9 +47,11 @@ The entire pitch is addressable regions with stable identity, and **nothing exer
 
 Everything needed exists: the container decodes (`lab p4dec`), the region adjacency graph is already built by `colorBytes2` as `share[]`, and edits are O(regions). This converts a measured claim into a demonstrable one, and it will find gaps in the format faster than any further measurement.
 
-### H2 — Alpha, and a colour-space tag
+### H2 — ~~Alpha~~, and a colour-space tag · **alpha DONE, tag still open**
 
-SHPC v1 is the minimum that carried two operating points. **No alpha channel, no colour-space tag, no metadata.** Most real asset classes need alpha; without it the format is not a candidate regardless of its byte numbers.
+**Alpha shipped** as SHPC v2 mode 1 — per-region flat, round-trips bit-exactly, v1 files still decode, and v2 costs exactly one byte more on an opaque image. Mode 2 (per-pixel plane) is reserved in the header and rejected by the decoder until A3 shows real game art needs it. See `DESIGN-ALPHA.md`.
+
+**Still missing: colour-space tag and metadata.** Neither blocks a game asset the way alpha did, so both are smaller than they look.
 
 ### H3 — A decoder outside Go
 
@@ -94,6 +97,6 @@ The merge starts at one region per pixel — ~8.28M sequential steps at 4K. A su
 
 1. **M1 and M2** (H6, H7) — cheap, code exists, same corpus. They harden report 24's baseline.
 2. **M3** (H9) — the niche decision. New corpus, a comparison arm to verify rather than assume, a day of work.
-3. **Phase 1 — SHPC v2: alpha and a colour-space tag** (H2). Starts regardless of the outcome, since both niches need it. **Alpha is not decided** — `DESIGN-ALPHA.md` documents both candidate approaches and five research items; **A1 (does the merge dissolve silhouettes?) is the cheapest open question in the study.**
+3. ~~**Phase 1 — SHPC v2: alpha**~~ — **ALPHA IS DONE.** Approach A (per-region flat) built and shipping as SHPC v2 mode 1; A1 and A1b both run and both retracted the fix the study had proposed. **The colour-space tag is still open** and is now the smallest remaining Phase 1 item.
 
 **H1 stays queued, not cancelled.** The earlier recommendation was to build the region editor first, on the reasoning that a demo finds format gaps faster than more measurement. That still holds — it is *which* demo that is unresolved, and M3 is what resolves it. A photo-editing demo and an asset-pipeline demo are different products.

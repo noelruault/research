@@ -1,0 +1,102 @@
+A1b — carry alpha through load -> merge -> container -> decode, then re-run A1.
+
+Commands (from code/lab):
+
+    go build ./... && go vet ./... && go test ./...
+    SP=/Users/noelruault/go/src/github.com/noelruault/sprites/assets/props/extra
+    for s in ak74 bow pickaxe; do
+      go run . hd $SP/$s.png $OUT/$s
+      for f in $OUT/$s/hd_*.png; do go run . silhouette $SP/$s.png $f $OUT/vis-$s-$(basename $f .png).png 8; done
+    done
+
+================================================================================
+1. REGRESSION: does carrying alpha move an opaque baseline?  NO. BYTE-IDENTICAL.
+================================================================================
+
+Built the binary at HEAD (pre-change) in a git worktree and ran both over the same opaque
+image, zigquest-ingame.png (246,400 px, alpha 255 everywhere), full 13-mark scale-space.
+
+    diff of stdout: one line, "mark 34103 done at 12s" vs "11s" -- wall-clock only.
+    13 of 13 renders: cmp -s reports IDENTICAL.
+
+This is guaranteed by construction, not by luck: the merge carries alpha as a fourth SSE channel,
+and a CONSTANT fourth channel contributes exactly zero to every dSSE term. Img.A is nil for a
+source with no alpha, and alphaAt() then returns a constant 255. Locked by
+TestAlphaOpaqueIsInert, which asserts dSSE is unchanged between a no-alpha arm and an
+all-opaque arm on identical geometry.
+
+Container: a v1 file written by the OLD binary decodes bit-exactly under the new one
+(0 wrong of 739,200 samples). On the same opaque image the new v2 file is 816 B against v1's
+815 B -- exactly the one predicted byte for the mode field, no more.
+
+================================================================================
+2. A1 RE-RUN: does the silhouette survive now?  YES, except at extreme coarsening.
+================================================================================
+
+Method identical to A1 (DESIGN-ALPHA-A1-data.txt). Comparator upgraded from RGB to RGBA,
+because a region is now identified by four channels. That change is backward-compatible and was
+verified as such: re-running the NEW comparator over the OLD renders reproduces the published A1
+table exactly, every row, all three sprites.
+
+                              BEFORE (A1)        AFTER (A1b)
+render                  cross  dissolved      dissolved   verdict
+--- ak74.png ---
+hd_~195 regions           234    62.39%          0.00%    silhouette held
+hd_~330 regions           234    50.43%          0.00%    silhouette held
+hd_~554 regions           234    44.44%          0.00%    silhouette held
+hd_ 940 regions           234    36.75%          0.00%    silhouette held
+--- bow.png ---
+hd_ 166 regions           694    52.02%         10.66%    DISSOLVED
+hd_~282 regions           694    43.52%          0.43%    DISSOLVED
+hd_~473 regions           694    37.32%          0.14%    DISSOLVED
+hd_ 804 regions           694    37.32%          0.00%    silhouette held
+hd_1368 regions           694    37.32%          0.00%    silhouette held
+--- pickaxe.png ---
+hd_ 160 regions            92    16.30%          0.00%    silhouette held
+
+Region counts shift by a few units between arms because the partitions genuinely differ now;
+marks are matched by nearest count. The "invisible" column is unchanged (76.07% / 99.28% /
+16.30%) -- it measures the SOURCE, not the pipeline, and is reported to show the same crossings
+that were unrecoverable before are now recovered.
+
+WHAT THE RESIDUAL 10.66% IS, AND WHY IT IS NOT THE OLD BUG. At bow's coarsest mark, 166 regions
+on a 3,420 px image, the merge can see the alpha difference and merges anyway, because the
+rate-distortion key judges the boundary not worth its bits at that rate. That is a CHOICE the
+merge is entitled to make, not information destroyed upstream. The distinction is visible in the
+shape of the numbers: before, dissolution was worst at FINE partitions too and hit a hard floor
+(bow was stuck at 37.32% across three successive marks, including 1,368 regions where the merge
+is barely merging at all). Now it is 0.00% everywhere except the single coarsest rung.
+
+WHAT THIS SETTLES. The never-merge-across-an-alpha-edge constraint that this study proposed
+twice is NOT needed at any usable operating point. Carrying alpha is sufficient. The constraint
+remains available as an option for extreme coarsening, where it would now be a deliberate
+rate-distortion override rather than a repair.
+
+================================================================================
+3. SHPC v2 ROUND TRIP, per-region alpha (mode 1)
+================================================================================
+
+sprite    regions   walls B   colour B   alpha B   header B   FILE B   round trip
+ak74          813       183       1263       361         24     1831   EXACT (0 wrong of 7,056)
+bow           753       227        519       540         24     1310   EXACT (0 wrong of 10,260)
+pickaxe        83        61        246        17         21      345   EXACT (0 wrong of 1,200)
+
+The round-trip check now compares alpha on the same footing as colour; without that an alpha
+plane decoding to garbage would still have printed EXACT, since nothing else in the decoder
+reads it.
+
+Alpha chunk cost tracks how binary the alpha is, as approach A predicts:
+  pickaxe   17 B for 83 regions  -- pure binary alpha, essentially free
+  ak74     361 B for 813 regions
+  bow      540 B for 753 regions -- the softest alpha of the three (18.25% soft, A3 pilot)
+
+Caveats.
+  - Three sprites, all small. Same corpus limitation as A1 and the A3 pilot.
+  - Only mode 1 (per-region flat) is implemented. Mode 2 (per-pixel plane) is reserved and
+    rejected by the decoder, because A3 has not shown that real game art needs it.
+  - The alpha chunk is brotli over one byte per region. No attempt was made to predict alpha from
+    neighbours the way colour is; on a mostly-binary plane there is little left to win, but that
+    is an assumption, not a measurement.
+  - Fidelity of the alpha itself is not measured here, only that it round-trips. A region's alpha
+    is its rounded mean, so a region spanning a soft gradient flattens it -- which is approach A's
+    known limitation, not a defect.

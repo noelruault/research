@@ -52,7 +52,7 @@ func (m *merger) runRD(stop int, snap func(*merger, float64)) {
 		m.blen -= int(l)
 		m.nreg--
 		m.area[a] += m.area[b]
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 4; i++ {
 			m.sum[a][i] += m.sum[b][i]
 		}
 		m.parent[b] = a
@@ -78,27 +78,30 @@ func (m *merger) runRD(stop int, snap func(*merger, float64)) {
 func relax(im *Img, lab []int32, n int, lambda float64, sweeps int) []int32 {
 	w, h := im.W, im.H
 	area := make([]float64, n)
-	sum := make([][3]float64, n)
+	sum := make([][4]float64, n)
 	for p, l := range lab {
 		area[l]++
 		for c := 0; c < 3; c++ {
 			sum[l][c] += im.P[p*3+c]
 		}
+		sum[l][3] += im.alphaAt(p)
 	}
-	mean := func(r int32) [3]float64 {
+	mean := func(r int32) [4]float64 {
 		a := area[r]
 		if a == 0 {
-			return [3]float64{0, 0, 0}
+			return [4]float64{0, 0, 0, 0}
 		}
-		return [3]float64{sum[r][0] / a, sum[r][1] / a, sum[r][2] / a}
+		return [4]float64{sum[r][0] / a, sum[r][1] / a, sum[r][2] / a, sum[r][3] / a}
 	}
-	d2 := func(p int, c [3]float64) float64 {
+	// Four channels here too, or relaxation would undo what the merge protected: a pixel would hop across a transparency edge whenever the colours matched, which is the A1 failure again one sweep later.
+	d2 := func(p int, c [4]float64) float64 {
 		s := 0.0
 		for i := 0; i < 3; i++ {
 			e := im.P[p*3+i] - c[i]
 			s += e * e
 		}
-		return s
+		e := im.alphaAt(p) - c[3]
+		return s + e*e
 	}
 	nbrs := func(p int) []int {
 		var o []int
@@ -175,6 +178,8 @@ func relax(im *Img, lab []int32, n int, lambda float64, sweeps int) []int32 {
 					sum[a][c] -= im.P[p*3+c]
 					sum[bestR][c] += im.P[p*3+c]
 				}
+				sum[a][3] -= im.alphaAt(p)
+				sum[bestR][3] += im.alphaAt(p)
 				area[a]--
 				area[bestR]++
 				lab[p] = bestR
@@ -258,6 +263,15 @@ func priceSeg(im *Img, lab []int32) (regions int, psnr, bBound, bCol float64, re
 		}
 	}
 	rec = &Img{W: im.W, H: im.H, P: make([]float64, len(im.P))}
+	// Carry the partition's alpha into the render. Without this the render is opaque everywhere,
+	// the silhouette the merge just protected is invisible in the output, and any measurement
+	// taken on the render reads the alpha work as having done nothing.
+	if a := regionAlphas(im, lab, n); a != nil {
+		rec.A = make([]float64, im.W*im.H)
+		for p, l := range lab {
+			rec.A[p] = a[l]
+		}
+	}
 	for p, l := range lab {
 		for c := 0; c < 3; c++ {
 			rec.P[p*3+c] = cols[l][c]

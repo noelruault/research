@@ -48,7 +48,7 @@ type merger struct {
 	w, h   int
 	parent []int32
 	area   []int32
-	sum    [][3]float64
+	sum    [][4]float64 // R,G,B,alpha — alpha is the fourth channel so a transparency edge is a real difference to the merge (A1)
 	adj    []map[int32]int32
 	sse    float64
 	nreg   int
@@ -63,10 +63,10 @@ func (m *merger) find(x int32) int32 {
 	return x
 }
 
-func (m *merger) mean(r int32) [3]float64 {
+func (m *merger) mean(r int32) [4]float64 {
 	a := float64(m.area[r])
 	s := m.sum[r]
-	return [3]float64{s[0] / a, s[1] / a, s[2] / a}
+	return [4]float64{s[0] / a, s[1] / a, s[2] / a, s[3] / a}
 }
 
 // dSSE is the exact squared-error increase from replacing two region means with their joint mean.
@@ -75,7 +75,9 @@ func (m *merger) dSSE(a, b int32) float64 {
 	wa, wb := float64(m.area[a]), float64(m.area[b])
 	f := wa * wb / (wa + wb)
 	d := 0.0
-	for i := 0; i < 3; i++ {
+	// Four channels. On an image with no alpha the fourth is constant, so every term is exactly
+	// zero and the partition is bit-identical to the one every opaque baseline was measured on.
+	for i := 0; i < 4; i++ {
 		e := ca[i] - cb[i]
 		d += e * e
 	}
@@ -86,12 +88,12 @@ func newMerger(im *Img) *merger {
 	n := im.W * im.H
 	m := &merger{w: im.W, h: im.H,
 		parent: make([]int32, n), area: make([]int32, n),
-		sum: make([][3]float64, n), adj: make([]map[int32]int32, n),
+		sum: make([][4]float64, n), adj: make([]map[int32]int32, n),
 		nreg: n, blen: (im.W-1)*im.H + im.W*(im.H-1)}
 	for i := 0; i < n; i++ {
 		m.parent[i] = int32(i)
 		m.area[i] = 1
-		m.sum[i] = [3]float64{im.P[i*3], im.P[i*3+1], im.P[i*3+2]}
+		m.sum[i] = [4]float64{im.P[i*3], im.P[i*3+1], im.P[i*3+2], im.alphaAt(i)}
 		m.adj[i] = make(map[int32]int32, 4)
 	}
 	for y := 0; y < im.H; y++ {
@@ -146,7 +148,7 @@ func (m *merger) run(stop int, snap func(m *merger, lambda float64)) {
 		m.blen -= int(l)
 		m.nreg--
 		m.area[a] += m.area[b]
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 4; i++ {
 			m.sum[a][i] += m.sum[b][i]
 		}
 		m.parent[b] = a
@@ -184,6 +186,24 @@ func (m *merger) labels() ([]int32, [][3]float64) {
 		lab[i] = id
 	}
 	return lab, cols
+}
+
+// alphaLabels is labels() plus the per-region rounded mean alpha, in the same region order.
+// Kept separate from labels() so the RGB colour path — and every signature threading [][3]float64
+// through the coders — is untouched by alpha existing.
+func (m *merger) alphaLabels() ([]int32, [][3]float64, []float64) {
+	lab, cols := m.labels()
+	alpha := make([]float64, len(cols))
+	seen := make([]bool, len(cols))
+	for i := range m.parent {
+		l := lab[i]
+		if seen[l] {
+			continue
+		}
+		seen[l] = true
+		alpha[l] = math.Round(m.mean(m.find(int32(i)))[3])
+	}
+	return lab, cols, alpha
 }
 
 func potts(path string) {

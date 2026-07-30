@@ -1,0 +1,2 @@
+ - [x] Carry alpha through the pipeline (load → merge → container → decode). That's the one-line loss I found, plus the format work behind it. It's what makes a game sprite representable at all. — **DONE**, SHPC v2 mode 1 (per-region flat alpha): silhouette dissolution 16–62% → **0.00%** at every usable mark, opaque output byte-identical to before, v1 files still decode. See `DESIGN-ALPHA.md` and `DESIGN-ALPHA-A1b-data.txt`.
+- Something that opens a .shpc and does something with it. The whole pitch is addressable regions and nothing has ever addressed one.

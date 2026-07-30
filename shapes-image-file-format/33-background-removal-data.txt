@@ -1,0 +1,90 @@
+33 — background removal: region graph vs pixel grid, and matched-fidelity bytes.
+
+Source: six consumer background-removal photographs (JPEG), decoded once with `sips -s format png`
+and used identically by every arm. 256x197 to 738x414.
+
+Commands (from code/lab, under bash):
+
+    for f in $SRC/*.png; do lab hd "$f" $OUT/$(basename $f .png); done
+    lab p4enc  $OUT/<img>/hd_<mark>.png $OUT/<img>.shpc
+    lab psnr   $SRC/<img>.png $OUT/<img>/hd_<mark>.png
+    cwebp -quiet -m 6 -q <q> $SRC/<img>.png -o t.webp ; dwebp -quiet t.webp -o t.png
+    lab bgcut  $SRC/<img>.png $OUT/<img>/hd_<mark>.png <img>-webp.png out.png <tol>
+    lab sbs    $SRC/<img>.png $OUT/<img>/hd_<mark>.png <img>-webp.png sbs.png
+
+=== 1. MATCHED-FIDELITY BYTES, capability band (~1,000-1,400 regions) ===
+
+WebP arm: smallest -m 6 quality whose PSNR reaches ours. Our PSNR definition on both sides.
+
+image       regions    PSNR   OURS .shpc    WebP m6    q   WebP PSNR    delta
+images         1229   29.22        11725       7176    8       29.25   +63.4%
+images-2       1189   25.65        11606       9170    3       26.05   +26.6%
+images-3       1005   28.31         6172       3946   20       28.50   +56.4%
+images-4       1368   24.23        12674      10158    1       25.53   +24.8%
+images-5       1165   24.06        13484       9116    1       24.32   +47.9%
+images-6       1433   29.31        10174       5064    5       29.33  +100.9%
+
+WebP wins all six. Consistent with report 23 (zero wins in 24 Kodak, mean +27.8%).
+
+TWO CAVEATS, BOTH AGAINST US:
+  - images-4 and images-5: WebP hit its quality FLOOR at q1 and overshot our fidelity by
+    1.30 dB and 0.26 dB. It would be smaller still if it could match exactly, so the stated
+    delta UNDERSTATES WebP's advantage on those two.
+  - Sources are JPEG. Every arm inherits the same prior loss; this is not a clean-source test.
+
+=== 2. BACKGROUND REMOVAL: same flood, two substrates ===
+
+Algorithm, identical on both arms: seed from the image border, absorb a neighbour whose colour is
+within `tol` of the seed set's running mean. Arm R traverses the region graph of our partition
+(1,229 regions); arm P traverses the pixel grid of WebP's decoded output at matched fidelity.
+Same seeds, same tolerance, same acceptance test.
+
+dog photograph, 738x414 = 305,532 px. Background is visually ~85% of the frame.
+
+tol   arm  steps      selected            sel px    frayed edge
+ 28   R      1571      265/1229 regions   151519              0
+ 28   P    382120      -                   96106          15832
+ 55   R      3032      633/1229 regions   232656              0
+ 55   P    731252      -                  183389           6633
+ 90   R      4251      990/1229 regions   267142              0
+ 90   P    885296      -                  221900           4672
+
+Steps ratio: 241x (tol 55) in favour of the region graph. Masks agree on 61.55% / 81.48% /
+83.85% of pixels at tol 28 / 55 / 90.
+
+WHAT THE REGION GRAPH WINS: 241x fewer flood decisions, and the selection is a list of 633 ids
+rather than 232,656 pixels. That is the O(regions) claim, measured.
+
+WHAT "FRAYED EDGE" IS AND IS NOT: it counts mask-edge pixels whose neighbour across the edge is
+in the SAME region of our partition, i.e. the mask cut through a region interior. Arm R's zero is
+DEFINITIONAL, not evidence -- its mask edges ARE region boundaries. Arm P's figure is judged by
+our partition, which is a biased referee. Read it as "the pixel wand disagrees with the image's
+own tonal structure this many times", not as a neutral quality score.
+
+WHAT NEITHER ARM WINS: the actual job.
+  tol 28 -- background largely SURVIVES. Grass is texture: many regions of drifting colour.
+  tol 55 -- background mostly gone, but THE DOG IS BEING EATEN (belly and legs selected).
+  tol 90 -- almost everything selected.
+There is no setting in between. A white dog in sunlight and bright sunlit grass are not separable
+by colour distance, and moving from pixels to regions changes the UNIT the failing test is applied
+to, not the test. See 33-bgcut/dog-bgcut-tol55.png: the cutout keeps the tree line, drops parts of
+the dog, and leaves grass fragments.
+
+=== 3. IMAGES ===
+
+33-bgcut/dog-source.png            the source
+33-bgcut/dog-fidelity-4panel.png   source | ours | WebP | our region boundaries
+33-bgcut/dog-bgcut-tol28.png       source | region-flood | pixel-flood | cutout, tol 28
+33-bgcut/dog-bgcut-tol55.png       same, tol 55
+
+In the fidelity panel the dog's outline IS traced by region boundaries -- which is why the mask
+mechanics work -- while the grass is shattered into texture regions, which is why the selection
+does not.
+
+Caveats.
+  - Six images, one subject type: a centred subject on a natural background.
+  - The flood is a deliberately simple rule. A better selector on the SAME region graph might do
+    far better; this tests the substrate, not the ceiling. The substrate being 241x cheaper is
+    what would make a smarter selector affordable.
+  - No comparison against a real background-removal tool (rembg, SAM). Those solve the semantic
+    half shown here to be missing, and that is the honest comparison to run next.

@@ -112,6 +112,10 @@ func main() {
 		alphaHistCmd(os.Args[2:])
 	case "silhouette": // silhouette <sprite.png> <render.png> <out.png> [scale] — A1: does the merge dissolve the silhouette?
 		silhouetteCmd(os.Args[2:])
+	case "sbs": // sbs <source.png> <ours.png> <rival.png> <out.png> — 4-panel comparison strip incl. our region boundaries
+		sbsCmd(os.Args[2:])
+	case "bgcut": // bgcut <source.png> <ours.png> <rival.png> <out.png> [tol] — background removal: region graph vs pixel grid
+		bgcutCmd(os.Args[2:])
 	default:
 		fmt.Fprintln(os.Stderr, "unknown mode")
 		os.Exit(2)

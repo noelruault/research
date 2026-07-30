@@ -110,6 +110,8 @@ func main() {
 		ccausalCmd(os.Args[2:])
 	case "alphahist": // alphahist <sprite.png ...> — how much sprite alpha is soft rim vs interior translucency (DESIGN-ALPHA.md)
 		alphaHistCmd(os.Args[2:])
+	case "silhouette": // silhouette <sprite.png> <render.png> <out.png> [scale] — A1: does the merge dissolve the silhouette?
+		silhouetteCmd(os.Args[2:])
 	default:
 		fmt.Fprintln(os.Stderr, "unknown mode")
 		os.Exit(2)

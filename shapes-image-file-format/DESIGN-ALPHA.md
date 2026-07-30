@@ -59,7 +59,33 @@ They are not exclusive. A mode field in the header:
 - **A second partition for alpha.** Run the merge on the alpha channel independently, giving alpha its own regions. Doubles the boundary bill in the worst case, but alpha boundaries and colour boundaries usually coincide, so the second partition might code almost free against the first as context.
 - **Analytic coverage at draw time.** No alpha stored for the rim at all; the renderer derives it from boundary geometry. See A4.
 
+## A1 is done, and it retracts the fix this document proposed
+
+**Run it and look: [`A1-silhouette/`](A1-silhouette/), numbers in [`DESIGN-ALPHA-A1-data.txt`](DESIGN-ALPHA-A1-data.txt), verb `lab silhouette`.**
+
+The merge dissolves the silhouette on all three sprites, at every mark — 16% to 62% of silhouette crossings. So the hazard is real. **But the cause is not the merge, and the fix proposed below is aimed at the wrong stage.**
+
+| sprite | crossings | dissolved | **invisible** |
+|---|---|---|---|
+| ak74 (940 → 195 regions) | 234 | 36.75% → 62.39% | **76.07%** |
+| bow (1,368 → 166 regions) | 694 | 37.32% → 52.02% | **99.28%** |
+| pickaxe (160 regions) | 92 | 16.30% | **16.30%** |
+
+"Invisible" counts crossings where the value `load()` hands the merge on the *opaque* side is already near-black, and therefore identical to the void.
+
+**Dissolved ≤ invisible on every row, every sprite, every mark. On pickaxe they are exactly equal — 15 and 15.** The merge never dissolved a crossing it could actually see.
+
+**The mechanism.** `load()` (`common.go:32`) discards alpha, and Go's PNG decoder returns **premultiplied** values. A transparent pixel arrives as `(0,0,0)` — black. A soft rim pixel arrives darkened toward black in proportion to its transparency. **A dark sprite on a transparent background becomes a dark shape on a black background**, and no merge rule can separate two colours that are equal.
+
+It is visible in the panels: in `ak74-328regions.png` the orange wooden stock keeps its silhouette while every edge of the black gun body, grip and barrel is marked dissolved — same image, same merge, outcome decided purely by whether the edge colour differs from black. In `bow-476regions.png` the bowstring is gone along its entire length.
+
+**The tell was bow's plateau.** Dissolution sits at exactly 259 crossings across three successive marks (476, 804, 1,368 regions). At 1,368 regions on a 3,420 px image the merge is barely merging anything, and 37% of the silhouette is still gone. A floor that deep is not something a merge is doing.
+
+**What replaces the proposed fix.** Stop destroying alpha at load; carry it into the merge. Then a transparency edge *is* a difference, and the constraint below is either trivially satisfied or unnecessary — **A1 cannot distinguish those two, because no version of this merge has ever been handed an alpha channel.** That is the next question, not a settled answer.
+
 ## "Never merge across an alpha edge" — what that meant
+
+> **Superseded by A1, kept for the reasoning.** The hazard described here is real and measured. The fix is not: it treats a symptom of an upstream loss. Read it as the hypothesis A1 tested.
 
 Two separate things, and the phrasing ran them together.
 
@@ -75,7 +101,9 @@ Two separate things, and the phrasing ran them together.
 
 None of these have registered thresholds yet. **They get pre-registered before they run**, per principle 2. Listed in the order they should happen.
 
-**A1 — Does the merge actually dissolve silhouettes?** Run the existing merge on a sprite with a transparent background, render, and look at the boundary. Cheapest item in the study and it confirms or kills the hazard above. If the merge already keeps the silhouette — because the background is uniform and the object is not — the constraint may be unnecessary, which is a better outcome than implementing it.
+**A1 — Does the merge actually dissolve silhouettes? — DONE, and it moved the fix upstream.** Yes on all three sprites (16–62% of crossings), but `dissolved ≤ invisible` everywhere: every dissolved crossing was one the merge received as black-on-black, because `load()` drops alpha and premultiplication turns transparency into black. The merge is correct; the pipeline loses the information before it. See the section above and `DESIGN-ALPHA-A1-data.txt`.
+
+**A1b — Carry alpha into the merge, then re-run A1.** The new top item. Once the merge can see alpha, does the silhouette hold on its own, or is an explicit never-merge-across-alpha constraint still needed? A1 cannot answer this — no version of the merge has ever received an alpha channel. This is the measurement that decides whether the constraint gets built at all.
 
 **A2 — What does per-region flat alpha cost?** Add alpha to the colour chunk, encode a sprite corpus, report the delta against the same file without alpha. Expected to be small; "expected" is not a number.
 

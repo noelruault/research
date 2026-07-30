@@ -88,6 +88,22 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — A1 ran: the merge dissolves silhouettes, and the merge is not the defect
+
+**Look at it: [`A1-silhouette/`](A1-silhouette/). Numbers: `DESIGN-ALPHA-A1-data.txt`. Verb: `lab silhouette`, builds and vets clean.**
+
+Three real game sprites, every mark of the scale-space. The silhouette dissolves on all of them — **16.30% to 62.39% of silhouette crossings**, worsening as regions coarsen. So the hazard flagged in the pre-registration is real and large.
+
+**Then the diagnostic column killed the fix.** `dissolved ≤ invisible` on every row, every sprite, every mark, where *invisible* counts crossings whose opaque side reaches the merge already near-black. On pickaxe the two are **exactly equal, 15 and 15**. The merge never dissolved a crossing it could distinguish.
+
+**Mechanism.** `load()` at `common.go:32` discards alpha, and Go's PNG decoder returns **premultiplied** values — so a transparent pixel arrives as black and a soft rim pixel arrives darkened toward black. A dark sprite on a transparent background becomes a dark shape on a black background. No merge rule separates colours that are equal. In `ak74-328regions.png` the orange stock keeps its silhouette while every edge of the black gun body is dissolved: same image, same merge, decided entirely by whether the edge colour differs from black.
+
+**The tell was a plateau, not a trend.** Bow dissolves at exactly 259 crossings across three successive marks (476, 804, 1,368 regions). At 1,368 regions on a 3,420 px image the merge is barely merging, and 37% of the silhouette is already gone. A floor that deep is not something a merge is doing — that is what prompted adding the `invisible` column rather than publishing the first table.
+
+**Retracted:** the fix this study proposed twice — "treat an alpha difference as an infinite merge cost". It targets a symptom of an upstream loss. **Replaced by A1b, now the top alpha item:** carry alpha into the merge, then re-run A1. Whether the constraint is needed *at all* is unknown and unknowable from here, because no version of this merge has ever been handed an alpha channel.
+
+**Method note.** The first run reported only the dissolved column and would have been published as "the merge dissolves silhouettes, add the constraint" — the fix the pre-registration already assumed. That is principle 2 failing in the direction it always fails: the measurement confirming the thing you already planned to build. The second column is what turned a confirmation into a retraction.
+
 ### 2026-07-30 — principles on the wall; alpha reopened and documented both ways ([`PRINCIPLES.md`](PRINCIPLES.md), [`DESIGN-ALPHA.md`](DESIGN-ALPHA.md))
 
 **Two standing documents added, and one decision retracted before it could do damage.**

@@ -1,0 +1,81 @@
+A1 — does the colour-driven merge dissolve a sprite's silhouette?
+
+Commands (from code/lab):
+
+    go build ./...
+    SP=/Users/noelruault/go/src/github.com/noelruault/sprites/assets/props/extra
+    for s in ak74 bow pickaxe; do
+      go run . hd $SP/$s.png $OUT/$s
+      for f in $OUT/$s/hd_*.png; do
+        go run . silhouette $SP/$s.png $f $OUT/vis-$s-$(basename $f .png).png 8
+      done
+    done
+
+Method. The merge renders every region as one flat colour, so a region straddling the
+silhouette shows the SAME colour on both sides of it. For every adjacent pixel pair crossing
+the true alpha silhouette (one a=0, one a>0), the test is whether the render's colour changes
+there. No change => both pixels are in one region => the silhouette was dissolved at that
+crossing. Needs no label dump.
+
+"invisible" counts crossings where the value load() hands the merge on the OPAQUE side is
+already near-black (all premultiplied channels <= 24), and is therefore indistinguishable from
+the void. These are crossings no merge rule could ever separate, because the information was
+destroyed before the merge ran.
+
+render                        cross  dissolv   dissolv%  invisible     invis% verdict
+--- ak74.png (84x28, 2352 px) ---
+hd_00000195.png                 234      146     62.39%        178     76.07% DISSOLVED
+hd_00000328.png                 234      118     50.43%        178     76.07% DISSOLVED
+hd_00000553.png                 234      104     44.44%        178     76.07% DISSOLVED
+hd_00000940.png                 234       86     36.75%        178     76.07% DISSOLVED
+--- bow.png (36x95, 3420 px) ---
+hd_00000166.png                 694      361     52.02%        689     99.28% DISSOLVED
+hd_00000280.png                 694      302     43.52%        689     99.28% DISSOLVED
+hd_00000476.png                 694      259     37.32%        689     99.28% DISSOLVED
+hd_00000804.png                 694      259     37.32%        689     99.28% DISSOLVED
+hd_00001368.png                 694      259     37.32%        689     99.28% DISSOLVED
+--- pickaxe.png (20x20, 400 px) ---
+hd_00000160.png                  92       15     16.30%         15     16.30% DISSOLVED
+
+THE RELATION THAT MATTERS: dissolved <= invisible on every row, all three sprites, every mark.
+
+  pickaxe: dissolved 15, invisible 15 -- EXACTLY equal. Every dissolved crossing is one the
+           merge was handed as black-on-black. Zero crossings dissolved that the merge could see.
+  bow:     invisible 99.28%, and dissolved plateaus at 259 across three successive marks
+           (476, 804, 1368 regions). A floor, not a merge effect -- at 1368 regions on a
+           3420 px image the merge is barely merging anything and 37% is still gone.
+  ak74:    invisible 76.07%; dissolved rises 36.75% -> 62.39% as regions coarsen, never
+           exceeding invisible.
+
+Mechanism, confirmed by the panel images in A1-silhouette/: load() at common.go:32 discards
+alpha (`r, g, bl, _ := src.At(...).RGBA()`), and Go's PNG decoder returns PREMULTIPLIED values.
+So a fully transparent pixel arrives as (0,0,0) = black, and a soft rim pixel arrives darkened
+toward black in proportion to its transparency. A dark sprite on a transparent background
+becomes a dark shape on a black background. The two are the same colour, and no merge
+constraint can separate colours that are equal.
+
+Visible in ak74-328regions.png: the orange wooden stock's silhouette SURVIVES (orange != black)
+while every edge of the black gun body, grip, muzzle and barrel is marked dissolved. Same
+image, same merge, opposite outcomes, decided purely by whether the edge colour differs from
+black. In bow-476regions.png the bowstring is dissolved along its entire length.
+
+WHAT THIS RETRACTS. PREREGISTRATION.md Phase 1 item 2 and DESIGN-ALPHA.md proposed the fix
+"treat an alpha difference as an infinite merge cost, so regions never merge across a
+transparency edge". That fix is aimed at the wrong stage. The merge is behaving correctly given
+its input; it never joined two crossings it could distinguish. Adding the constraint would
+paper over an upstream loss.
+
+THE ACTUAL FIX: stop destroying alpha at load. Carry it into the merge. Once the merge can see
+alpha, a transparency edge IS a difference, and the constraint is either trivially satisfied or
+unnecessary -- which A1 cannot yet distinguish, because no version of the merge has ever
+received an alpha channel.
+
+Caveats.
+  - Three sprites, all small (400 to 3420 px). Same corpus limitation as the A3 pilot.
+  - The blackish threshold is 24/255, picked to catch premultiplied soft-rim pixels, not tuned.
+    A different threshold moves the "invisible" column but cannot move the dissolved column,
+    which is measured from the render and is threshold-free.
+  - Fully transparent pixels are treated as void and any a>0 as object, so the silhouette here
+    is the outermost edge of anything drawn at all.
+  - This measures dissolution of the silhouette only. It says nothing about whether the merge's
+    regions are good, and nothing about colour fidelity.

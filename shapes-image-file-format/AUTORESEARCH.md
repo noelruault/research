@@ -88,6 +88,21 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — the measurement methodology is now one document ([`METHODOLOGY.md`](METHODOLOGY.md))
+
+Every comparison protocol and metric this study uses was scattered across reports 16–37 and their data files. It is now one place, organised by **what each metric is valid for and what confounds it** — because that second column is where the retractions came from.
+
+**Protocols:** matched-fidelity byte comparison, lossless identical-content, two-arm substrate, cross-source segmentation, and the baseline-choice rule (raster + sidecar, never a raster codec alone).
+
+**Metrics table, with the confounds attached:** PSNR, boundary Jaccard, pair agreement, dissolved crossings, blob count, edge-fidelity dE, frayed edge. Two rules generalised out of the retractions —
+
+- **The referee rule.** Never score a comparison on our own partition. Report 33 flagged it for "frayed edge"; report 35's blob metric repeated it in spirit and was retracted. Edge-fidelity dE scores against the source instead, and neither arm owns it.
+- **The metric-choice rule.** Choose the metric before the run and publish the unflattering one alongside. Reporting only the flattering metric makes the flattering metric worthless.
+
+**Pre-run and post-run checklists** carrying the traps this session actually walked into: a flat number beside moving ones is a bug (an unchanged 15/15 caught a render that had silently dropped its alpha); a plateau is not a trend (dissolution stuck at exactly 259 across three marks was upstream information loss); probe sampled inputs before trusting them (two "keep" points landed on grass).
+
+**Deliberately incomplete.** Two consultant briefs are out — comparison against real background-removal tools and matte corpora, and format rigour (BD-rate, perceptual metrics, a modern corpus). Their protocols merge in when they return; the file says so rather than pretending to be finished.
+
 ### 2026-07-30 — segment one image, colour from another (report 37); and report 36's dE row withdrawn
 
 **Owner's idea: flatten the colours, take the shape, apply it to the original.** This format can do it natively — geometry and colour are separate chunks — so it was worth a verb (`lab crosseg`) rather than an argument.

@@ -91,7 +91,7 @@ Marked **[needs P0]** where the claim depends on the regions being *semantically
 
 **W9 — The capability operating point and the byte operating point are different. (New, report 14.)** The segmentation is best at **227–1,383 regions (21.99–24.99 dB)**; every byte result, including the 0.91%, was measured at **11,121 regions (28.51 dB)** where the median region is 34 px of texture speckle. Nine reports optimised a rate the applications do not want, and the rate they *do* want has never been benchmarked against WebP. This is now the largest open question in the programme.
 
-**W8 — ~~Encoder cost is unmeasured~~ — MEASURED, report 18: 3 m 44 s and 2.89 GB at 4K, single-threaded.** 68× `cwebp` at 960×540, ~150× at 4K. It does **not** block the stage-4 applications, which all operate on an already-encoded partition, but it excludes upload-time encoding, interactive re-encode, and mobile/embedded entirely. Decode is unaffected and remains a strength. The number is soft — the encoder is single-threaded on 15 cores, prices all 20 marks when one is wanted, and has never been profiled — so it is a lever (**new P8**), not a wall.
+**W8 — ~~Encoder cost is unmeasured~~ — MEASURED (report 18) then HALVED (report 25): 3 m 44 s → 2 m 7 s at 4K, 2.89 GB unchanged.** 68× `cwebp` at 960×540, ~150× at 4K. It does **not** block the stage-4 applications, which all operate on an already-encoded partition, but it excludes upload-time encoding, interactive re-encode, and mobile/embedded entirely. Decode is unaffected and remains a strength. The number is soft — the encoder is single-threaded on 15 cores, prices all 20 marks when one is wanted, and has never been profiled — so it is a lever (**new P8**), not a wall.
 
 ## Roadmap
 
@@ -111,7 +111,8 @@ Four stages. **Nothing in stage 4 should start before stage 1 finishes** — eve
 |---|---|---|
 | ~~P3~~ | ~~Fix the wall coder's legality (#12)~~ | **DONE — report 20. `potts.go` now reads `V(x+1,y)`; report 08 regenerated from the legal coder.** Cost +4.33% to +13.71% where CAE is chosen, 0.00% below ~6,400 regions. **The parity and sidecar headlines were already legal** — they use the interleaved coder, confirmed decodable |
 | ~~P4~~ | ~~Build a real container and bitstream~~ | **DONE — report 21. SHPC v1, ~20 B of overhead, round-trips bit-exactly.** Parity is now measured, not plausible: **+0.930%** at 28.5 dB and **−1.097%** at the capability point, as real files |
-| **P8** | **Profile and parallelise the encoder** | 3 m 44 s single-threaded on 15 cores, pricing 20 marks when one is needed, never profiled. Engineering, not research — and "3.7 minutes" kills adoption arguments before the byte numbers are heard |
+| ~~P8~~ | ~~Profile and parallelise the encoder~~ | **HALF DONE, HALF WRONG — report 25.** Pricing one mark instead of twenty: **3 m 44 s → 2 m 7 s (−43%), byte-identical output.** But *parallelism is the wrong lever*: the part that is embarrassingly parallel is the part just deleted, and what remains is a sequential agglomerative merge |
+| **P8b** | **Coarser initial partition** | The merge starts at one region per pixel — ~8.28M steps to reach ~11k regions at 4K. A superpixel pre-pass would cut that by orders of magnitude. **Changes the partitions**, so every baseline needs re-running or it reproduces falsification #3. Real option, dangerous one |
 | — | Fix the loop-count hole (P-02) | A decoder cannot tell when the loop list ends. Correctness, not optimisation |
 
 ### Stage 3 — prove it generalises (weeks)

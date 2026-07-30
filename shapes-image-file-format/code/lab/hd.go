@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -159,6 +160,26 @@ func hd(path, outDir string) {
 	mi := 0
 	fmt.Printf("#\n# scale-space: runRD + relax6, walls = min(CAE, contour), colours = colorBytes2\n")
 	fmt.Printf("%-9s %10s %8s %10s %10s %10s %8s\n", "regions", "crack", "psnr", "wallB", "colB", "totalB", "bpp")
+
+	// P8: a production encoder targets one operating point, but this prices all twenty marks of the
+	// ladder — and the fine ones dominate, because per-mark cost scales with region count. HDONLY=<n>
+	// keeps only the mark nearest n, which is what an encoder shipping a single file actually does.
+	if s := os.Getenv("HDONLY"); s != "" {
+		want, _ := strconv.Atoi(s)
+		best, bd := marks[0], 1<<62
+		for _, mk := range marks {
+			d := mk - want
+			if d < 0 {
+				d = -d
+			}
+			if d < bd {
+				bd, best = d, mk
+			}
+		}
+		marks = []int{best}
+		mi = 0
+		fmt.Fprintf(os.Stderr, "HDONLY: pricing only the mark at %d regions\n", best)
+	}
 
 	t1 := time.Now()
 	m := newMerger(im)

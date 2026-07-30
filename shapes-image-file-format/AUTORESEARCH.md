@@ -86,6 +86,16 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — P8: 43% of the encode was unnecessary, and my prescription was wrong (report 25)
+
+`HDONLY=<n>` prices one mark instead of twenty: **3 m 44 s → 2 m 7 s (−43%)**, render `md5`-identical to the published one and the priced row identical to the ladder's. **Free** — no approximation, just not computing nineteen things nobody wanted. The four finest marks alone were 2 m 0 s of the original 3 m 44 s.
+
+**Parallelism was the wrong prescription and the roadmap said it.** Reading `hd.go` rather than a profiler settled it: per-mark work runs on a *copy* while the merge carries on from the unrelaxed partition, so marks are mutually independent — meaning the embarrassingly parallel part is exactly the part now deleted. What remains is the agglomerative merge from one region per pixel, ~8.28M sequential steps at 4K. Threads buy ~nothing.
+
+**The real remaining lever is algorithmic**: start the merge from a coarser initial partition. Queued as **P8b**, and flagged dangerous — it changes the partitions, so every baseline must be re-run or it reproduces falsification #3.
+
+Application verdict unmoved (report 18): fine for archival, author-time and batch; still excluded from upload-time, interactive and mobile, where 2.89 GB settles it regardless of the clock. Memory was not re-measured.
+
 ### 2026-07-30 — P5: the parity result does not generalise (report 22)
 
 Three Kodak photographs, both coders native 768×512 with no resampling, WebP `-m 6`, fidelity matched by bisection, shape side as **real SHPC files**:

@@ -92,7 +92,7 @@ Live state and the active queue are in [`AUTORESEARCH.md`](AUTORESEARCH.md). Thi
 
 ---
 
-## P-06 — Re-tuning `bitsPerEdge` / `bitsPerReg` (B3) · `parked`
+## P-06 — Re-tuning `bitsPerEdge` / `bitsPerReg` (B3) · `CLOSED, NEGATIVE — report 26`
 
 **What it is.** `potts2.go:15` hardcodes `bitsPerEdge = 1.73` and `bitsPerReg = 25.0`, measured at 512×288, and they drive the RD merge key and the Ising relaxation λ at *every* resolution. Actual wall cost at 4K is 1.22–1.61 bits/edge at the operating rungs and **0.4854 at lossless** (was 0.4534 before the legality repair — report 20 moved it, so this entry's premise moved with it).
 
@@ -100,7 +100,13 @@ Live state and the active queue are in [`AUTORESEARCH.md`](AUTORESEARCH.md). Thi
 
 **Depends on.** The wall coder's real cost per edge — which **report 09 changed** (interleave −12.6%) and **report 20 changed again** (legality +4.3% to +13.7%). Both have now landed, so the constant is at its stalest and the wall coder is finally stable enough to re-measure against.
 
-**Revive when.** ~~After #12 is fixed~~ — **that condition is now satisfied (report 20).** The wall coder is legal and the interleave has landed, so the constant can be re-measured once against a settled coder. **This entry is now the strongest revive candidate in the file**, replacing P-01.
+**Revived, tested, and closed negative — report 26.** Re-measured across Kodak-24: `bitsPerEdge` should be 1.529 (is 1.73) and `bitsPerReg` 22.4 (is 25.0) — but their **ratio**, which is what the merge key depends on, was already right to **1.2%** (14.45 vs 14.63). Setting both to their measured values made the coder **worse on all four images tested**, on both raw bytes and the sidecar margin, at fractionally higher fidelity.
+
+**Why, and this is the part worth keeping:** the absolute `bitsPerEdge` enters the Ising relaxation as a *straightening pressure*, not a cost estimate. Report 04 measured straightening at 15%, because the context coder pays for unpredictable turns rather than for edges — so over-weighting walls relative to their linear cost buys real bytes, and "correcting" it loses them. **1.73 is a tuning parameter that looks like a measurement**, and the comment describing it as "measured cost of one crack edge" is the actual defect.
+
+**This entry's reasoning was wrong in an instructive way:** it argued from the gap between a constant and a measurement without asking what the constant was *doing*. The gap was real and irrelevant.
+
+**Successor: P-06b.** If over-weighting walls helps, values *above* 1.73 may help more. Untested, and the opposite of what this entry proposed.
 
 **Cost to revive.** High — a full scale-space re-run plus re-pricing every published mark, baseline included.
 

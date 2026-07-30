@@ -88,6 +88,28 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — why WebP wins, decomposed; affine revived and closed negative (report 34)
+
+**[`34-why-webp-wins.md`](34-why-webp-wins.md).** "WebP is better" is not an answer. The dog photograph at 1,229 regions, as a real SHPC v2 file:
+
+| component | bytes | share |
+|---|---|---|
+| **wall chunk** | **9,302** | **79.3%** |
+| colour chunk | 2,395 | 20.4% |
+| header | 24 | 0.2% |
+
+WebP at matched fidelity: **7,176 B**. So **our wall chunk alone is +29.6% against WebP's entire file**, and **with colour entirely free we still lose by 30.0%**. Every colour lever in this study competes for 20% of a file we lose by 63%. Parity needs a **48.9% cut in the wall bill**.
+
+**The explanation is report 02's and it still holds:** WebP stores residuals of an index map, we store geometry, and geometry is redundancy WebP never pays for. VP8's segmentation is per-macroblock so its boundary *is* the block grid and costs nothing; edges inside a block are paid in DCT coefficients it is already sending for texture. AV1's wedge modes code a straight-line boundary from a small codebook for a handful of bits. **The shape idea is inside all three winners in the only form that pays — implicit, block-local, no explicit global boundary map.**
+
+**P-08 (per-region affine colour) revived, tested, negative.** Its trigger fired when B10/RCT landed in report 15 and nobody re-ran it. Affine loses at **every** operating point, by up to 1.9×. It does deliver on geometry — 1,024 affine regions reach 28.06 dB with 29,145 crack edges where constant needs 41,580 — but the plane coefficients cost **9.2 KB against the boundary's 6.3 KB**. A generous RCT-scale 28% discount on the planes still loses to the constant arm at *higher* fidelity, so the conclusion survives the fairness objection. Downgraded in `PARKED.md`, not formally closed: a proper close re-measures planes *through* RCT.
+
+**The wall coder is already at its best of ten variants** (`interAsym`, −13.93% vs `caeBytes`), and `caeBytes` equals the `hd` table's wall figure at this mark, so **CAE beat contour here — P-01 and P-02 stay parked, trigger checked and did not fire.**
+
+**What remains, against a 4,549 B hole:** P-03 (wider CAE context, never stacked with the interleave) is worth ~280–560 B, about a tenth. Colour levers cannot exceed 2,395 B even at zero. **Only P-07 — approximate or curve-fitted boundaries — is the right magnitude, and it costs exactness, which is the property report 28 showed is the whole reason to transmit a partition at all.** That is a different product, to be entered deliberately rather than as a byte optimisation.
+
+**And the reframe, on a fresh image this study had never seen:** priced against WebP **+ a region map** (using our own wall coder, report 19's strongest sidecar, so conservative) — WebP alone 7,176 B with no segmentation, WebP+sidecar 16,478 B, **ours 11,725 B: 28.8% smaller**. Report 24's +30.5% reproduces off-corpus. Both statements stay on the record: **a poor image codec, a good structured-image format.**
+
 ### 2026-07-30 — first bytes on the target niche: 1 win, 2 losses vs WebP lossless (report 32)
 
 **[`32-sprites-vs-codecs.md`](32-sprites-vs-codecs.md).** Every byte number in this study came from photographs. The niche is game sprites and nobody had measured one.

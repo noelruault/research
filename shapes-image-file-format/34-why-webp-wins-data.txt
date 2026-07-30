@@ -1,0 +1,129 @@
+34 — where our bytes go, why WebP wins, and the two levers revived for this report.
+
+All figures: the dog photograph from report 33's corpus, 738x414, at the 1,229-region mark
+(29.22 dB), unless stated. Commands from code/lab.
+
+=== 1. COMPONENT SPLIT OF A REAL FILE ===
+
+    lab p4enc $OUT/images/hd_00001229.png dog.shpc
+
+  walls   cross-entropy    9301.67 B   coded     9306 B   coder overhead  +4 B (+0.047%)
+  colour  brotli -q11         2395 B   raw      3687 B
+  header    24 B (magic 4, version 2, 10 varint, mode 1, coefficients 8)
+  FILE    11725 B
+
+  walls  9302 B = 79.3%
+  colour 2395 B = 20.4%
+  header   24 B =  0.2%
+
+WebP at matched fidelity (cwebp -m 6 -q 8, 29.25 dB): 7176 B.
+
+  our WALL CHUNK ALONE vs WebP's ENTIRE FILE:        +29.6%
+  with our colour chunk entirely FREE:                +30.0%   (9326 vs 7176)
+  bytes to cut to reach parity:                       4549 B
+  that as a share of the wall bill:                   48.9%
+
+Colour is 20% of a file we lose by 63%. No colour lever can close this; that is arithmetic, not
+an opinion.
+
+=== 2. P-08, PER-REGION AFFINE COLOUR — REVIVED AND CLOSED NEGATIVE ===
+
+PARKED.md listed P-08 as "killed on numbers that are now stale", revive trigger "after B10 (RCT)".
+B10 landed in report 15 and it was never re-run. Re-run:
+
+    lab affine $SRC/images.png
+
+seed partition: 16384 regions, 128961 crack edges
+
+ regions   crackLen  PSNRexact   boundary     planes      total
+      32       6142      23.87     1.4 KB     0.3 KB     1.7 KB
+     256      14560      26.30     3.1 KB     2.4 KB     5.5 KB
+     512      19510      27.00     4.2 KB     4.7 KB     8.9 KB
+    1024      29145      28.06     6.3 KB     9.2 KB    15.5 KB
+    2048      42539      29.41     9.1 KB    18.2 KB    27.3 KB
+
+Against the constant-colour scale-space on the same image (lab hd):
+
+ regions      crack      psnr      wallB      colB    totalB
+     237      21560     26.59       3854       765      4619
+     413      29099     27.35       5510      1292      6802
+     812      41580     28.35       8647      2410     11057
+    1229      52673     29.22      10808      3548     14356
+
+MATCHED-FIDELITY COMPARISON — affine loses everywhere:
+
+  ~26.3-26.6 dB   constant  4619 B      affine  5500 B
+  ~27.0-27.4 dB   constant  6802 B      affine  8900 B
+  ~28.1-28.4 dB   constant 11057 B      affine 15500 B
+  ~29.2-29.4 dB   constant 14356 B      affine 27300 B   (1.9x)
+
+MECHANISM: affine DOES deliver what it promised on geometry. 1,024 affine regions reach 28.06 dB
+with 29,145 crack edges where the constant arm needs 41,580 crack edges. But the plane
+coefficients cost 9.2 KB against the boundary's 6.3 KB. Nine numbers per region instead of three
+costs more than the walls it saves.
+
+FAIRNESS OBJECTION, AND WHY THE CONCLUSION SURVIVES IT: affine's plane coder predates RCT, so it
+is measured with the weaker colour coder while the constant arm has the stronger one -- exactly
+the trap PARKED.md warns about. Grant affine a generous RCT-scale 28% discount on planes:
+9.2 KB -> 6.6 KB, total 12.9 KB at 28.06 dB. Constant is 11057 B at the HIGHER 28.35 dB. Still
+worse. The conclusion does not depend on the unfairness.
+
+This DOWNGRADES rather than formally closes P-08: a proper close would re-measure the plane
+coefficients through RCT rather than discount them arithmetically.
+
+=== 3. WALL CODER — ALREADY AT ITS BEST MEASURED SETTING ===
+
+    lab wallxexact $OUT/images/hd_00001229.png
+
+exact partition: 52673 crack edges, caeBytes 10808 B
+
+variant        bytes   (V / Hz)          vs caeBytes
+interAsym       9302   (1057 / 8245)     -13.93%   <-- SHIPPED, best
+interVH         9540   (1230 / 8310)     -11.72%
+inter12         9628   (1383 / 8245)     -10.91%
+interHV         9619   (1194 / 8425)     -11.00%
+base           10140   (9764 /  376)      -6.18%
+base12         10497   (9813 /  684)      -2.87%
+baseAsym       10699   (9813 /  886)      -1.00%
+baseFix        10808   (9764 / 1044)      +0.00%
+hzFirst        11086   (1124 / 9962)      +2.58%
+noCross        19726   (9764 / 9962)     +82.52%
+
+The shipped coder wins all ten. Also: caeBytes (10808) equals the hd table's wallB at this mark,
+which means CAE was chosen over contour here -- so P-01 (contour turn coding) and P-02 (loop
+channel) are UNCHOSEN at this operating point and STAY PARKED. Trigger checked, did not fire.
+
+=== 4. WHAT REMAINS, AGAINST A 4549 B HOLE ===
+
+lever                          status                        plausible size    closes it?
+P-03 wider CAE context         live, never stacked           -3..-6% of walls  no (~280-560 B)
+                               with the interleave                             ~1/10th
+P-01/P-02 contour              parked, trigger did NOT fire  0 B here          no
+P-08 affine colour             closed negative (this report) negative          no
+colour levers (P-04, P-05)     blocked/parked                <=2395 B total    no, arithmetically
+P-07 approximate boundaries    parked on cost, trigger fired right magnitude   maybe, but it
+                                                                               trades exactness
+
+P-07 is the only lever of the right size, and it costs the property being sold: report 28's
+finding is that a STABLE, EXACT partition is what a re-segmenting client cannot reproduce. A
+lossy boundary is a different product and should be entered deliberately, not as a byte tweak.
+
+=== 5. AGAINST THE BASELINE THAT MATCHES THE PRODUCT ===
+
+Sidecar priced with our own wall coder, which report 19 measured as the STRONGEST available
+(beats raw label plane + xz -9e by 2.46x), so this is conservative rather than self-serving.
+
+  WebP alone                 7176 B    no segmentation
+  WebP + a region map       16478 B    yes
+  ours                      11725 B    yes -- the structure IS the image
+
+  ours vs WebP+sidecar:  28.8% smaller
+
+On a fresh image from a corpus this study had never seen, reproducing report 24's +30.5% mean on
+Kodak-24.
+
+Caveats.
+  - One image decomposed in full. Report 33 has the six-image byte table; the component split,
+    the affine re-run and the wall sweep are this photograph only.
+  - Nothing here re-opens the killed list. "Let the decoder regrow the regions" remains provably
+    a context model bounded by H(X | causal past) (report 04) and is not a lever.

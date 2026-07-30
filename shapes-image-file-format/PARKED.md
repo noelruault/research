@@ -140,6 +140,10 @@ Sweeping the ratio itself (8, 11, 14.45, 20, 30) on two images: **no setting dom
 
 **Revive when.** After B10. Cheap check: re-run report 04's affine comparison with RCT applied to *both* arms. If affine coefficients also compress ~28% better, the original comparison's conclusion may or may not survive — **and nobody knows which**, because the arms were never re-measured together.
 
+**TRIGGER FIRED AND TESTED — report 34. Downgraded to negative.** B10 landed in report 15; the re-run was done on the dog photograph from report 33's corpus. **Affine loses at every operating point, by up to 1.9×.** It delivers exactly what it promised on geometry — 1,024 affine regions reach 28.06 dB with 29,145 crack edges where constant needs 41,580 — but the plane coefficients cost **9.2 KB against the boundary's 6.3 KB**. Nine numbers per region instead of three costs more than the walls it saves.
+
+Granting affine a generous RCT-scale 28% discount on its planes (9.2 → 6.6 KB, total 12.9 KB at 28.06 dB) still loses to constant's 11,057 B at the *higher* 28.35 dB, so the conclusion does not rest on the unfairness. **Not formally closed:** a proper close re-measures the plane coefficients *through* RCT rather than discounting them arithmetically. One image.
+
 **Cost to revive.** Low — `code/lab/affine.go` exists.
 
 **This is exactly the class the convention file warns about:** killed on a comparison, where one side of the comparison has since improved by 28%.

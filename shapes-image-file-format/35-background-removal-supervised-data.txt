@@ -1,0 +1,89 @@
+35 — supervised colour classification of regions vs pixels.
+
+Same corpus and same arms as report 33. The ONLY change is the selection rule: report 33 flooded
+from the image border with a drifting RGB tolerance; here the caller points at examples and every
+unit is classified by 1-nearest-neighbour in CIELAB. Same classifier, same examples, both arms.
+
+    lab bgclass <source.png> <ours-render.png> <rival.png> <out.png> keep=x,y;.. remove=x,y;..
+
+Examples are sampled from the SOURCE (what a user would be pointing at). Ties go to keep, so the
+subject is never lost on a tie. CIELAB rather than RGB because a shadowed white hair and a sunlit
+blade of grass are close in RGB magnitude and far apart perceptually — the exact confusion that
+sank report 33's flood.
+
+=== RUN 1 — dog, 738x414, 1,229 regions, 4 keep / 4 remove examples ===
+
+  KEEP   (250,150) rgb(222,216,202)   REMOVE (100,350) rgb(124,139, 56)
+  KEEP   (370, 60) rgb( 42, 44, 39)   REMOVE (600,300) rgb(133,146, 64)
+  KEEP   (225,120) rgb( 46, 46, 38)   REMOVE (620, 60) rgb( 96, 99, 92)
+  KEEP   (300,230) rgb(101,105, 81)   REMOVE (400,380) rgb( 91,109, 49)
+
+arm                 decisions   removed px     bg blobs     fg blobs
+R  per region            1229       201408           46           29
+P  per pixel           305532       203135          146          117
+decisions ratio 249x; masks agree on 95.40% of pixels
+
+=== RUN 2 — dog, same image, 7 keep / 11 remove (tree and shadow examples added) ===
+
+arm                 decisions   removed px     bg blobs     fg blobs
+R  per region            1229       246489           44           33
+P  per pixel           305532       248211          187          264
+decisions ratio 249x; masks agree on 94.50% of pixels
+
+THE TREND IS THE FINDING. Sharpening the classifier from 8 to 18 examples removed 45,081 more
+background pixels (the tree line started going) and:
+    per-region blobs   75 -> 77    (flat)
+    per-pixel blobs   263 -> 451   (+71%)
+A sharper decision boundary fragments a per-pixel mask and does not fragment a per-region one.
+The partition regularises the decision spatially for free; there is nothing to regularise with
+morphology afterwards.
+
+=== RUN 3 — bobcat, 597x335, 1,433 regions, 7 keep / 8 remove ===
+
+arm                 decisions   removed px     bg blobs     fg blobs
+R  per region            1433        99404          133           11
+P  per pixel           199995        95462          344          191
+decisions ratio 140x; masks agree on 91.96% of pixels
+
+Foreground blobs 11 vs 191: the subject comes out as 11 connected pieces on the region graph and
+191 on the pixel grid, from the identical classifier.
+
+=== SUMMARY ===
+
+image     arm      decisions   total blobs   ratio vs pixel arm
+dog r1    region        1229            75   3.5x cleaner, 249x fewer decisions
+dog r1    pixel       305532           263
+dog r2    region        1229            77   5.9x cleaner, 249x fewer decisions
+dog r2    pixel       305532           451
+bobcat    region        1433           144   3.7x cleaner, 140x fewer decisions
+bobcat    pixel       199995           535
+
+=== WHAT WORKS, AND WHAT DOES NOT ===
+
+WORKS: chromatic separation. Green grass against a white/black dog is cleanly separable once
+examples are supplied. Report 33's failure was the ALGORITHM (a drifting unsupervised flood), not
+the representation. Mask agreement between arms rises from 61.55% under the flood to 91.96-95.40%
+under supervision, i.e. both substrates now largely agree because the rule is actually right.
+
+DOES NOT WORK: achromatic collision. The dog's black ear is rgb(42,44,39) and the dark foliage
+behind it is rgb(10,16,16) to rgb(54,60,60). The bobcat's dark markings sit inside the range of
+its own blurred dark background. These are the SAME COLOUR to any colour rule, so no set of
+colour examples separates them, on either substrate. Visible in the images: the dog cut keeps
+part of the tree line; the bobcat cut has holes in the animal's dark markings.
+
+That residue is precisely what a learned model buys and colour cannot: iOS Lift Subject uses
+shape and semantics, not a colour lookup. This report does not claim to match it and did not test
+against it.
+
+=== CAVEATS ===
+
+  - Two images, one subject type (a centred animal on a natural background).
+  - Examples were chosen by hand, by the author, looking at the picture. A real interaction
+    supplies one touch point, not seven; how the result degrades with fewer/worse examples is
+    untested.
+  - "Blobs" counts 4-connected components of each mask value. It measures fragmentation, which is
+    a proxy for how much morphological cleanup a mask needs. It is not a ground-truth accuracy
+    measure, and there is no ground-truth mask for these images.
+  - No comparison against rembg, SAM or Lift Subject. Those solve the semantic half.
+  - The per-region arm classifies OUR partition's region colours; the per-pixel arm classifies
+    WebP's decoded pixels at matched fidelity. Both are downstream of a lossy encode.

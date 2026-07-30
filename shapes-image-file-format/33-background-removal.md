@@ -4,6 +4,8 @@
 
 **Answer, in one line: it makes the *mask mechanics* dramatically cheaper and edge-exact, and it does not help you decide what the background is — which is the part that was hard.** On these photographs no tolerance separates the subject from the background on either substrate.
 
+> **Partly superseded by report 35.** The failure below is the *algorithm's*, not the representation's. Replace this unsupervised flood with a supervised classifier over a handful of example colours and the chromatic separation works cleanly — and the region graph is then **140–249× cheaper and 3.5–5.9× less fragmented** than the same rule on pixels. What survives from this report is the harder half: colour cannot separate a black ear from dark foliage, and deciding *what* to select still needs semantics. Read the two together.
+
 Data: [`33-background-removal-data.txt`](33-background-removal-data.txt). Verbs: `lab bgcut`, `lab sbs`.
 
 ## The experiment

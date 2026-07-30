@@ -88,6 +88,31 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — supervised colour cut: report 33's pessimism was the algorithm's fault (report 35)
+
+**[`35-background-removal-supervised.md`](35-background-removal-supervised.md).** Report 33 used an unsupervised flood with a drifting RGB tolerance and concluded the format does not help decide what the background is. Swap the rule for a 1-nearest-neighbour classifier in CIELAB over a handful of user-supplied example colours — everything else held identical — and it works.
+
+**Chromatic separation is fine.** Grass goes, dog stays, which no tolerance achieved in report 33. Agreement between the two arms rises from **61.55%** under the flood to **91.96–95.40%** under supervision: both substrates agree once the rule is right.
+
+**The region graph wins twice, and the second win is the interesting one.**
+
+| run | arm | decisions | total blobs |
+|---|---|---|---|
+| dog, 18 examples | **region** | **1,229** | **77** |
+| | pixel | 305,532 | 451 |
+| bobcat, 15 examples | **region** | **1,433** | **144** |
+| | pixel | 199,995 | 535 |
+
+140–249× fewer decisions, and 3.5–5.9× less fragmentation. **Sharpening the dog classifier from 8 to 18 examples took per-pixel blobs 263 → 451 (+71%) while per-region stayed 75 → 77 (flat).** A sharper decision boundary fragments a pixel mask and cannot fragment a region mask — the partition regularises spatially for free, so there is no morphology pass to run afterwards. On the bobcat the subject is **11 connected pieces on the region graph against 191 on the pixel grid**, same classifier.
+
+**This is the first measured capability win in the study that is not about bytes.**
+
+**The hard limit is real and stated:** colour cannot separate things that are the same colour. The dog's black ear is rgb(42,44,39); the foliage behind it runs rgb(10,16,16)–rgb(54,60,60). So the cut keeps part of the tree line and the bobcat has holes in its dark markings. No example set fixes that on either substrate — it is exactly what a learned model buys.
+
+**The division of labour that follows, and it composes:** deciding *what* to select needs semantics; *executing* the selection is where this format is strong. A model that emits region labels rather than a pixel mask inherits both the cheapness and the exact edges, and the 140–249× is what makes an expensive model affordable per-region.
+
+Two images, hand-picked examples, no ground-truth mask, no comparison against rembg/SAM/Lift Subject. Report 33 now carries a forward pointer.
+
 ### 2026-07-30 — why WebP wins, decomposed; affine revived and closed negative (report 34)
 
 **[`34-why-webp-wins.md`](34-why-webp-wins.md).** "WebP is better" is not an answer. The dog photograph at 1,229 regions, as a real SHPC v2 file:

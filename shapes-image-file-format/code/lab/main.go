@@ -116,6 +116,8 @@ func main() {
 		sbsCmd(os.Args[2:])
 	case "bgcut": // bgcut <source.png> <ours.png> <rival.png> <out.png> [tol] — background removal: region graph vs pixel grid
 		bgcutCmd(os.Args[2:])
+	case "bgclass": // bgclass <source.png> <ours.png> <rival.png> <out.png> keep=x,y;.. remove=x,y;.. — supervised cut, region vs pixel
+		bgclassCmd(os.Args[2:])
 	default:
 		fmt.Fprintln(os.Stderr, "unknown mode")
 		os.Exit(2)

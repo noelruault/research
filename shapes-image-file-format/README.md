@@ -4,6 +4,8 @@ The complete research record behind an attempt to build **an image format made o
 
 **The answer is no, and the one exception that survived for a while did not survive being checked properly either.** This folder is the evidence trail for that conclusion, including the thirteen claims the investigation produced and then falsified against its own measurements — the last six of them after the study already looked finished, one of them after this README had already published it as a headline, and one of them a wall coder that eight reports had priced without noticing no decoder could run it.
 
+**Continuing this work?** Start at [`HANDOFF.md`](HANDOFF.md).
+
 ## What this is
 
 Seven rounds of measurement, each with its report and its raw data companion, plus two reports that are the honest record of what went wrong and what worked. The work was done for [`noelruault/images`](https://github.com/noelruault/images), a project that converts rasters into rectangle covers, and it settles the compression question that project kept re-asking.

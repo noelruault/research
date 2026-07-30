@@ -1,5 +1,7 @@
 # Autoresearch ledger — shapes image format, bottleneck programme
 
+> **New here? Read [`HANDOFF.md`](HANDOFF.md) first.** It states where the study stands, what is settled and must not be re-derived, the method rules that were learned the hard way, and a queue ranked by what makes this a usable format rather than a cheaper one. This file is the running log behind it.
+
 **This file is the handover.** An agent with no memory of the conversation should be able to read this file alone, pick the top open item, and continue without asking anything. Update it in the same commit as the work it describes. Newest results go at the top of the log.
 
 ## Mission

@@ -1,6 +1,6 @@
 # Handoff — start here
 
-You are picking up a shape-based image format. Everything below is measured and committed; nothing is from memory or conversation. Read this file, then `AUTORESEARCH.md` (the running ledger), then `PARKED.md` (set-aside ideas with revive triggers). Report 13 holds the capability argument and the roadmap.
+You are picking up a shape-based image format. Everything below is measured and committed; nothing is from memory or conversation. Read this file, then `PRINCIPLES.md` (**what this is for and how it is measured — seven rules, each naming the failure it prevents**), then `PREREGISTRATION.md` (**the active plan — three measurements with their decision thresholds committed before they run**), then `AUTORESEARCH.md` (the running ledger), then `PARKED.md` (set-aside ideas with revive triggers). `DESIGN-ALPHA.md` holds the alpha design study, both approaches, nothing decided. Report 13 holds the capability argument and the older roadmap.
 
 **The single most useful thing to know: the byte-optimisation phase is finished, and it is mostly negative. Do not restart it.** The value now is in making the format *usable* and *demonstrating* the capability that justifies it.
 
@@ -62,13 +62,19 @@ Report 13 claims a truncatable progressive stream as a **strength**, and it is n
 
 Never profiled, only measured. Driven by the merge's per-pixel structures. This is what excludes mobile and any multi-tenant encoder, and `HDONLY` did not touch it. At 768×512 it is not a problem, so it only blocks 4K work.
 
-### H6 — Finish report 28's Test 2 on the corpus
+### H6 — Finish report 28's Test 2 on the corpus · **now M1, pre-registered**
 
 Test 1 (mask stability across deliveries) is 10 images. Test 2 (agreement with the transmitted partition) is **2**, and is labelled indicative. It supports the same claim and is cheap.
 
-### H7 — A different segmenter for the free-mask client
+### H7 — A different segmenter for the free-mask client · **now M2, pre-registered**
 
-Report 28 gave the client *our own* merge, which bounds free-mask agreement from **above**. SLIC, Felzenszwalb or SAM would agree less and would strengthen a finding already measured in its generous case.
+Report 28 gave the client *our own* merge, which bounds free-mask agreement from **above**. SLIC or Felzenszwalb would agree less and would strengthen a finding already measured in its generous case.
+
+### H9 — Boundary recall against human ground truth · **now M3, pre-registered — the one that decides the niche**
+
+Report 14 judged the regions meaningful **by eye, on three windows of one photograph**, and every photo-editing application in report 13 rests on that. H6 and H7 harden a claim already held; neither measures whether the regions are *right*. This one does, against the strongest freely available automatic segmenter, and it is the only queued item that can go against us.
+
+**Metric and thresholds are committed in `PREREGISTRATION.md` before the run** — including why the primary metric is boundary recall plus under-segmentation error rather than the conventional F-measure, and why the F-measure gets published anyway.
 
 ### H8 — P8b: coarser initial partition *(low value, real hazard)*
 
@@ -82,6 +88,12 @@ The merge starts at one region per pixel — ~8.28M sequential steps at 4K. A su
 - **Code** `code/lab` — builds and vets clean, `go test` passes. Verbs: `hd` (encode a scale-space; `HDONLY=<n>` for one mark), `p4enc`/`p4dec` (container), `rcdec`, `wallcheck` (decoder-side causality), `wallxexact`, `recolour`, `floor`.
 - **Corpus** Kodak-24 is not committed; fetch from `r0k.us/graphics/kodak/`. The original eval image and its renders live in the session scratchpad and are reproducible with `lab hd`.
 
-## What I would do first
+## What to do first — decided 2026-07-30, see `PREREGISTRATION.md`
 
-**H1.** Not because it is the biggest number, but because every remaining byte question has been answered and the format's case now rests on a capability nobody has actually used. Building the demo will tell you what H2–H4 need to look like, and it is the fastest route to knowing whether this is a good option or merely a defensible one.
+**Evidence first, niche after.** The format has two candidate niches — authored assets (gaming, animation) and photo editing — and the record cannot currently choose between them. Rather than pick one and build, run the three measurements that decide it, with thresholds committed before they run.
+
+1. **M1 and M2** (H6, H7) — cheap, code exists, same corpus. They harden report 24's baseline.
+2. **M3** (H9) — the niche decision. New corpus, a comparison arm to verify rather than assume, a day of work.
+3. **Phase 1 — SHPC v2: alpha and a colour-space tag** (H2). Starts regardless of the outcome, since both niches need it. **Alpha is not decided** — `DESIGN-ALPHA.md` documents both candidate approaches and five research items; **A1 (does the merge dissolve silhouettes?) is the cheapest open question in the study.**
+
+**H1 stays queued, not cancelled.** The earlier recommendation was to build the region editor first, on the reasoning that a demo finds format gaps faster than more measurement. That still holds — it is *which* demo that is unresolved, and M3 is what resolves it. A photo-editing demo and an asset-pipeline demo are different products.

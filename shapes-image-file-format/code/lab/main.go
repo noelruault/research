@@ -108,6 +108,8 @@ func main() {
 		cselCmd(os.Args[2:])
 	case "ccausal":
 		ccausalCmd(os.Args[2:])
+	case "alphahist": // alphahist <sprite.png ...> — how much sprite alpha is soft rim vs interior translucency (DESIGN-ALPHA.md)
+		alphaHistCmd(os.Args[2:])
 	default:
 		fmt.Fprintln(os.Stderr, "unknown mode")
 		os.Exit(2)

@@ -1,0 +1,42 @@
+A3 pilot — how much of a real game sprite's alpha is soft, and how much of that is silhouette rim?
+
+Command (from code/lab):
+
+    go build ./... && go run . alphahist \
+      /Users/noelruault/go/src/github.com/noelruault/sprites/assets/props/extra/*.png
+
+Corpus: the only real game-sprite PNGs available at the time of the run — the three prop
+sprites in noelruault/sprites. n=3. NOT a corpus; a pilot. See DESIGN-ALPHA.md item A3.
+
+file                                            pixels      a=0    a=255     soft    soft%     rim interior interior%
+.../assets/props/extra/ak74.png                   2352     1358      710      284   12.07%     203       81     3.44%
+.../assets/props/extra/bow.png                    3420     2426      370      624   18.25%     564       60     1.75%
+.../assets/props/extra/pickaxe.png                 400      251      149        0    0.00%       0        0     0.00%
+
+Definitions:
+  a=0       fully transparent
+  a=255     fully opaque
+  soft      1..254
+  rim       soft AND at least one of the 8 neighbours is a=0  -> anti-aliased silhouette edge
+  interior  soft AND no neighbour is a=0                      -> candidate genuine translucency
+
+Read carefully:
+
+  1. "interior" is an UPPER BOUND on translucency, not a measurement of it. The 8-neighbour
+     test only catches soft pixels directly touching alpha 0, so the inner row of a 2-pixel-wide
+     anti-aliased gradient counts as interior when it is still rim. On sprites this small
+     (20x20 to 84x28) a 2px AA band is a large share of the whole image.
+
+  2. The high soft% on ak74 and bow is a perimeter-to-area effect. At 2-3k pixels the silhouette
+     rim is a big fraction of the image; the same sprite at 4x the linear size would report a
+     far smaller soft%. Do not read 12-18% as "soft alpha is significant".
+
+  3. pickaxe.png is 0.00% soft — pure binary alpha, the case a flat per-region alpha handles exactly.
+
+Also run, and excluded from the table: assets/characters/knight/verify/*.png. All nine are
+a=255 everywhere. They are opaque screenshots of rendered output, not sprites with alpha,
+and they say nothing about this question.
+
+What this pilot does NOT establish: whether interior translucency exists in real game art at
+a rate that justifies a per-pixel alpha mode. n=3, all tiny, and the interior column is an
+upper bound. A3 in DESIGN-ALPHA.md states the test that would settle it.

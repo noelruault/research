@@ -88,6 +88,40 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — principles on the wall; alpha reopened and documented both ways ([`PRINCIPLES.md`](PRINCIPLES.md), [`DESIGN-ALPHA.md`](DESIGN-ALPHA.md))
+
+**Two standing documents added, and one decision retracted before it could do damage.**
+
+`PRINCIPLES.md` — seven, each naming the failure it prevents and where that failure actually happened here. Six are what this study already enforced. The seventh is new and is the owner's framing: **other formats inspire us, they do not set our bar.** The initial target is game assets. Its stated exception keeps M3 honest — where a free alternative competes for the same user, that is product competition and it gets measured.
+
+`DESIGN-ALPHA.md` — the alpha decision recorded in the pre-registration was a preference stated as a conclusion, which is exactly the defect report 26 found in `bitsPerEdge`. Retracted via Amendment 1 (append-only, no data seen). Both approaches now documented: per-region flat, per-pixel plane, a header mode field carrying both, and three recorded-not-pursued ideas. Five research items A1–A5.
+
+**The argument worth keeping, and it came from asking the question from scratch rather than copying PNG:** in a raster format anti-aliasing is a *resolution artifact* — the true silhouette is a curve between pixel centres and the encoder stores a coverage estimate because the curve was lost. We did not lose it. A decoder holding the boundary could compute coverage analytically at draw time, which would make most stored soft alpha a re-transmission of something the file already contains. **That is an argument, not a measurement** — item A4.
+
+**A3 pilot ran** (`lab alphahist`, new verb, builds and vets clean; data in `DESIGN-ALPHA-data.txt`). Three real prop sprites: soft alpha 12.07% / 18.25% / 0.00%, of which most is silhouette rim (71% and 90%), leaving at most 3.44% / 1.75% / 0.00% as interior translucency.
+
+**Read as inconclusive, deliberately.** n=3, all sprites are 20×20 to 84×28 so the rim is a large share of the image purely from perimeter-to-area, and the interior column is an **upper bound** — the 8-neighbour test miscounts the inner row of a 2px AA band as translucency. The pilot is consistent with the design argument and is not evidence for it. The first version of this measurement reported only soft%, which would have read as "soft alpha is significant" and been wrong; the rim/interior split is what makes it honest.
+
+**A1 is now the cheapest open question in the study**: run the existing merge on a sprite with a transparent background and look at whether the silhouette survives. The hazard flagged in the pre-registration is still untested, and the merge already preserving silhouettes would be a better outcome than implementing a constraint.
+
+### 2026-07-30 — the next three measurements are pre-registered before they run ([`PREREGISTRATION.md`](PREREGISTRATION.md))
+
+**Decision taken with the owner: evidence first, niche after.** The format has two candidate niches — authored assets (gaming, animation) and photo editing — and the record cannot currently choose between them. Rather than pick one and build, the three measurements that decide it run first, with their thresholds committed **before** any of them runs.
+
+Method rule #1 said name the *knobs* before the run. This extends it to **metrics and decision thresholds**, because a threshold chosen after seeing the data is not a threshold.
+
+- **M1** — report 28 Test 2 (currently n=2) across the same ten images. Hardens report 24's baseline. Cheap; code exists.
+- **M2** — the free-mask test with an off-the-shelf segmenter instead of our own merge, which report 28's own caveat says bounds agreement from above. Cheap.
+- **M3** — boundary recall against human-annotated ground truth, versus the strongest freely available automatic segmenter. **This is the one that decides the niche**, and it is the only one that can go against us.
+
+**The asymmetry is the point.** M1 and M2 harden a claim already held; neither touches segmentation *quality*. Report 14 judged the regions meaningful **by eye, on three windows of one photograph** — the weakest evidence in this record, and the whole photo-editing case rests on it. Report 28 already carved out one-shot local selection as the case its finding does *not* cover, and photo editing is largely one-shot local selection.
+
+Registered in advance, because both are open to the charge of being self-serving if chosen later: M3's primary metric is boundary **recall** plus under-segmentation error rather than the conventional F-measure (over-segmentation is free for selection — the sky is 2 regions; under-segmentation is unrecoverable), **and the F-measure is published anyway** on the same runs. The decision threshold is anchored on report 14's 34 px median region at 11,121, past which "select a region" stops meaning anything to a user.
+
+**Phase 1 — SHPC v2, alpha and a colour-space tag — starts regardless of the outcome**, since both niches need it. Design calls and one untested hazard (the merge is colour-SSE-driven and will happily merge across a cutout boundary) are recorded in the pre-registration rather than left to be rediscovered.
+
+Nothing has run yet. This entry exists so the commit ordering is on the record.
+
 ### 2026-07-30 — report 28 extended to ten images; the free-mask finding holds
 
 Reordered ahead of P8b, and the evidence says so: P8b affects encode *speed*, which touches no surviving claim, while report 28 rested on two images and underpins the only claim that survived a corpus.

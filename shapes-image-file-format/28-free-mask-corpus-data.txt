@@ -1,0 +1,21 @@
+# Report 28 extended to ten images: is a client-side mask stable across deliveries?
+#
+# Protocol per image: the matched-fidelity WebP from report 23, plus a q75 re-encode; each decoded
+# and segmented client-side with this study's OWN merge (the generous case); the two masks compared
+# at the mark nearest 4,500 regions. Code: 28-freemask/pcmp.go.
+#
+# columns : image webpA_B webpB_B regionsA regionsB pair_agreement boundary_jaccard
+#
+kodim01	25604	-	4604	5135	86.9020	0.4015
+kodim02	23632	31312	4241	4251	89.0640	0.3786
+kodim04	21712	34628	4500	4602	84.5132	0.2846
+kodim06	22864	55130	4373	4536	86.8325	0.3556
+kodim09	16848	24832	4342	4356	89.4198	0.3594
+kodim12	20398	26746	4273	4285	88.3147	0.3570
+kodim15	19328	30598	4401	4439	87.2846	0.2901
+kodim18	23134	62836	4362	4409	85.7231	0.2844
+kodim21	20894	45390	4430	4460	88.7461	0.3480
+kodim23	14986	20702	4374	4313	84.9220	0.2383
+#
+# n=10  mean 0.330  median 0.352  range 0.238-0.402
+# images where a client-side mask keeps >50% of its boundaries across deliveries: 0

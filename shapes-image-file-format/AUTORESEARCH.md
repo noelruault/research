@@ -86,6 +86,16 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-30 — report 28 extended to ten images; the free-mask finding holds
+
+Reordered ahead of P8b, and the evidence says so: P8b affects encode *speed*, which touches no surviving claim, while report 28 rested on two images and underpins the only claim that survived a corpus.
+
+Ten images, same protocol. **Mean boundary Jaccard 0.330, median 0.352, range 0.238–0.402. On zero images does a client-side mask keep even half its boundaries across two deliveries of the same picture.**
+
+The *consistency* is the point — every image lands in a narrow band, so this is a property of the approach rather than of one picture. That is the opposite of the parity result, which report 23 showed was one photograph's luck.
+
+**Report 24's baseline is now supported on a corpus at both ends**: the margin itself across 24 images, and the assumption underneath it across 10.
+
 ### 2026-07-30 — the free-mask baseline, tested at last (report 28)
 
 Report 24's margin rests on the assumption that a transmitted partition is worth paying for when a client could segment the decoded pixels for free. Measured, with the client given **our own merge** on WebP-decoded pixels — the generous case, since a different library would agree less:

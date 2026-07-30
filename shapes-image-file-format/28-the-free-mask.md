@@ -19,6 +19,27 @@ The same source image, delivered as two different WebP files (a matched-fidelity
 
 **Between a quarter and two-fifths of the boundaries are shared.** Region counts differ by up to 11.5%. There is no correspondence between region #4,211 in one delivery and any region in the other.
 
+### Extended to ten images
+
+The two images above plus eight more, same protocol — the matched-fidelity delivery from report 23 against a `q75` re-encode, each segmented client-side:
+
+| image | delivery A | delivery B | regions A / B | pair | **boundary Jaccard** |
+|---|---|---|---|---|---|
+| kodim01 | 25,604 | — | 4,604 / 5,135 | 86.90% | 0.4015 |
+| kodim02 | 23,632 | 31,312 | 4,241 / 4,251 | 89.06% | 0.3786 |
+| kodim04 | 21,712 | 34,628 | 4,500 / 4,602 | 84.51% | 0.2846 |
+| kodim06 | 22,864 | 55,130 | 4,373 / 4,536 | 86.83% | 0.3556 |
+| kodim09 | 16,848 | 24,832 | 4,342 / 4,356 | 89.42% | 0.3594 |
+| kodim12 | 20,398 | 26,746 | 4,273 / 4,285 | 88.31% | 0.3570 |
+| kodim15 | 19,328 | 30,598 | 4,401 / 4,439 | 87.28% | 0.2901 |
+| kodim18 | 23,134 | 62,836 | 4,362 / 4,409 | 85.72% | 0.2844 |
+| kodim21 | 20,894 | 45,390 | 4,430 / 4,460 | 88.75% | 0.3480 |
+| kodim23 | 14,986 | 20,702 | 4,374 / 4,313 | 84.92% | 0.2383 |
+
+**n = 10. Mean Jaccard 0.330, median 0.352, range 0.238–0.402. On zero images does a client-side mask keep even half its boundaries across two deliveries of the same picture.**
+
+The consistency matters more than the mean: every image lands in a narrow band, so this is a property of the approach rather than of any one picture — unlike the parity result, which report 23 showed was one photograph's luck.
+
 ## Test 2 — does the client's mask match the transmitted one?
 
 | | kodim01 | kodim23 |

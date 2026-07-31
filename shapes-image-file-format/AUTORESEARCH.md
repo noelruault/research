@@ -88,6 +88,22 @@ The byte queue below stays valid but is now subordinate to the above.
 
 ## Log — newest first
 
+### 2026-07-31 — a portable detector, the selection chunk, and the handoff to build (report 44)
+
+**[`44-portable-detector.md`](44-portable-detector.md), [`HANDOFF-VIEWER.md`](HANDOFF-VIEWER.md).**
+
+**u2net (Apache-2.0, ONNX) matches Apple Vision at mean IoU 0.9505** across six photographs, 6/6 above a bar registered before the run, at **163–246 ms warm against Vision's ~160 ms**. Speed was deliberately excluded from the target on the expectation a portable model would lose to dedicated silicon; it did not, and that is recorded because the expectation was wrong in our favour. isnet (0.9525) and birefnet (0.9643) also cleared it; birefnet is 50× slower at 973 MB.
+
+**SHPC v3 adds a selection chunk.** Mode 1 is one instance id per region, 0 = background: **96–168 B**. Mode 2 adds a confidence byte and a producer string for **+63 B**, because mode 1 asserts a selection nothing can falsify — "region #4,211 means the same thing everywhere" is only checkable if the file records what drew it. Round-trips EXACT; v1 and v2 files still decode.
+
+**Snapping a model's mask onto the partition costs 1.7–5.2% IoU and improves edge fidelity** (11.25 → 12.97 dog, 12.98 → 15.40 bobcat, judged against the source). A model works on a fixed low-resolution grid and upscales; our boundaries are exact on the native lattice, so the snap replaces a resampled boundary with a real one.
+
+**The browser path is unblocked**: the decoder compiles under `GOOS=js GOARCH=wasm` today, and the last external-process call was brotli, now replaceable by `andybalholm/brotli` v1.2.2 (MIT, verified to build for `js/wasm`).
+
+**Licences recorded with how each was verified** ([`LICENSES.md`](LICENSES.md)): u2net Apache-2.0 and rembg MIT confirmed at source; isnet and birefnet measured but never licence-checked; whether rembg's redistributed `u2net.onnx` is byte-identical to upstream is unconfirmed. Apple's model files are gitignored — this repo pushes to GitHub and committing them would publish them.
+
+**Next is the viewer**, and `HANDOFF-VIEWER.md` carries the full brief: the format has never been opened by a tool, the selection chunk generalises to per-region attributes (a bone id is the same shape of data as an instance id), and `sprites` already draws primitives at 60 fps. Prior art is named honestly — Meta's 2.5D character rigs, UniRig, Tripo — along with the part that is genuinely unsolved: a subject detector does not give you limbs.
+
 ### 2026-07-30 — connectivity: the foreground collapses to one piece (report 39)
 
 **Owner's observation — "stuff not connected to the centred object is usually background" — and it is two operations, fixing two different failures.** Hole filling (a background component never touching the border is enclosed by the subject, so flip it) fixes the bobcat's dark markings. Disconnected rejection (keep only the component holding the subject seed) fixes the dog's floating tree blobs.

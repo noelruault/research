@@ -116,6 +116,8 @@ func main() {
 		sbsCmd(os.Args[2:])
 	case "bgcut": // bgcut <source.png> <ours.png> <rival.png> <out.png> [tol] — background removal: region graph vs pixel grid
 		bgcutCmd(os.Args[2:])
+	case "snap": // snap <model-mask.png> <ours-render.png> <source.png> <out.png> — put a learned model's mask onto our partition
+		snapCmd(os.Args[2:])
 	case "crosseg": // crosseg <seg-source.png> <colour-source.png> <regions> <out.png> — partition from one image, colours from another
 		crossegCmd(os.Args[2:])
 	case "bgclass": // bgclass <source.png> <ours.png> <rival.png> <out.png> keep=x,y;.. remove=x,y;.. — supervised cut, region vs pixel

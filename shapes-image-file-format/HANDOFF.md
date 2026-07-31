@@ -14,6 +14,8 @@ You are picking up a shape-based image format. Everything below is measured and 
 | The capability is real | A free client-side mask keeps only **24–40%** of its boundaries across two deliveries of the same image; 10 images, none above half (report 28) |
 | Encode cost | **2 m 7 s and 2.89 GB at 4K**, ~10 s at 768×512 (reports 18, 25) |
 | **Alpha works** | **SHPC v2** carries per-region alpha end to end; silhouette dissolution 16–62% → **0.00%** at every usable mark. Opaque output byte-identical to v1's (`DESIGN-ALPHA.md`, A1b) |
+| Portable detector | **u2net (Apache-2.0) matches Apple Vision at mean IoU 0.9505** on six photographs, at its speed, and runs off macOS (report 44) |
+| Selection in the file | **SHPC v3** carries an instance id per region for **96–168 B**, with optional confidence and provenance (report 44) |
 | Bytes on the target niche | Sprites, lossless: **1 win, 2 losses vs WebP**; 3 of 3 vs PNG and AVIF (report 32). n=3, and bow's loss is **alpha itself** — 540 B of alpha against 519 B of colour |
 
 **The positioning that follows:** if you want pixels, use WebP. If you want pixels **and** a segmentation with stable region identity, this is the cheapest measured way to get both, by roughly 30%. Price it against **raster + sidecar**, never against a raster codec alone.

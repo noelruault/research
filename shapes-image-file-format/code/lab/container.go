@@ -28,6 +28,8 @@ import (
 	"math"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 )
 
 // ---------------------------------------------------------------- range coder
@@ -359,7 +361,33 @@ func p4Brotli(args []string, in []byte) []byte {
 // The region count is derivable from the decoded partition; it is transmitted anyway, as a 2-3 byte consistency check that catches a truncated or mismatched wall chunk before the colour stream is misread. It is paid for.
 
 const p4Magic = "SHPC"
-const p4Version = 2
+const p4Version = 3
+
+// Selection modes. A selection is an instance id per region: an index set where 0 is background
+// and each region belongs to exactly one instance, which is the shape of data every
+// instance-segmentation model emits.
+//
+// The point is WHERE this is computed. A learned model supplies the semantics once, at encode
+// time; the file then carries the answer as region ids, so every client gets the identical
+// selection with no model and no per-device variation. Report 28 measured the alternative: a
+// client re-deriving a mask keeps only 24-40% of its boundaries across two deliveries of the
+// same image.
+const (
+	p4SelNone     = 0 // no selection stored
+	p4SelInstance = 1 // one instance id per region, 0 = background
+	// Mode 2 additionally records how much to trust the selection and which model produced it.
+	// Mode 1 asserts a selection with nothing attached, which a reader cannot falsify; the claim
+	// "region #4,211 means the same thing on every device forever" is only checkable if the file
+	// says what drew it. Every segmentation model worth using reports a confidence, and storing
+	// it costs one byte.
+	//
+	// Chunk payload, brotli'd as a whole:
+	//   1 byte    confidence, quantised 0..255 from the model's 0..1
+	//   uvarint   producer length
+	//   ...       producer, e.g. "u2net/1"
+	//   n bytes   instance id per region, 0 = background
+	p4SelInstanceMeta = 2
+)
 
 const (
 	p4AlphaNone     = 0 // no alpha channel in the source
@@ -382,6 +410,34 @@ func p4EncCmd(args []string) {
 	w, h := im.W, im.H
 	lab, cols, _ := exactPartition(im)
 	n := len(cols)
+	// Optional third argument: a model's foreground mask (greyscale PNG, bright = subject),
+	// snapped onto the partition by per-region majority vote and stored as instance ids.
+	selMode := byte(p4SelNone)
+	var selChunk []byte
+	if len(args) > 2 {
+		ids := p4SnapSelection(args[2], lab, n, w, h)
+		selMode = p4SelInstance
+		payload := ids
+		// Optional 4th arg: a file holding the model's confidence (0..1). 5th: the producer name.
+		if len(args) > 3 {
+			selMode = p4SelInstanceMeta
+			conf := 0.0
+			if b, err := os.ReadFile(args[3]); err == nil {
+				conf, _ = strconv.ParseFloat(strings.TrimSpace(string(b)), 64)
+			}
+			producer := "unknown"
+			if len(args) > 4 {
+				producer = args[4]
+			}
+			var buf bytes.Buffer
+			buf.WriteByte(byte(math.Round(math.Max(0, math.Min(1, conf)) * 255)))
+			p4PutUvarint(&buf, uint64(len(producer)))
+			buf.WriteString(producer)
+			buf.Write(ids)
+			payload = buf.Bytes()
+		}
+		selChunk = p4Brotli([]string{"-q", "11", "-c", "-"}, payload)
+	}
 	alphas := regionAlphas(im, lab, n)
 	mode := byte(p4AlphaNone)
 	var alphaChunk []byte
@@ -413,16 +469,24 @@ func p4EncCmd(args []string) {
 	if mode != p4AlphaNone {
 		p4PutUvarint(&hdr, uint64(len(alphaChunk)))
 	}
+	hdr.WriteByte(selMode)
+	if selMode != p4SelNone {
+		p4PutUvarint(&hdr, uint64(len(selChunk)))
+	}
 	var coef [8]byte
 	binary.LittleEndian.PutUint32(coef[0:], math.Float32bits(fa[0]))
 	binary.LittleEndian.PutUint32(coef[4:], math.Float32bits(fa[1]))
 	hdr.Write(coef[:])
 
-	file := append(append(append(hdr.Bytes(), wall...), colour...), alphaChunk...)
+	file := append(append(append(append(hdr.Bytes(), wall...), colour...), alphaChunk...), selChunk...)
 	must(os.WriteFile(args[1], file, 0o644))
 
 	xe := xeV + xeH
-	est := xe + float64(len(colour)) + float64(len(alphaChunk)) + 8
+	if selMode != p4SelNone {
+		fmt.Printf("  select  brotli -q11   %10d B   raw %8d B   mode %d (instance id per region)\n",
+			len(selChunk), n, selMode)
+	}
+	est := xe + float64(len(colour)) + float64(len(alphaChunk)) + float64(len(selChunk)) + 8
 	fmt.Printf("p4enc %s %dx%d regions=%d -> %s\n", args[0], w, h, n, args[1])
 	fmt.Printf("  walls   cross-entropy %10.2f B   coded %8d B   coder overhead %+6d B (%+.3f%%)\n",
 		xe, len(wall), len(wall)-int(math.Round(xe)), 100*(float64(len(wall))-xe)/xe)
@@ -449,8 +513,8 @@ func p4DecCmd(args []string) {
 	}
 	file, err := os.ReadFile(args[0])
 	must(err)
-	if len(file) < 5 || string(file[:4]) != p4Magic || (file[4] != 1 && file[4] != 2) {
-		fmt.Fprintln(os.Stderr, "fatal: not a SHPC v1 or v2 file")
+	if len(file) < 5 || string(file[:4]) != p4Magic || (file[4] < 1 || file[4] > 3) {
+		fmt.Fprintln(os.Stderr, "fatal: not a SHPC v1, v2 or v3 file")
 		os.Exit(1)
 	}
 	version := file[4]
@@ -471,6 +535,19 @@ func p4DecCmd(args []string) {
 			alphaLen = rd()
 		}
 	}
+	selMode, selLen := byte(p4SelNone), 0
+	if version >= 3 {
+		b, err := r.ReadByte()
+		must(err)
+		selMode = b
+		if selMode != p4SelNone {
+			selLen = rd()
+		}
+	}
+	if selMode > p4SelInstanceMeta {
+		fmt.Fprintf(os.Stderr, "fatal: selection mode %d is not implemented\n", selMode)
+		os.Exit(1)
+	}
 	if mode > p4AlphaPerRegin {
 		fmt.Fprintf(os.Stderr, "fatal: alpha mode %d is not implemented (only 0 and 1)\n", mode)
 		os.Exit(1)
@@ -484,9 +561,9 @@ func p4DecCmd(args []string) {
 		math.Float32frombits(binary.LittleEndian.Uint32(coef[4:])),
 	}
 	off := len(file) - r.Len()
-	if off+wallLen+colLen+alphaLen != len(file) {
-		fmt.Fprintf(os.Stderr, "fatal: chunk lengths %d+%d+%d do not fill %d B after a %d B header\n",
-			wallLen, colLen, alphaLen, len(file), off)
+	if off+wallLen+colLen+alphaLen+selLen != len(file) {
+		fmt.Fprintf(os.Stderr, "fatal: chunk lengths %d+%d+%d+%d do not fill %d B after a %d B header\n",
+			wallLen, colLen, alphaLen, selLen, len(file), off)
 		os.Exit(1)
 	}
 
@@ -514,9 +591,36 @@ func p4DecCmd(args []string) {
 			im.A[p] = float64(raw[l])
 		}
 	}
+	if selMode != p4SelNone {
+		raw := p4Brotli([]string{"-d", "-c", "-"}, file[off+wallLen+colLen+alphaLen:])
+		if selMode == p4SelInstanceMeta {
+			if len(raw) < 2 {
+				fmt.Fprintln(os.Stderr, "fatal: selection chunk too short for its metadata")
+				os.Exit(1)
+			}
+			conf := float64(raw[0]) / 255
+			plen, adv := binary.Uvarint(raw[1:])
+			if adv <= 0 || 1+adv+int(plen) > len(raw) {
+				fmt.Fprintln(os.Stderr, "fatal: selection producer field is malformed")
+				os.Exit(1)
+			}
+			producer := string(raw[1+adv : 1+adv+int(plen)])
+			fmt.Printf("  selection confidence %.3f, produced by %q\n", conf, producer)
+			raw = raw[1+adv+int(plen):]
+		}
+		if len(raw) != n {
+			fmt.Fprintf(os.Stderr, "fatal: selection holds %d ids, partition has %d regions\n", len(raw), n)
+			os.Exit(1)
+		}
+		inst := map[byte]int{}
+		for _, v := range raw {
+			inst[v]++
+		}
+		fmt.Printf("  selection: %d instance(s) + background; regions per id %v\n", len(inst)-1, inst)
+	}
 	im.writePNG(args[1])
-	fmt.Printf("p4dec %s -> %s: v%d, %dx%d, %d regions, alpha mode %d, a=(%.5f,%.5f)\n",
-		args[0], args[1], version, w, h, n, mode, fa[0], fa[1])
+	fmt.Printf("p4dec %s -> %s: v%d, %dx%d, %d regions, alpha mode %d, selection mode %d, a=(%.5f,%.5f)\n",
+		args[0], args[1], version, w, h, n, mode, selMode, fa[0], fa[1])
 
 	if len(args) < 3 {
 		return

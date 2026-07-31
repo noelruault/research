@@ -1,1 +1,11 @@
 .DS_Store
+
+# Apple's Vision model files. Legal to read locally; NOT redistributable.
+# This repo pushes to GitHub, so committing them would publish them. See 41-vision-recon.md.
+shapes-image-file-format/weights/
+*.espresso.weights
+*.espresso.net
+*.espresso.shape
+
+# build artefacts
+shapes-image-file-format/code/lab/lab

@@ -1,0 +1,78 @@
+DoD RESULT — a portable detector matching Vision on the bg-removal folder.
+
+Target (pre-registered in DOD-portable-detector.md before the run):
+  IoU >= 0.90 against Vision's mask on all six images = DONE.
+
+Stack, verified on this machine:
+  uv 0.11.16 -> python 3.12 -> rembg 2.0.77 + onnxruntime 1.28.0
+  providers: CoreMLExecutionProvider, AzureExecutionProvider, CPUExecutionProvider
+  (macOS python3 is 3.14; rembg needs 3.12, which uv supplies without touching the system)
+
+=== PRIMARY METRIC: pixel-level IoU vs Vision's mask ===
+
+model                mean IoU   >=0.90   warm ms   weights    verdict
+u2net                  0.9541      6/6   163-246    176 MB    DONE
+isnet-general-use      0.9525      6/6   431-502    179 MB    DONE
+birefnet-general       0.9643      6/6  6455-8385    973 MB    DONE
+
+ALL THREE MEET THE DoD. Per-image:
+
+image        u2net   isnet   birefnet     vision px
+images      0.9558  0.9770    0.9764         27918
+images-2    0.9425  0.9502    0.9423         70373
+images-3    0.9556  0.9300    0.9643         19578
+images-4    0.9894  0.9864    0.9893         97752
+images-5    0.9420  0.9252    0.9634        104909
+images-6    0.9396  0.9464    0.9499         79909
+
+First-run ms includes model load (u2net 1160, isnet 1572, birefnet 8302); the ranges above are
+warm.
+
+=== THE PICK: u2net ===
+
+It matches Vision's SPEED as well as its output -- 163-246 ms warm against Vision's ~160 ms on the
+Neural Engine -- while running on ONNX Runtime, which means it also runs in a browser via
+onnxruntime-web. birefnet scores highest (0.9643) but is 50x slower and 973 MB; on this corpus the
+extra 1 point of IoU is not worth either.
+
+=== REPORTED ALONGSIDE: the snapped arm ===
+
+Both masks snapped onto the same partition, selected pixel counts:
+
+image       vision-snapped   u2net-snapped   delta
+images               27874           28437   +2.0%
+images-2             69082           69765   +1.0%
+images-3             19596           19971   +1.9%
+images-4             97072           97090   +0.02%
+images-5            106131          110231   +3.9%
+images-6             79692           82418   +3.4%
+
+Consistent with the pixel-level IoU. The pipeline downstream of detection does not care which
+model ran.
+
+=== SPEED IS NOT PART OF THE DoD, AND DID NOT NEED TO BE ===
+
+The DoD deliberately excluded speed, expecting a portable model to be slower than dedicated
+silicon. u2net came in at parity anyway. Recorded because the expectation was wrong in our favour,
+which is the kind of thing that should be written down rather than quietly enjoyed.
+
+=== LICENCE: PARTIALLY VERIFIED, DO NOT TREAT AS SETTLED ===
+
+  rembg package     MIT            VERIFIED from package metadata on this machine
+  u2net.onnx        weights are downloaded from
+                    https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx
+                    i.e. redistributed by rembg, not fetched from the U-2-Net project directly.
+  UPSTREAM LICENCE  NOT VERIFIED. U-2-Net is commonly cited as Apache-2.0 but that was NOT checked
+                    at source here, and a weights licence is not always the code licence.
+
+TODO before anything ships: confirm the upstream U-2-Net weights licence at its own repository.
+The DoD required "verified at the source, not assumed" and this row is not yet that.
+
+=== CAVEATS ===
+
+  - Vision's mask is the REFERENCE, NOT GROUND TRUTH. There are no human-drawn masks for these
+    six images. A model scoring lower could be better; the disagreements were not adjudicated.
+  - Six images, one subject type (a centred animal/object on a natural background).
+  - Only three models tried, all through rembg. Not a survey.
+  - onnxruntime-web performance in an actual browser is UNMEASURED. These numbers are native
+    macOS with a CoreML provider available; WASM/WebGPU will differ.

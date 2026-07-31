@@ -5,6 +5,7 @@ go 1.26.4
 require github.com/noelruault/images v0.0.0
 
 require (
+	github.com/andybalholm/brotli v1.2.2 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/noelruault/pixelize v0.0.0 // indirect
 	golang.org/x/image v0.41.0 // indirect

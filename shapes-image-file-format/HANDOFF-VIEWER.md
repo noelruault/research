@@ -127,3 +127,9 @@ Some detector-internals exploration was done during this session for **learning 
 **Apple's model files are `.gitignore`d** (`shapes-image-file-format/weights/`, `*.espresso.*`). This repo pushes to GitHub; committing them would publish them. Vision remains usable as an optional fast path on macOS through its public API, because calling a system API is not redistribution.
 
 **The shipping detector is u2net, Apache-2.0** — and `LICENSES.md` records exactly what was verified at source and what was not.
+
+### Local-only notes
+
+`shapes-image-file-format/private-notes/` is **gitignored** and holds what that exploration produced, kept on disk because the knowledge is useful and out of git because this repo is public. Its `README.md` explains each piece and why none of it shipped.
+
+**One item there is promotable**: `private-notes/go-runtime/shpnet/` is a pure-Go inference runtime for u2net — **our own code on an Apache-2.0 model**, scoring IoU 0.9428 against `onnxruntime` with foreground fractions matching to 0.1%. It removes Python and `onnxruntime` from the stack entirely, which would make detection, decoding and editing **one Go binary in the browser**. It is unreviewed and slow (78 s/image, naïve convolution), so it was parked rather than committed. Reviewing and promoting it is a strong early move for the viewer work.

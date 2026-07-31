@@ -9,3 +9,6 @@ shapes-image-file-format/weights/
 
 # build artefacts
 shapes-image-file-format/code/lab/lab
+
+# Local-only research notes. Kept on disk, never pushed: this repo is public.
+shapes-image-file-format/private-notes/

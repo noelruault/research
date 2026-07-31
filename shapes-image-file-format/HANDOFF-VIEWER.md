@@ -1,5 +1,7 @@
 # Handoff — build the viewer/editor
 
+> **Superseded, 2026-07-31: the viewer exists and lives in `noelruault/sprites-editor`.** Steps 1 and 2 of section 6 are done there (WASM-capable Go decoder, canvas viewer, region inspect, recolour, alpha, selection painting, save). The codec was ported into that repo, which is now the living copy; this study stays parked. Do not rebuild any of it here. Everything below is still the reasoning that produced it, and sections 3 to 5 are still the open questions.
+
 **For a fresh session.** Everything below is measured and committed. Read `HANDOFF.md` first for the format's state, then this for what to build next and why.
 
 The research phase is over. The format is a real file that carries geometry, colour, alpha and a subject selection. **Nothing has ever opened one and used it.** That is the whole job now.

@@ -64,6 +64,7 @@ This is a study in the `research` repo: one directory per question, reports numb
 - `1brc/CORRECTIONS.md` exists (empty is a valid state — it means nothing published was later disproved).
 - The headline is re-measured in a quiet window before publishing: other loops paused, machine on AC power — if on battery at final-dod time, end the cycle with `pause: needs AC power for the headline re-measure` — power + load recorded in the companion.
 - Index rows staged in THIS branch for the merge: the 1brc entry in root `README.md` Records, the 1brc row in root `PARKED.md`'s register index, and a `## 1brc` pointer section in repo `CLAUDE.md`.
+- The method retrospective exists (`method-retro`'s `NN-method-what-worked.md`): what the execution taught about METHOD, distilled from lessons, corrections, review repairs and the ledger — the results are not the only deliverable; the transferable method lessons are one too.
 
 ## Workflow authorization (explicit opt-in, scoped)
 

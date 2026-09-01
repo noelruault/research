@@ -7,30 +7,22 @@
 #   1. the topmost unbuilt `- [ ] `id`` group in backlog.md, not already in built.md;
 #   2. else "DONE".
 #
-# There is no review queue and no reviewer loop: every group is reviewed INSIDE the cycle that built
-# it, and that review repairs what it finds instead of filing tickets. So the only thing that can
-# ever be dispatched is a backlog group. That is what bounds the backlog.
+# There is no review queue and no reviewer loop: every group is reviewed INSIDE the cycle that built it, and that review repairs what it finds instead of filing tickets. So the only thing that can ever be dispatched is a backlog group. That is what bounds the backlog.
 #
 # BATCHING IS THE DEFAULT, NOT AN OPTION. A cycle's dominant cost is ORIENTATION, not the edit:
 # every cycle re-reads spec, backlog, ledger and code before it can touch anything, so N tickets as
-# N cycles pays that toll N times. Measured on a live pair: 66 cycles, $188, and 21 of 24 ships were
-# one-line-fix tickets that each paid full orientation. So this prints a GROUP of BACKLOG_BATCH ids.
+# N cycles pays that toll N times. Measured on a live pair: 66 cycles, $188, and 21 of 24 ships were one-line-fix tickets that each paid full orientation. So this prints a GROUP of BACKLOG_BATCH ids.
 #
-# THE ONE EXCEPTION: a ticket whose line contains the token HUGE is dispatched ALONE, because some
-# tickets genuinely are a whole cycle. The batch stops BEFORE a HUGE ticket rather than swallowing
-# it; if a HUGE ticket is first in line it goes out by itself. Mark sparingly — it is the exception.
+# THE ONE EXCEPTION: a ticket whose line contains the token HUGE is dispatched ALONE, because some tickets genuinely are a whole cycle. The batch stops BEFORE a HUGE ticket rather than swallowing it; if a HUGE ticket is first in line it goes out by itself. Mark sparingly — it is the exception.
 # Usage: scripts/loop-next.sh [<docs-subdir>] [<backlog-batch>]
 set -euo pipefail
 
 DOCS="${1:-1brc}"
 # Batch sizes. Declared here because the loops below reference them and the script runs under
-# `set -u`: without these an unset variable aborts mid-dispatch, AFTER ids have been printed, so the
-# caller sees a partial group and a non-zero exit. Overridable by argv or environment.
+# `set -u`: without these an unset variable aborts mid-dispatch, AFTER ids have been printed, so the caller sees a partial group and a non-zero exit. Overridable by argv or environment.
 BACKLOG_BATCH="${BACKLOG_BATCH:-3}"
-# argv overrides. Deliberately NOT written as a nested parameter default, because that form ends in a
-# doubled closing brace and the template token-scanner reads it as an unsubstituted placeholder.
-# if-blocks rather than `[ ... ] && x`, because the script runs under `set -e` and a bare test that
-# evaluates false would abort the run.
+# argv overrides. Deliberately NOT written as a nested parameter default, because that form ends in a doubled closing brace and the template token-scanner reads it as an unsubstituted placeholder.
+# if-blocks rather than `[ ... ] && x`, because the script runs under `set -e` and a bare test that evaluates false would abort the run.
 if [ -n "${2:-}" ]; then BACKLOG_BATCH="$2"; fi
 ROOT="$(git rev-parse --show-toplevel)"
 BACKLOG="$ROOT/docs/$DOCS/backlog.md"
@@ -39,16 +31,15 @@ BUILT="$ROOT/docs/$DOCS/built.md"
 git fetch origin --quiet 2>/dev/null || true
 
 built_ids() { grep -oE '`[a-z0-9-]+`' "$BUILT" 2>/dev/null | tr -d '`'; grep -oE '^- ?[a-z0-9-]+' "$BUILT" 2>/dev/null | sed 's/^- *//'; }
-# NOT `built_ids | grep -q`: grep -q exits on the first match, the upstream grep takes SIGPIPE, and
-# `set -o pipefail` turns that into a FAILURE — so is_built reported "not built" exactly when it had
-# found a match, and finished work got redispatched. Collect first, then match.
-is_built() { printf '%s\n' "$(built_ids)" | grep -qxF "$1"; }
+# Collected once, matched over a HERESTRING, because any `$(...) | grep -q` here returned 141 (SIGPIPE) on ~30% of calls: a MATCH reported "not built" and built work got redispatched.
+# A herestring is a temp file, so it cannot race a reader's early exit; scripts/loop-next-selftest.sh pins both properties.
+BUILT_IDS="$(built_ids)"
+is_built() { grep -qxF "$1" <<<"$BUILT_IDS"; }
 open_ids() { grep -oE '^- \[ \] `[a-z0-9-]+`' | grep -oE '`[a-z0-9-]+`' | tr -d '`'; }
 # A ticket is HUGE if its own backlog line carries the token. Matched on the line, not the id.
 is_huge() { grep -qE "^- \[ \] \`$1\`.*HUGE" "$2" 2>/dev/null; }
 # The dependency in a "(needs: `dep`)" annotation, or empty. Mirrors router's needsID: the runner
-# ROUTES on the first ticket that passes this same gate, so dispatching a gated ticket here would
-# build one ticket at another ticket's routed price (internal/loop/selectorparity_test.go pins it).
+# ROUTES on the first ticket that passes this same gate, so dispatching a gated ticket here would build one ticket at another ticket's routed price (internal/loop/selectorparity_test.go pins it).
 needs_id() { grep -E "^- \[ \] \`$1\`" "$2" 2>/dev/null | sed -nE 's/.*\(needs: *`?([a-z0-9-]+).*/\1/p' | head -1; }
 
 if [ -f "$BACKLOG" ]; then

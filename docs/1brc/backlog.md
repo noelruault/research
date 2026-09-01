@@ -1,27 +1,19 @@
-# Backlog — 1brc (1brc-loop)
+# 1brc backlog — append-only ids, priority order
 
-Build the topmost unbuilt `- [ ]` id not already in `built.md`. ids are **append-only + stable**
-(never renumber/delete). Priority order top to bottom. Each must pass the green gate (spec.md).
-Every group is reviewed and repaired inside the cycle that built it (spec.md), so nothing else queues.
+Ids are stable and append-only; never renumber or delete. `[dN]` = difficulty for router delegation. `HUGE` = dispatched alone. `FANOUT` = Workflow-authorized design-space search (see spec.md). `(needs: `id`)` gates dispatch on a built dependency.
 
-<!-- Replace the example with real tickets. Keep the final-dod ticket LAST. -->
-
-- [ ] `t-01-example` — <what to build> + <acceptance: how to know it's done> + <the test it leaves>.
-
-## Terminal
-
-- [ ] `final-dod` — HUGE. **The only ticket that may emit "backlog empty", and it is dispatched ALONE** (that is what the HUGE token buys: batched with other tickets, a cycle could reach the stop sentinel while its group was still open). Confirm every group carries a
-  `- reviewed <id>` line in `review.md`, then that the full Definition of Done (spec.md) holds and the
-  green gate passes end-to-end. If
-  ANY item fails, file append-only fix tickets and KEEP LOOPING. Only when every item passes, end the
-  cycle with the literal phrase `backlog empty`.
-
-<!-- Tickets are dispatched in GROUPS (default 3 per cycle), because a
-     cycle's cost is orientation, not the edit. A ticket that genuinely fills a whole cycle on its own
-     gets the token HUGE somewhere on its line and is then dispatched alone. Use it sparingly. -->
-
-<!-- DIFFICULTY: give every ticket a `[dN]` marker, N in 1..5. The runner routes the cycle's model
-     from the top unbuilt ticket's marker (d1-2 cheap, d3-4 mid, d5 strongest), which is measured at
-     -70% cost. An unannotated backlog silently runs everything on the default model.
-     For a GROUP, mark it with its HARDEST member's difficulty — never under-power a group — and try
-     to draw groups so their members sit in one band, or the cheap members subsidise nothing. -->
+- [ ] `def-understand` — fetch and study https://github.com/gunnarmorling/1brc (README, rules, eval method, top leaderboard entries and their write-ups); write `1brc/01-definition.md` + `1brc/01-definition-data.txt` (cited sources, fetch dates); symlink `1brc/definition.md` -> `01-definition.md` (the handoff name). State OUR target: <1s, 1B rows, this M5 Pro, warm cache. [d3]
+- [ ] `env-data` — build the generator (port official logic or extend SOURCE's `cmd/synthetic_generator.go`; keep generator code in `1brc/code/gen/`); generate `measurements-10m/100m/1b.txt` into `/Users/noelruault/Downloads/1brc/1brc-assets/`; record command+rows+bytes+sha256 per file in `1brc/02-baseline-data.txt`. Also produce the reference (trivially correct) implementation + expected outputs for 10m. [d3]
+- [ ] `env-baseline` — measure the physical floor on this machine: dd/read bandwidth on the 1b file (cold+warm), `wc -l` time, naive Go line-scan time; install hyperfine if missing; write `1brc/02-baseline.md` (+ data companion) deriving what <1s implies in GB/s and ns/row. (needs: `env-data`) [d2]
+- [ ] `asm-recon` — technique inventory from top 1BRC solutions (thomaswue, artsiomkorzun, jerrinot, ...), marcelroed/gigatoken (tokenization angle), and arm64/NEON literature: semicolon/newline finding (SWAR vs NEON cmeq), branchless fixed-point temp parse, name hashing, mmap strategies. Write `1brc/03-technique-recon.md` mapping each technique to an arm64 equivalent and a testable hypothesis. (needs: `def-understand`) [d3]
+- [ ] `asm-kernels` HUGE FANOUT — build N competing arm64 assembly tokenizer kernels under `1brc/code/asm/` (at minimum: SWAR 8-byte, NEON 16B+ vector scan, gigatoken-inspired tokenizer, branchless temp parse; each with scalar-reference correctness check in `make test` and a GB/s microbenchmark); write `1brc/04-asm-kernels.md` (+ data) declaring a measured winner per sub-problem. (needs: `asm-recon`) [d5]
+- [ ] `skill-performance-assembly` — distill the kernel work into the global skill `/Users/noelruault/.claude-work-home/.claude/skills/performance-assembly/SKILL.md` (macOS arm64: NEON idioms, SWAR, alignment, page-fault/mmap behavior, Instruments/sample profiling, Go Plan9-asm quirks, microbench discipline). Employer-agnostic, generalized, frontmatter like sibling skills. (needs: `asm-kernels`) [d4]
+- [ ] `go-recon` — raw/unsafe Go study: mmap via syscall, unsafe.Pointer walks, bounds-check elimination (verify with `-gcflags=-d=ssa/check_bce`), custom open-addressing hash, per-core sharding, GOGC off, //go:noescape + Plan9 asm interop; recon automataIA/1brc-rs and top Go 1BRC solutions for transplantable ideas. Write `1brc/05-go-techniques.md`. (needs: `asm-kernels`) [d3]
+- [ ] `go-skeleton` — scaffold `1brc/code/go` (module, flag parsing, Makefile, bin/ gitignored), `1brc/scripts/check-correctness.sh` (byte-compare vs reference on 10m), hyperfine bench script `1brc/scripts/bench.sh` writing raw output to a dated file. Gate green end-to-end with a naive implementation. (needs: `env-data`) [d3]
+- [ ] `go-v1-parallel` — mmap + per-core chunk sharding + custom hash map, no asm yet; correctness gate then hyperfine on 100m and 1b; record in `1brc/06-experiment-ledger.md` (create it: append-only; idea, prediction, measured, verdict). (needs: `go-skeleton`) [d4]
+- [ ] `go-v2-kernels` — integrate the asm-kernels winners (Go Plan9 asm or SWAR-in-Go where the call overhead kills the asm win — measure both); ledger every swap. (needs: `go-v1-parallel`) [d4]
+- [ ] `go-autoresearch-harness` — read https://github.com/karpathy/autoresearch, adapt its loop (hypothesis queue -> experiment -> metric -> keep/kill -> ledger) into `1brc/scripts/experiment.sh` + a hypothesis queue section in the ledger; seed >=10 hypotheses from recon reports. Write the adaptation note in the ledger header. (needs: `go-v2-kernels`) [d3]
+- [ ] `go-opt-round-1` HUGE FANOUT — run the autoresearch loop: take the top hypotheses, one experiment each (parallel attempts allowed), measure, keep/kill, ledger; end with the new best binary + number. (needs: `go-autoresearch-harness`) [d5]
+- [ ] `go-opt-round-2` HUGE FANOUT — next hypothesis batch; profile-driven (sample/pprof the current best first, let the profile refill the queue). (needs: `go-opt-round-1`) [d5]
+- [ ] `go-opt-round-3` HUGE FANOUT — final round: chase the remaining gap to <1s or exhaust the queue; park survivors in `1brc/PARKED.md` with revive triggers. (needs: `go-opt-round-2`) [d5]
+- [ ] `final-dod` — verify EVERY item in spec.md's Definition of Done; run the 1b correctness pass; write `1brc/README.md` + final report with headline numbers; only this ticket may emit "backlog empty", and only with all checks passing. (needs: `go-opt-round-3`) [d4]

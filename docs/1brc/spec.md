@@ -1,46 +1,63 @@
-# Loop spec — 1brc
+# 1brc — solve the One Billion Row Challenge as research
 
-**Branch:** `1brc-loop`. One writer.
-**This file is the operating contract. The loop reads it every cycle. FILL IT IN.**
+## Goal
 
-## What we are building
+Produce a Go implementation of the 1BRC (https://github.com/gunnarmorling/1brc) that processes 1,000,000,000 measurement rows in **under 1 second wall clock on this machine**, built the research way: definition first, assembly kernel exploration second, Go techniques recon third, then an autoresearch-style optimization loop. Every claim measured, every number re-derivable, every dead end recorded.
 
-<!-- Describe the goal / north star. What does "done" look like? -->
+This is a study in the `research` repo: one directory per question, reports numbered oldest-first, each report with a `*-data.txt` companion holding the raw output AND the command that produced it. The study lives at `1brc/` (repo root, sibling of `shapes-image-file-format/`). Code lives under `1brc/code/`.
 
-## Green gate (trust exit codes, from repo root)
+## The machine (record precisely in the baseline report; these are session-observed, re-verify)
 
-A cycle may only commit if ALL of these exit 0 (edit to match this repo):
+- Apple M5 Pro, `hw.ncpu` 15, 24 GB RAM, macOS Darwin 25.5.0, arm64.
+- go1.27.0 darwin/arm64.
+- Free disk at setup: ~349 GB.
 
-```
-# e.g.
-# npm run typecheck
-# npm run build
-# npm test
-```
+## Inputs and data — NEVER commit big files
 
-Noisy warnings are not failures; trust `$?`. **Never commit red.** Non-trivial pure logic leaves
-ONE assert-based unit test wired into the gate.
+- All generated measurement files live OUTSIDE the repo, in `/Users/noelruault/Downloads/1brc/1brc-assets/`. Never commit any file over 5 MB; never put measurement data under the repo tree.
+- Starter material (read-only reference, SOURCE): `/Users/noelruault/Downloads/1brc/1brc/` — a Go module with `main.go` (imports a missing `internal/reader/v99`, treat as skeleton inspiration only), `cmd/synthetic_generator.go`, `cmd/generate.sh`, `cmd/profile.sh`, a Makefile; `/Users/noelruault/Downloads/1brc/1brc-assets/` has `cities/` (10k-cities.csv, world-cities.csv) and `lines.out` (a sample expected output).
+- The official challenge generates data with ~413 weather stations (Gaussian around per-station means) plus a 10k-station variant. The `env-data` ticket decides the generator (port the official one or extend the starter's) and records for EVERY generated file: exact command, row count, byte size, sha256 — in the data companion. A number nobody can re-derive is worthless here.
+- Standard files: `measurements-1b.txt` (1,000,000,000 rows, ~13-14 GB), `measurements-100m.txt` (dev iteration), `measurements-10m.txt` (correctness gate). Plus 10k-station variants if the definition report says the official eval uses them.
 
-## Definition of Done (the builder only stops when ALL hold)
+## Green gate — exact commands, trust exit codes
 
-The terminal `final-dod` ticket emits the literal phrase `backlog empty` ONLY when:
+- Docs/report-only groups: nothing to build; commit directly.
+- Groups touching `1brc/code/go`: from repo root, ALL must exit 0:
+  - `cd 1brc/code/go && go vet ./... && go build -o bin/1brc . && go test ./...`
+  - `bash 1brc/scripts/check-correctness.sh` — runs the binary on `measurements-10m.txt` and byte-compares against the reference output (`go-skeleton` creates both the script and the reference generator; the reference is a trivially-correct implementation, not a fast one).
+- Groups touching `1brc/code/asm`: `cd 1brc/code/asm && make test` must exit 0. Every kernel ships with a runnable check that fails if the kernel lies (compare against a scalar reference over random + adversarial inputs).
+- Never commit red. Noisy warnings are not failures; exit codes are the truth.
 
-- every backlog ticket is in built.md;
-- every group has been reviewed in-cycle and carries a `- reviewed <id> <sha>: …` line in `review.md`;
-- the full green gate passes end-to-end;
-- <!-- any project-specific DoD checks: coverage, perf budgets, visual/QA passes... -->
+## Method rules (this repo's conventions — binding)
 
-If any item is not yet true, KEEP LOOPING — split the gap into new append-only tickets.
+- **Measured / derived / hypothesis.** Label every performance claim. A comparative claim is a hypothesis until benchmarked on THIS machine. Leaderboard timings from the official repo are facts about THEIR machine (32-core EPYC limited to 8 cores); never compare our wall clock against them as if same hardware — record both, compare techniques, not clocks.
+- **Headline number = warm page cache**, matching the official eval method (their file sat in RAM). Record cold-cache runs separately when interesting. Use `hyperfine` (brew install if missing) with warmup runs; record the full hyperfine output in the data companion.
+- **Correctness before speed.** A variant that fails byte-compare is not a result; it is a bug. The correctness gate runs before any benchmark is recorded.
+- **Reports numbered oldest-first** in `1brc/`: `01-definition.md`, `02-baseline.md`, ... each with `NN-*-data.txt`. One paragraph = one source line; no hard-wrapping.
+- **Clean-room reading of other solutions.** Read gunnarmorling/1brc top entries, marcelroed/gigatoken, automataIA/1brc-rs, Go blog posts for TECHNIQUES (mmap, SWAR, NEON, custom hash, branchless parse). Reimplement from understanding; never paste code verbatim; note the license of anything studied in `1brc/LICENSES.md` if an implementation is closely derived.
+- **Parked ideas**: `1brc/PARKED.md`, per repo convention — every entry carries what it depends on and a concrete revive trigger; distinguish killed-on-argument from killed-on-numbers (record the baseline it was measured against).
+- **Commit subjects are plain English sentences** naming what changed and why. This machine's commit guard BLOCKS `feat:`/`fix:`/type(scope) prefixes — a conventional-commit subject will be rejected at commit time.
+- **Cross-check the definition from the source.** `01-definition.md` is written from the official repo (README + rules + eval scripts), fetched and cited — never from memory. Once written, it is the authority for constraints (station name byte limits, temperature range, rounding semantics, output format).
 
-## Out of scope (never becomes a ticket)
+## The staged plan (what the backlog encodes)
 
-<!-- deploys, device tests, anything the loop must not attempt -->
+1. **Definition** — what 1BRC asks, exactly; official eval method; leaderboard top-10 timings and their techniques; our target restated for this machine.
+2. **Data + baseline** — generate the files; measure the physical floor: raw read bandwidth, `wc -l`, a naive Go scan. The floor tells us what <1s demands (≥14 GB/s effective parse rate).
+3. **Assembly kernel research** — the problem is tokenization (find `;` and `\n`, parse a fixed-point temp, hash a name). Explore N kernel approaches in parallel on arm64: SWAR on 8-byte words, NEON vector scans, gigatoken-style tokenization, branchless fixed-point parse. Microbenchmark each in GB/s; a measured winner emerges.
+4. **Skill distillation** — write the global `performance-assembly` skill (macOS/arm64 assembly performance playbook) from what the kernel work taught. Employer-agnostic, no repo/PR references.
+5. **Go recon** — how far raw/unsafe Go goes: mmap, unsafe pointer walks, bounds-check elimination, custom open-addressing hash, per-core sharding, GC off, Go asm (Plan 9 syntax) for the kernels that beat pure Go.
+6. **Build + autoresearch** — skeleton with correctness gate, then v1 (parallel mmap), v2 (winning kernels integrated), then optimization rounds run the karpathy/autoresearch way: hypothesis queue → one experiment per idea → measure → keep/kill → ledger. The experiment ledger is `1brc/06-experiment-ledger.md` (append-only; every row: idea, prediction, measured result, verdict).
 
-## Pipeline conventions (baked in — do not re-derive)
+## Definition of Done (final-dod checks all of these)
 
-- **One loop, one branch (`1brc-loop`), one group per cycle, green-only.**
-- **Review is a BLOCKING step inside the cycle**, not a second loop: the same cycle that builds a
-  group audits it against the handoff and the diff, FIXES what it finds, records one line in
-  `review.md`, and only then closes the group. It never files a review ticket — a review queue costs
-  a cycle of orientation per finding and grows without bound.
-- ids are **append-only + stable**. Never renumber/delete.
+- `01-definition.md` exists, written from cited sources, with the official rules and eval method.
+- Correctness gate green: byte-identical output vs reference on 10m AND on the 1b file (run once, record).
+- A best Go binary with a measured 1B-row wall clock on this machine, hyperfine-backed, warm cache, reported with mean ± stddev.
+- Target: **< 1.0 s**. If not reached, the final report states the measured best, the gap, the bottleneck analysis (profile-backed), and PARKED.md carries the untried ideas with revive triggers. An honest miss with the ledger intact is a valid research outcome; an unmeasured claim is not.
+- The `performance-assembly` skill exists at `/Users/noelruault/.claude-work-home/.claude/skills/performance-assembly/SKILL.md` (with frontmatter matching the sibling skills' format) and is employer-agnostic.
+- Every report has its data companion; every number re-derivable from a recorded command.
+- `1brc/README.md` summarizes the study: question, method, headline numbers, report index.
+
+## Workflow authorization (explicit opt-in, scoped)
+
+Tickets whose backlog line carries the token FANOUT are genuine design-space searches: N independent attempts judged against each other. For those tickets ONLY, the cycle MAY author and run ONE Workflow to build the attempts in parallel. Afterward the same green gate runs, still one group per cycle, still never commit red; adversarially verify each attempt's measurement before declaring a winner. Every other ticket stays single-threaded (serial-first: parallelism buys wall clock only, and this loop can wait).

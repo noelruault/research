@@ -6,9 +6,9 @@ shapes-image-file-format/weights/
 *.espresso.weights
 *.espresso.net
 *.espresso.shape
-
 # build artefacts
 shapes-image-file-format/code/lab/lab
-
 # Local-only research notes. Kept on disk, never pushed: this repo is public.
 shapes-image-file-format/private-notes/
+.backups/
+1brc/code/go/bin/

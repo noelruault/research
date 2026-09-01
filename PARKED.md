@@ -38,6 +38,7 @@ Every parked entry carries all seven. An entry missing "revive when" or "depends
 
 | study | parked register |
 |---|---|
+| `1brc` | [`1brc/PARKED.md`](1brc/PARKED.md) |
 | `shapes-image-file-format` | [`shapes-image-file-format/PARKED.md`](shapes-image-file-format/PARKED.md) |
 | `quantization` | not yet written |
 | `nearest-color-scaling` | not yet written |

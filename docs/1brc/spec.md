@@ -23,7 +23,7 @@ This is a study in the `research` repo: one directory per question, reports numb
 
 - Docs/report-only groups: nothing to build; commit directly.
 - Groups touching `1brc/code/go`: from repo root, ALL must exit 0:
-  - `cd 1brc/code/go && go vet ./... && go build -o bin/1brc . && go test ./...`
+  - `cd 1brc/code/go && test -z "$(gofmt -l .)" && go vet ./... && go build -o bin/1brc . && go test ./...`
   - `bash 1brc/scripts/check-correctness.sh` — runs the binary on `measurements-10m.txt` and byte-compares against the reference output (`go-skeleton` creates both the script and the reference generator; the reference is a trivially-correct implementation, not a fast one).
 - Groups touching `1brc/code/gen` (the generator and the reference implementation): `cd 1brc/code/gen && test -z "$(gofmt -l .)" && go vet ./... && go build ./... && go test ./...` must exit 0. Note the `test -z`: `gofmt -l` exits 0 even when it lists unformatted files, so `gofmt -l . && ...` is not a gate.
 - Groups touching `1brc/code/asm`: `cd 1brc/code/asm && make test` must exit 0. Every kernel ships with a runnable check that fails if the kernel lies (compare against a scalar reference over random + adversarial inputs).

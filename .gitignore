@@ -12,3 +12,6 @@ shapes-image-file-format/code/lab/lab
 shapes-image-file-format/private-notes/
 .backups/
 1brc/code/go/bin/
+# `go build ./...` in a main package writes the binary next to the source, named after the directory.
+1brc/code/go/go
+1brc/code/gen/gen

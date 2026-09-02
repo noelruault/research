@@ -50,7 +50,8 @@ binary; it is documentation and data.
   no residual, because `wall × 15 cores` is an identity: 80.5% user CPU, 8.0% system
   (the kernel's copy out of the `pread`, whose only removal mechanism, mmap, is killed
   at 5.6×) and 11.5% idle cores (open, ceiling 1.0740 s, still over target). Thirty-six
-  ledger rows with the prediction written before each run, thirteen falsified claims in
+  ledger rows, twenty-seven of them with the prediction written before the run and the rest
+  meta-results measuring the method itself, thirteen falsified claims in
   its own `CORRECTIONS.md`, nine ideas parked with tests rather than wishes, and a
   measurement harness that *refuses* rather than merely recording — eight identical
   arms once ranked monotonically by 21.08%, and a 10x-smaller file disagreed with the

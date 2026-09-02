@@ -20,6 +20,18 @@ Distinguish **killed on an argument that does not expire** (safe to leave) from 
 
 The short version: **a poor image codec and a good structured-image format.** It loses to WebP alone on all 24 Kodak images (mean +27.8%, zero wins) and beats WebP **plus a region-map sidecar** on all 24 (mean +30.5%). Price it against raster+sidecar, never against a raster codec alone. The bytes question is settled — do not re-derive it. Thirteen claims were falsified in the making; the register is `06-corrections-and-falsifications.md`.
 
+## 1brc
+
+**Start at [`1brc/README.md`](1brc/README.md), and at [`1brc/09-result.md`](1brc/09-result.md) for the closing statement.** The question is settled and the study is closed: **1.233 s ± 0.010 s** for a billion rows against a **1.000 s** target, **+23.3%, NOT REACHED**. Do not re-derive the gap; it decomposes with no residual (80.5% user CPU, 8.0% system, 11.5% idle) and 09 names both bounds on closing it.
+
+Three things in there bind any future work on this study, and each cost a measurement to learn.
+
+**A 1b timing is only a number inside a bracketed invocation.** Deltas are taken between arms of ONE `hyperfine` run, with the incumbent named first AND last and a 20 s cooldown before every timed run; a bracket wider than 3% means no arm in that invocation may be quoted. Eight IDENTICAL arms without the cooldown rose monotonically by **21.08%**. Use `1brc/scripts/experiment.sh`, which enforces all of it and refuses to run when another measurement holds the lock or the machine is busy.
+
+**A cheaper proxy does not rank arms.** Seven arms measured at 100m disagreed with the 1b file seven times, four of them inverting sign. The harness refuses any file but 1b unless `--mechanism-only`, and then stamps the output `NOT A VERDICT`.
+
+**The headline does not reproduce across sessions, and the study says so.** The byte-identical binary reads 1.257 s a day later in a 0.000%-spread bracket (`CORRECTIONS.md` C13). Both figures are published, because the miss is the same size on either.
+
 ## Measuring compression in this repo
 
 **A modelled cost is not a compressed stream.** Cross-entropy of an adaptive coder ranks *models*; it does not rank *streams*, and it can point the wrong way. Measured here: at four of twenty-one operating points a modelled figure said a transform was **+7.4% worse** while `brotli -q11` on the real residual stream said **−9.2% better** — the wrong sign, on the largest colour win in the study. The mechanism was that the stream was 37% zeros, and a general compressor lives on exact-hit rate and LZ matches rather than residual variance.

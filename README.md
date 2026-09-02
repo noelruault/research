@@ -43,6 +43,19 @@ binary; it is documentation and data.
   produced, believed, published, and then falsified against its own
   measurements — and the practices that caught them.
 
+- **[1brc/](1brc/)** — can a Go program aggregate the
+  [One Billion Row Challenge](https://github.com/gunnarmorling/1brc)'s 1,000,000,000
+  measurements (13.8 GB) in under one second on an Apple M5 Pro? **Result: no, by
+  1.233 s ± 0.010 s against a 1.000 s target, +23.3%** — and the gap decomposes with
+  no residual, because `wall × 15 cores` is an identity: 80.5% user CPU, 8.0% system
+  (the kernel's copy out of the `pread`, whose only removal mechanism, mmap, is killed
+  at 5.6×) and 11.5% idle cores (open, ceiling 1.0740 s, still over target). Thirty-six
+  ledger rows with the prediction written before each run, thirteen falsified claims in
+  its own `CORRECTIONS.md`, nine ideas parked with tests rather than wishes, and a
+  measurement harness that *refuses* rather than merely recording — eight identical
+  arms once ranked monotonically by 21.08%, and a 10x-smaller file disagreed with the
+  real one on seven arms out of seven. Carries its own method retrospective.
+
 - **[compression-agent/](compression-agent/)** — a measurement-driven subagent
   that picks the right HTTP compression for a stack by benchmarking, not opinion.
 

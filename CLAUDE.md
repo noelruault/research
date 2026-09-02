@@ -32,6 +32,20 @@ Three things in there bind any future work on this study, and each cost a measur
 
 **The headline does not reproduce across sessions, and the study says so.** The byte-identical binary reads 1.257 s a day later in a 0.000%-spread bracket (`CORRECTIONS.md` C13). Both figures are published, because the miss is the same size on either.
 
+## Measuring wall clock in this repo
+
+The sibling of the compression rules below, and the same kind of lesson: the number you get is a fact about the harness until you prove otherwise. Promoted from `1brc/08-method-what-worked.md`, which paid for each rule with a wrong verdict first; that report carries the evidence.
+
+**A delta is only taken inside one bracketed invocation**, with the incumbent named FIRST and LAST — first is the most flattered slot there is, so an incumbent measured only there is the one arm the invocation cannot judge. **A bracket spread over 3% is a refusal to quote any arm, never a correction factor**: a modelled per-slot drift once "recovered" +19.18% for a change that re-measured at +0.06%. A contaminated invocation is re-run, not repaired.
+
+**Ask the harness to rank N copies of one thing before believing it about N different things.** The null experiment is what you run before the first verdict, not after one embarrasses you — eight identical arms once rose monotonically by 21.08%, wider than every verdict then pending. Re-run it whenever the harness changes.
+
+**A cheaper proxy has to be shown to rank arms before it is used to rank arms**, and so does a differently-shaped baseline — they fail independently. Seven arms on a 10x-smaller input disagreed with the real one seven times, four inverting sign; a kernel measured −40.4% against a baseline the real program did not contain scored +10.4% in it.
+
+**Any provenance field describing a condition under which the number is invalid should be a precondition that refuses, not a field that records.** Recording load and power did not stop two measurements being voided by a housekeeping storm; a lock and a quiet gate did. This one costs a harness change per study — a study whose measurements are cheap and repeatable does not need it.
+
+**For studies that ship code: mutate the decision the cycle just made**, not only the arithmetic, and classify each surviving mutant as a real gap, an equivalent mutant, or unkillable by construction before scoring it. A semantic choice with no test on it shipped three separate times in one study while every byte-compare passed, because no corpus input could express the divergence.
+
 ## Measuring compression in this repo
 
 **A modelled cost is not a compressed stream.** Cross-entropy of an adaptive coder ranks *models*; it does not rank *streams*, and it can point the wrong way. Measured here: at four of twenty-one operating points a modelled figure said a transform was **+7.4% worse** while `brotli -q11` on the real residual stream said **−9.2% better** — the wrong sign, on the largest colour win in the study. The mechanism was that the stream was 37% zeros, and a general compressor lives on exact-hit rate and LZ matches rather than residual variance.

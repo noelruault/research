@@ -43,3 +43,9 @@ Not applied. `method-retro` writes a retrospective; it does not change a shared 
 - **P4 — add "mutate the decision this cycle just made" to the shared method text, with its three-way classification of survivors** (real gap / equivalent mutant / unkillable by construction). Evidence: the first-`;`-versus-last-`;` semantic choice shipped three separate times here, and `go test -race` earned its 5.9 s of gate time on exactly one mutant that every byte-compare in the suite passed. Cost: a paragraph. Reason to reject: it is a code-study rule, and half of this repo's studies ship no long-lived binary for a mutant to live in.
 
 None of the four is a blocker for `final-dod`.
+
+### Decided by the operator, 2026-09-02
+
+**P1, P2 and P4 ACCEPTED; P3 REJECTED.** The three accepted ones landed as ONE new section of root `CLAUDE.md`, "Measuring wall clock in this repo", rather than as three edits in two files: they are one lesson about trusting a harness, and a reader who needs the bracket rule needs the refusal rule in the same breath. Each is stated generally with its number attached and points back at `1brc/08-method-what-worked.md` for the evidence, so a study measuring throughput or memory can translate the rule without re-deriving why it exists. P2's reason-to-reject survives as a stated exemption in the text (a study whose measurements are cheap and repeatable does not need a lock), and P4 is scoped in the text to studies that ship code, which answers its own objection.
+
+**P3 rejected on the argument it brought against itself**, which does not expire: a self-audit's score published as a study artefact invites optimising the score, and `docs/<loop>/` is loop scaffolding rather than research output. The counts stay where they are — real, readable, and unpublished. Nothing here is killed on numbers, so nothing goes to `PARKED.md`.

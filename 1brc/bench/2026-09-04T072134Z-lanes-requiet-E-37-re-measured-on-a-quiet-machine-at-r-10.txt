@@ -1,0 +1,26 @@
+# experiment 2026-09-04T072134Z
+hypothesis: lanes-requiet: E-37 re-measured on a quiet machine at -r 10
+prediction: E-37 saw wall -2.28% with ranges overlapping both incumbent slots while user CPU was -5.28% against a 0.034% control, on a machine where WebKit held 71-97% of a core. If the wall win is real it lands 2-5% and disjoint at -r 10; if it was the busy machine, the arms overlap again and lanes stays a flag.
+file:     measurements-1b.txt   runs: 10   warmup: 1   cooldown: 20s
+commit:   ac3a37088cfcb7d2ee9f18d72194dc7c3763d26f
+go:       go version go1.27.0 darwin/arm64
+machine:  Apple M5 Pro, hw.ncpu 15, 24 GiB, 26.5.2 arm64
+hyperfine: hyperfine 1.20.0
+power:    'AC Power' 	80%; AC attached; not charging present: true
+load:      9:31  up 3 days, 23:50, 32 users, load averages: 3.36 3.66 3.84
+
+$ ptr.a: /Users/noelruault/go/src/github.com/noelruault/research-1brc/1brc/code/go/bin/1brc -in /Users/noelruault/Downloads/1brc/1brc-assets/measurements-1b.txt  > /dev/null
+$ lanes: /Users/noelruault/go/src/github.com/noelruault/research-1brc/1brc/code/go/bin/1brc -in /Users/noelruault/Downloads/1brc/1brc-assets/measurements-1b.txt -fold lanes > /dev/null
+$ ptr.b: /Users/noelruault/go/src/github.com/noelruault/research-1brc/1brc/code/go/bin/1brc -in /Users/noelruault/Downloads/1brc/1brc-assets/measurements-1b.txt  > /dev/null
+
+Benchmark 1: ptr.a
+  Time (mean ± σ):      1.318 s ±  0.030 s    [User: 14.726 s, System: 1.907 s]
+  Range (min … max):    1.286 s …  1.377 s    10 runs
+ 
+Benchmark 2: lanes
+  Time (mean ± σ):      1.283 s ±  0.038 s    [User: 13.979 s, System: 1.940 s]
+  Range (min … max):    1.249 s …  1.370 s    10 runs
+ 
+Benchmark 3: ptr.b
+
+VOID — this invocation was KILLED before hyperfine finished the bracket, so it has no closing incumbent slot and no arm in it may be quoted. Kept for provenance only: it is the evidence that two `lanes-requiet` attempts died mid-run, which is why the ticket was still open.

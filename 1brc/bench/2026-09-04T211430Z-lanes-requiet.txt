@@ -1,0 +1,18 @@
+# experiment 2026-09-04T211430Z
+hypothesis: lanes-requiet
+prediction: E-37 saw wall -2.28% with ranges overlapping both incumbent slots while user CPU was -5.28% against a 0.034% control bracket, on a machine where WebKit held 71-97% of a core. At -r 10 with the incumbent bracketed first AND last: if the wall win is real it lands 2-5% and disjoint and lanes becomes the -fold default; if it was the busy machine, the arms overlap again and lanes stays a flag. The CPU channel is predicted to reproduce -5.28% either way, because core-stealing cannot touch a process own user CPU.
+file:     measurements-1b.txt   runs: 10   warmup: 1   cooldown: 20s
+commit:   856215f92e83a07177d5a184f70d5f9f1994cf1e
+go:       go version go1.27.0 darwin/arm64
+machine:  Apple M5 Pro, hw.ncpu 15, 24 GiB, 26.5.2 arm64
+hyperfine: hyperfine 1.20.0
+power:    'AC Power' 	80%; AC attached; not charging present: true
+load:     23:14  up 4 days, 13:33, 29 users, load averages: 4.18 3.63 3.31
+
+$ ptr.a: /Users/noelruault/go/src/github.com/noelruault/research-1brc/1brc/code/go/bin/1brc -in /Users/noelruault/Downloads/1brc/1brc-assets/measurements-1b.txt  > /dev/null
+$ lanes: /Users/noelruault/go/src/github.com/noelruault/research-1brc/1brc/code/go/bin/1brc -in /Users/noelruault/Downloads/1brc/1brc-assets/measurements-1b.txt -fold lanes > /dev/null
+$ ptr.b: /Users/noelruault/go/src/github.com/noelruault/research-1brc/1brc/code/go/bin/1brc -in /Users/noelruault/Downloads/1brc/1brc-assets/measurements-1b.txt  > /dev/null
+
+Benchmark 1: ptr.a
+
+VOID — this invocation was KILLED before hyperfine finished the bracket, so it has no closing incumbent slot and no arm in it may be quoted. Kept for provenance only: it is the evidence that two `lanes-requiet` attempts died mid-run, which is why the ticket was still open.

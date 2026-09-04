@@ -1,46 +1,41 @@
-# Loop spec — 1brcPerf
+# 1brc-perf — measure the open performance questions while the laptop is idle
 
-**Branch:** `1brc-perf`. One writer.
-**This file is the operating contract. The loop reads it every cycle. FILL IT IN.**
+## Goal
 
-## What we are building
+The 1brc study is closed at **1.233 s** against a 1.000 s target (`1brc/09-result.md`). This loop does not reopen it. It runs the specific measurements that were left owed, on a machine that is **not being used by its operator**, and ledgers what they say. Every ticket here is one experiment or one repair, and the deliverable is a ledger row, not an opinion.
 
-<!-- Describe the goal / north star. What does "done" look like? -->
+The one thing this loop may change about the shipped binary is a **default**, and only on a disjoint win.
 
-## Green gate (trust exit codes, from repo root)
+## The rule that gates everything: never measure a machine in use
 
-A cycle may only commit if ALL of these exit 0 (edit to match this repo):
+`E-37` was measured while the operator was working. Its CPU channel was clean (−5.28% against a 0.034% control bracket) and its wall clock was not (−2.28% with ranges overlapping the incumbent's), because a browser at 97% CPU steals cores from a wall clock and cannot touch a process's own user CPU.
 
-```
-# e.g.
-# npm run typecheck
-# npm run build
-# npm test
-```
+So: **every timed run in this loop goes through `bash 1brc/scripts/measure-when-idle.sh`**, never `experiment.sh` directly. It waits for 10 minutes since the last keystroke, a one-minute load under 4.2, and up to 8 hours for both, and it never forces. A cycle that waits all night and measures nothing is a **success**; a cycle that measures a busy machine has produced a row nobody may quote.
 
-Noisy warnings are not failures; trust `$?`. **Never commit red.** Non-trivial pure logic leaves
-ONE assert-based unit test wired into the gate.
+Corollary, learned the same way: **do not build, test, or run anything else while a measurement is running.** Rebuilding the binary hyperfine is timing voids the invocation. Do the build and the correctness gate FIRST, then measure, then touch nothing until it returns.
 
-## Definition of Done (the builder only stops when ALL hold)
+## Green gate — exact commands, trust exit codes
 
-The terminal `final-dod` ticket emits the literal phrase `backlog empty` ONLY when:
+From the repo root, all must exit 0 before any commit:
 
-- every backlog ticket is in built.md;
-- every group has been reviewed in-cycle and carries a `- reviewed <id> <sha>: …` line in `review.md`;
-- the full green gate passes end-to-end;
-- <!-- any project-specific DoD checks: coverage, perf budgets, visual/QA passes... -->
+- `cd 1brc/code/go && test -z "$(gofmt -l .)" && go vet ./... && go build -o bin/1brc . && go test ./...`
+- `bash 1brc/scripts/check-correctness.sh` — case zero is upstream's twelve sample pairs, then both 10m cases.
+- For a ticket that adds or changes an arm: `ARM="<its flags>" bash 1brc/scripts/check-correctness.sh` too, because an arm is byte-compared before it is ever timed.
+- `bash 1brc/scripts/experiment.sh --self-test` when anything under `scripts/` changes.
 
-If any item is not yet true, KEEP LOOPING — split the gap into new append-only tickets.
+Docs-only tickets have no build gate.
 
-## Out of scope (never becomes a ticket)
+## Method rules (binding, inherited from the study)
 
-<!-- deploys, device tests, anything the loop must not attempt -->
+- **A delta is only taken inside one bracketed invocation**, incumbent named FIRST and LAST. Bracket spread over **3%** means no arm may be quoted: re-run, never subtract.
+- **Report both channels.** Wall clock and user CPU, each with its own bracket. When they disagree, say so and say which one the confound could touch. A CPU-channel win with no wall win is a real result and is written as one.
+- **A win is disjoint or it is a candidate**, not a verdict. A default changes only on a disjoint wall-clock win.
+- **Prediction before the run**, containing a number, or labelled `sweep:`.
+- **New code needs a differential test against inputs the corpus cannot express** (the `;`-in-name class), and every new test gets mutated to prove it fails.
+- Measured / derived / hypothesis on every claim. Numbers from a busy machine are not published.
+- Commit subjects are plain-English sentences; the guard rejects `feat:`-style prefixes.
+- Append rows to `1brc/07-experiment-ledger.md` with the next free `E-` number. Never renumber.
 
-## Pipeline conventions (baked in — do not re-derive)
+## Definition of Done
 
-- **One loop, one branch (`1brc-perf`), one group per cycle, green-only.**
-- **Review is a BLOCKING step inside the cycle**, not a second loop: the same cycle that builds a
-  group audits it against the handoff and the diff, FIXES what it finds, records one line in
-  `review.md`, and only then closes the group. It never files a review ticket — a review queue costs
-  a cycle of orientation per finding and grows without bound.
-- ids are **append-only + stable**. Never renumber/delete.
+`final-perf` verifies: every ticket below is either ledgered with a verdict or explicitly parked in `1brc/PARKED.md` with all seven fields; the gate is green; `1brc/09-result.md` and `1brc/README.md` agree with the ledger at every site that publishes a number; and any default that moved is justified by a disjoint, quiet-machine measurement.

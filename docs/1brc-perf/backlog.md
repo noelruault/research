@@ -1,27 +1,10 @@
-# Backlog — 1brcPerf (1brc-perf)
+# 1brc-perf backlog — append-only ids, priority order
 
-Build the topmost unbuilt `- [ ]` id not already in `built.md`. ids are **append-only + stable**
-(never renumber/delete). Priority order top to bottom. Each must pass the green gate (spec.md).
-Every group is reviewed and repaired inside the cycle that built it (spec.md), so nothing else queues.
+Ids are stable and append-only; never renumber or delete. `[dN]` = difficulty. `HUGE` = dispatched alone. `(needs: `id`)` gates dispatch. Every timed ticket runs through `1brc/scripts/measure-when-idle.sh` — see spec.md.
 
-<!-- Replace the example with real tickets. Keep the final-dod ticket LAST. -->
-
-- [ ] `t-01-example` — <what to build> + <acceptance: how to know it's done> + <the test it leaves>.
-
-## Terminal
-
-- [ ] `final-dod` — HUGE. **The only ticket that may emit "backlog empty", and it is dispatched ALONE** (that is what the HUGE token buys: batched with other tickets, a cycle could reach the stop sentinel while its group was still open). Confirm every group carries a
-  `- reviewed <id>` line in `review.md`, then that the full Definition of Done (spec.md) holds and the
-  green gate passes end-to-end. If
-  ANY item fails, file append-only fix tickets and KEEP LOOPING. Only when every item passes, end the
-  cycle with the literal phrase `backlog empty`.
-
-<!-- Tickets are dispatched in GROUPS (default 3 per cycle), because a
-     cycle's cost is orientation, not the edit. A ticket that genuinely fills a whole cycle on its own
-     gets the token HUGE somewhere on its line and is then dispatched alone. Use it sparingly. -->
-
-<!-- DIFFICULTY: give every ticket a `[dN]` marker, N in 1..5. The runner routes the cycle's model
-     from the top unbuilt ticket's marker (d1-2 cheap, d3-4 mid, d5 strongest), which is measured at
-     -70% cost. An unannotated backlog silently runs everything on the default model.
-     For a GROUP, mark it with its HARDEST member's difficulty — never under-power a group — and try
-     to draw groups so their members sit in one band, or the cheap members subsidise nothing. -->
+- [ ] `lanes-requiet` HUGE — re-measure `-fold lanes` on a genuinely idle machine at `-r 10`, incumbent first AND last, and settle the wall clock E-37 could not. E-37 measured user CPU −5.28% (control bracket 0.034%) and wall −2.28% with overlapping ranges, on a machine where WebKit held 71-97% of a core. Prediction to pre-register: if the wall win is real it lands 2-5% and disjoint; if it was noise the arms overlap again at `-r 10`. Ledger the row either way; promote `lanes` to the `-fold` default ONLY on a disjoint wall win. [d3]
+- [ ] `lanes-stacked` HUGE — measure `-fold lanes` stacked with more workers, since lanes cuts compute and therefore ENLARGES the idle share P-06 attacks: arms `default`, `-fold lanes`, `-fold lanes -workers 24`, `-fold lanes -workers 28`, incumbent bracketed. E-37 took wall-above-floor from 33.7% to 37.9%, so the two mechanisms are predicted to be complements rather than substitutes (contrast E-31, where fill-ahead and oversubscription proved substitutes). State the prediction as a number before running. (needs: `lanes-requiet`) [d4]
+- [ ] `lanes-four` — extend `foldRowsLanes` from two cursors to four behind `-fold lanes4`, gate it (including `ARM` correctness and a mutated differential test), and measure 1 vs 2 vs 4 cursors in one bracketed invocation. Prediction: if two cursors bought 5.28% of CPU by filling stalls, four buys less than double and may lose to register pressure and cache pressure on four live rows. A measured plateau is the useful answer here, not a win. (needs: `lanes-requiet`) [d4]
+- [ ] `gigatoken-license` — add the one-line `1brc/LICENSES.md` entry for marcelroed/gigatoken: studied for the tokenization angle (`03-technique-recon.md:5,78`), contributed the batch SHAPE that became `TokenizeBatch`, nothing copied and the module sources were never fetchable, so no derivation to attribute. The file lists other studied implementations and this omission is an inconsistency, not a licence risk. Docs-only, no gate. [d1]
+- [ ] `p06-workers` HUGE — `PARKED.md` P-06, queue item 18: sweep `-workers` above 20 on an idle machine, using the arm and keep-rule P-06 already quotes rather than a new one. Its stated ceiling is perfect packing at 1.0740 s, still +7.40% over target, so this is a candidate for the gap and never for the goal — say that in the ledger row whatever it measures. (needs: `lanes-stacked`) [d4]
+- [ ] `final-perf` — verify every DoD item in spec.md; confirm the ledger, `09-result.md` and `README.md` agree at every site that publishes a number; park anything unmeasured in `1brc/PARKED.md` with all seven fields. Only this ticket may emit "backlog empty". (needs: `p06-workers`) [d3]

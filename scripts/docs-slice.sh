@@ -35,10 +35,10 @@
 # findings.md instead of 24,397 B, because 67 of its 91 headings carry no id of their own.
 # Everything before the first heading is always printed: that is the file`s own contract.
 #
-# Env: DOCS overrides the docs subdir (1brc), DOCS_ROOT overrides the repo root.
+# Env: DOCS overrides the docs subdir (1brc-perf), DOCS_ROOT overrides the repo root.
 set -euo pipefail
 
-DOCS="${DOCS:-1brc}"
+DOCS="${DOCS:-1brc-perf}"
 ROOT="${DOCS_ROOT:-$(git rev-parse --show-toplevel)}"
 
 resolve() { # <name> -> a readable path

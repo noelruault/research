@@ -15,3 +15,5 @@ shapes-image-file-format/private-notes/
 # `go build ./...` in a main package writes the binary next to the source, named after the directory.
 1brc/code/go/go
 1brc/code/gen/gen
+# A detached measurement appends a waiting line every 15 s for up to 8 hours; bench/ keeps results, not launcher logs.
+1brc/bench/*-detached.log

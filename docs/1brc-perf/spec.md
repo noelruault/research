@@ -36,6 +36,20 @@ Docs-only tickets have no build gate.
 - Commit subjects are plain-English sentences; the guard rejects `feat:`-style prefixes.
 - Append rows to `1brc/07-experiment-ledger.md` with the next free `E-` number. Never renumber.
 
+## Every generalizable finding is fed back to the global skill
+
+A ledger row is this study's memory. The `performance-golang` skill is every *future* project's, and a finding that stays in the ledger is one nobody outside this repo will ever benefit from.
+
+So: when a cycle produces a result that would change how someone writes or reviews Go **outside this study**, append it to `/Users/noelruault/.claude/skills/performance-golang/SKILL.md` in the same cycle, under the section it belongs to. That includes negative results and harness defects, which are the most transferable things here.
+
+Three hard rules, because this file outlives the study:
+
+- **Employer- and project-agnostic.** No repo paths, no ticket ids, no `1brc`, no `E-NN` citations. Describe the shape of the workload ("a 13.8 GB single-file aggregation, ~14-byte records") and keep the mechanism and the number. A reader must never need this repo to use the entry.
+- **Carry the number and its conditions.** "Two cursors are faster" is worthless; "−5.28% user CPU against a 0.034% control bracket, wall clock did not follow" is the entry. State the machine class and Go version.
+- **Do not restate what the skill already says.** Read the neighbouring sections first and extend or correct them rather than appending a duplicate; a correction to an existing entry is worth more than a new one.
+
+What does NOT go: anything true only of this corpus, this machine's exact clock, or this study's file layout. When unsure, write it in the ledger only and say in the handoff why it did not generalize.
+
 ## Definition of Done
 
 `final-perf` verifies: every ticket below is either ledgered with a verdict or explicitly parked in `1brc/PARKED.md` with all seven fields; the gate is green; `1brc/09-result.md` and `1brc/README.md` agree with the ledger at every site that publishes a number; and any default that moved is justified by a disjoint, quiet-machine measurement.

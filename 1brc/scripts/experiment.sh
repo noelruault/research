@@ -282,6 +282,10 @@ self_test() {
   if [[ $(QUIET_LOAD=999 provenance_header "$REPO") != *"NOT QUIET"* ]]; then echo "ok: a header taken on a quiet machine carries no stamp"
   else echo "FAIL: provenance_header stamped a quiet machine" >&2; fails=$((fails + 1)); fi
 
+  # busiest is stamped on EVERY header, not only the refusal: a machine under the load line can still be losing 1.5 cores to a daemon, which is the confound that voided E-37.
+  if [[ $(QUIET_LOAD=999 provenance_header "$REPO") == *"busiest:"* ]]; then echo "ok: a header taken on a quiet machine still names the busiest processes"
+  else echo "FAIL: provenance_header named no busiest process on a quiet machine, so a core-stealer under the load line goes unrecorded" >&2; fails=$((fails + 1)); fi
+
   if ((fails)); then echo "experiment --self-test: $fails FAILED" >&2; return 1; fi
   echo "experiment --self-test: all checks passed"
 }

@@ -86,8 +86,10 @@ provenance_header() {
   echo "hyperfine: $(hyperfine --version)"
   echo "power:    $(pmset -g batt | sed -n '1s/^Now drawing from //p') $(pmset -g batt | sed -n "2s/.*[)]\s*//p")"
   echo "load:     $(uptime)"
+  # E-37 was voided by a core-stealer nobody recorded, and load1 alone cannot name one: three Defender daemons hold ~1.5 cores at load 4.5, under any threshold worth setting.
+  echo "busiest:  $(busiest)"
   pmset -g batt | grep -q "AC Power" || echo "PROVISIONAL: measured on battery, spec.md:42 requires the headline on AC power"
   if over_quiet_load "$l"; then
-    echo "NOT QUIET: one-minute load $l is over $QUIET_LOAD at the start of this measurement; busiest: $(busiest)"
+    echo "NOT QUIET: one-minute load $l is over $QUIET_LOAD at the start of this measurement"
   fi
 }

@@ -266,6 +266,12 @@ self_test() {
   if [[ $got -eq 4 && $(grep -c slept <<<"$out") -eq 2 ]]; then echo "ok: a busy machine is waited out twice before the measurement refuses"
   else echo "FAIL (want 4 after 2 waits, got $got after $(grep -c slept <<<"$out")): the wait budget is not spent before refusing" >&2; fails=$((fails + 1)); fi
 
+  # hid_idle is called on every pass of the wait loop, so a SIGPIPE in it does not degrade the gate, it kills the run: `set -euo pipefail` turns the 141 into an exit and the unattended waiter dies at require_quiet instead of waiting. 40 passes because the pre-fix rate was 296/300 and one call proves nothing.
+  got=0
+  for _ in $(seq 1 40); do hid_idle >/dev/null || { got=$?; break; }; done
+  if [[ $got -eq 0 ]]; then echo "ok: hid_idle survives 40 calls without a SIGPIPE from its own pipeline"
+  else echo "FAIL (status $got on a call within 40): hid_idle closes ioreg's pipe early, so the wait loop dies instead of waiting" >&2; fails=$((fails + 1)); fi
+
   # The two defaults are pinned for the reason the cooldown default is: the self-test overrides both, so a mutant that moves them disables the gate in production and nothing else would notice.
   if [[ $QUIET_LOAD == 6.0 && $QUIET_WAIT == 180 ]]; then echo "ok: the preflight defaults to refusing over load 6.0 after waiting 180 s"
   else echo "FAIL: the preflight defaults moved to load '$QUIET_LOAD' / wait '$QUIET_WAIT' s" >&2; fails=$((fails + 1)); fi

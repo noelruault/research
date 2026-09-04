@@ -14,7 +14,8 @@ QUIET_SLEEP="${QUIET_SLEEP:-sleep}"
 # Seconds since the last keyboard or mouse event. Load average cannot answer "is the operator using this laptop": a browser rendering keeps load high with nobody typing, and a user reading a page keeps load low while every measurement they trigger lands mid-run.
 # 0 disables the gate, which is the default so an interactive run is unchanged.
 IDLE_MIN="${IDLE_MIN:-0}"
-hid_idle() { ioreg -c IOHIDSystem 2>/dev/null | awk '/HIDIdleTime/ { print int($NF / 1000000000); exit }'; }
+# The awk must NOT `exit` on the match: ioreg writes 438 KB and an early exit closes the pipe under it, so the pipeline returns 141 and `set -euo pipefail` kills the caller mid-wait. Measured at 296/300 iterations before the fix, which is what killed two unattended `lanes-requiet` waits at require_quiet.
+hid_idle() { ioreg -c IOHIDSystem 2>/dev/null | awk '/HIDIdleTime/ && !seen { idle = int($NF / 1000000000); seen = 1 } END { if (seen) print idle }'; }
 
 load1() { sysctl -n vm.loadavg | awk '{print $2}'; }
 # over_quiet_load compares in awk because bc is not guaranteed and the rest of this lib already needs awk.

@@ -6,6 +6,29 @@ This document is the Go arm of the study. It states what was built, what each ex
 
 **Result: 1.202 s ± 0.032 s**, against a self-imposed 1.000 s target. The target is missed by 20.2%. The compute floor is 0.939 s, below the target, and the gap between the two is the read path.
 
+## The finding that outlives the number
+
+**Roughly half the results in this document reverse on different hardware, and the useful work was finding out which half.**
+
+Every headline below is a verdict about one machine. The ones that flip are predictable from the hardware, which is what makes them worth writing down:
+
+| result | verdict here | what it turns on | where it should invert |
+|---|---|---|---|
+| mmap vs parallel `read()` | mmap 5.6× slower | Darwin's 16 KiB pages, 842,067 serial faults | a kernel with huge pages |
+| page cache vs uncached | page cache slower | the file is 53.5% of RAM | any machine with 64 GB |
+| hand-written NEON vs SWAR | SWAR wins | arm64 has no `PMOVMSKB` | x86-64, one instruction for the mask |
+| 4 row cursors | +2.93%, worse than 1 | register budget on this core | x86-64, where the same change is −8% |
+| oversubscribing workers | −7.49% at 15 cores | core count and read-stall ratio | 10 cores, where another study measured it losing |
+| custom table vs stdlib map | custom wins 15.8% | 413 keys, 0.3% load factor | 10,000 keys, where the map wins by 12.81% |
+
+And the converse carries the most weight. **A result that survives two different machines is about the mechanism rather than the laptop.** Dropping mmap for parallel `pread` was measured here at 5.6× and independently by [driquet](https://driquet.info/1brc-autoresearch/) at −52% on a different chip, different core count and a different file. That one generalises. The register-pressure results do not, and are not claimed to.
+
+Two practices follow, and they are the reason this study is shaped the way it is.
+
+**Nothing is ever deleted.** All 32 arms still ship behind their flags, including everything that lost, each carrying the number that killed it. `scripts/lab-suite.sh` re-ranks the whole set on any machine, and **the interesting output there is not the wall clock, it is which rows flip.**
+
+**A killed idea records the baseline it was killed against.** `PARKED.md` entries carry a runnable revive trigger, because a mechanism rejected against one bottleneck is not rejected, it is waiting. driquet's run demonstrates it from the other side: a SWAR scan rejected at 1.9% was re-tried four rounds later, after fixing I/O made compute visible, and accepted at −7.3%. Same code, opposite verdict, and the only thing that changed was what was in the way.
+
 ## The machine of record
 
 Every number in this document was measured on:

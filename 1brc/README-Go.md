@@ -4,7 +4,27 @@ Aggregate 1,000,000,000 weather measurements (13,795,610,267 bytes) into per-sta
 
 This document is the Go arm of the study. It states what was built, what each experiment measured, and what the numbers support. Sibling documents will cover the same problem in other languages, so the method here is written to be re-run rather than re-argued.
 
-**Result: 1.202 s ± 0.032 s**, against a self-imposed 1.000 s target. The target is missed by 20.2%. The compute floor is 0.939 s, below the target, and the gap between the two is the read path.
+## Results, by what the implementation is allowed to use
+
+"Fastest Go" has no single answer, because the two published rules for this challenge disagree about what counts. Both are stated by people who did the work, so this study reports against both rather than picking the flattering one. All three rows are the **same binary**, same gate, same bracketed invocation.
+
+| tier | what it may use | wall clock | user CPU |
+|---|---|---:|---:|
+| **Unrestricted** | `unsafe` pointer walks, `F_NOCACHE` | **1.233 s** | 14.88 s |
+| **Idiomatic** (stdlib incl. `syscall`) | no `unsafe`, no asm, no cgo, no third-party | **1.388 s** | 17.10 s |
+| **Portable idiomatic** (no OS-specific calls) | also no `syscall`, no mmap | **1.904 s** | 17.65 s |
+
+Bracket on that invocation: 2.88% wall, 0.29% user CPU.
+
+**The two idiomatic bars, and why both exist.** [driquet](https://driquet.info/1brc-autoresearch/) sets it at *"idiomatic, stdlib-only Go. Goroutines and syscall are fair game; unsafe, assembly, cgo, and third-party dependencies are not."* [Ben Hoyt](https://benhoyt.com/writings/go-1brc/) sets it at *"portable Go using only the standard library: no assembly, no unsafe, and no memory-mapped files."* Our `F_NOCACHE` call is `syscall.Syscall(SYS_FCNTL, …)`, which is stdlib and needs no `unsafe`, so it passes the first bar and fails the second on **portability**: the constant is darwin-only. Turning it off skips the call entirely, and that arm uses no `syscall` package at all.
+
+**What each restriction costs, which is the useful part:**
+
+- **`unsafe` is worth 12.6% of wall and 14.9% of CPU.** Real, and smaller than its reputation. It buys the pointer walk; giving it up costs a seventh of the CPU.
+- **Portability costs more than `unsafe` does: another 37 points of wall for only 3.7 points of CPU.** Dropping `F_NOCACHE` barely changes the compute and moves the time into system CPU and waiting, exactly as the read floor predicts.
+- **Reaching for the stdlib map and a scalar parse costs +81.8% of CPU** (2.302 s), which is the rung both referenced write-ups climbed and which this study never shipped.
+
+**Target 1.000 s, missed on every tier.** The compute floor is 0.939 s, below the target, and the gap between floor and clock is the read path. Nothing below is an assembly result: the assembly arms were built, measured, and lost.
 
 ## The finding that outlives the number
 
@@ -302,6 +322,8 @@ Perfect hashing stays parked, on a mechanism rather than an estimate. Both cheap
 | validation in the parsed domain | 1.424 s | | 18.2% of CPU removed |
 | pointer walk | 1.233 s | 14.85 s | −13.49% user CPU |
 | **two row cursors** | **1.202 s** | **14.09 s** | −5.15% user CPU, four reproductions |
+
+Every row above is the unrestricted tier. The idiomatic tiers are measured separately at the top of this document: **1.388 s** stdlib-with-`syscall`, **1.904 s** fully portable.
 
 **Target 1.000 s. Missed by 20.2%.**
 
